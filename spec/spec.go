@@ -26,7 +26,8 @@ type (
 		ExcludeFilesRegExp []string                            `yaml:"excludeFiles"`
 		Components         map[yamlComponentName]YamlComponent `yaml:"components"`
 		Dependencies       map[yamlComponentName]YamlRules     `yaml:"deps"`
-		Common             []yamlComponentName                 `yaml:"common"`
+		CommonComponents   []yamlComponentName                 `yaml:"commonComponents"`
+		CommonVendors      []yamlVendorName                    `yaml:"commonVendors"`
 	}
 
 	YamlAllow struct {
@@ -45,7 +46,7 @@ type (
 		MayDependOn    []yamlComponentName `yaml:"mayDependOn"`
 		CanUse         []yamlVendorName    `yaml:"canUse"`
 		AnyProjectDeps bool                `yaml:"anyProjectDeps"`
-		anyVendorDeps  bool                `yaml:"anyVendorDeps"`
+		AnyVendorDeps  bool                `yaml:"anyVendorDeps"`
 	}
 
 	yamlSpecValidator struct {

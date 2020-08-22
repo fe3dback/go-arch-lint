@@ -38,7 +38,8 @@ func (v *validator) validate() error {
 	v.validateExcludeFiles()
 	v.validateDeps()
 	v.validateVendors()
-	v.validateCommon()
+	v.validateCommonComponents()
+	v.validateCommonVendors()
 
 	// display warnings
 	if warnings, ok := v.getWarnings(); !ok {
@@ -122,7 +123,7 @@ func (v *validator) validateDeps() {
 					return nil
 				}
 
-				if rules.anyVendorDeps {
+				if rules.AnyVendorDeps {
 					return nil
 				}
 
@@ -140,10 +141,18 @@ func (v *validator) validateVendors() {
 	}
 }
 
-func (v *validator) validateCommon() {
-	for index, componentName := range v.spec.Common {
-		v.check(fmt.Sprintf("$.common[%d]", index), func() error {
+func (v *validator) validateCommonComponents() {
+	for index, componentName := range v.spec.CommonComponents {
+		v.check(fmt.Sprintf("$.commonComponents[%d]", index), func() error {
 			return v.isKnownComponent(componentName)
+		})
+	}
+}
+
+func (v *validator) validateCommonVendors() {
+	for index, vendorName := range v.spec.CommonVendors {
+		v.check(fmt.Sprintf("$.commonVendors[%d]", index), func() error {
+			return v.isKnownVendor(vendorName)
 		})
 	}
 }

@@ -110,7 +110,7 @@ func (a *Arch) assembleComponents(spec YamlSpec) error {
 			AllowedImports: allowedImports,
 			SpecialFlags: &SpecialFlags{
 				AllowAllProjectDeps: depMeta.AnyProjectDeps,
-				AllowAllVendorDeps:  depMeta.anyVendorDeps,
+				AllowAllVendorDeps:  depMeta.AnyVendorDeps,
 			},
 		})
 	}
@@ -177,7 +177,11 @@ func (a *Arch) assembleAllowedImports(
 
 	allowedComponents := make([]ComponentName, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
-	allowedComponents = append(allowedComponents, spec.Common...)
+	allowedComponents = append(allowedComponents, spec.CommonComponents...)
+
+	allowedVendors := make([]VendorName, 0)
+	allowedVendors = append(allowedVendors, vendorNames...)
+	allowedVendors = append(allowedVendors, spec.CommonVendors...)
 
 	for _, name := range allowedComponents {
 		maskPath := spec.Components[name].LocalPath
@@ -192,7 +196,7 @@ func (a *Arch) assembleAllowedImports(
 		}
 	}
 
-	for _, name := range vendorNames {
+	for _, name := range allowedVendors {
 		importPath := spec.Vendors[name].ImportPath
 		localPath := fmt.Sprintf("vendor/%s", importPath)
 		absPath := fmt.Sprintf("%s/%s", a.rootDirectory, localPath)
