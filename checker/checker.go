@@ -3,6 +3,7 @@ package checker
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/files"
@@ -44,10 +45,17 @@ func (arc *Checker) Check() {
 
 func (arc *Checker) resolveComponent(filePath string) *spec.Component {
 	matched := make(map[string]*spec.Component)
+	directory := filepath.Dir(filePath)
 
 	for _, component := range arc.arch.Components {
 		for _, componentDirectory := range component.ResolvedPaths {
-			if strings.HasPrefix(filePath, componentDirectory.AbsPath) {
+			if strings.HasPrefix(directory, componentDirectory.AbsPath) {
+				suffixPath := strings.TrimPrefix(directory, componentDirectory.AbsPath)
+
+				if strings.Contains(suffixPath, "/") {
+					continue
+				}
+
 				matched[componentDirectory.ImportPath] = component
 				continue
 			}
@@ -75,7 +83,7 @@ func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFil
 	for _, resolvedImport := range file.Imports {
 		allowed := arc.checkImport(component, resolvedImport)
 		if !allowed {
-			arc.logWarning(fmt.Sprintf("Component '%s' file '%s' shouldnot depend on '%s'",
+			arc.logWarning(fmt.Sprintf("Component '%s': file '%s' shouldn't depend on '%s'",
 				component.Name,
 				strings.TrimPrefix(file.Path, arc.rootDirectory),
 				resolvedImport.Name,
@@ -99,7 +107,6 @@ func (arc *Checker) checkImport(component *spec.Component, resolvedImport files.
 }
 
 func (arc *Checker) checkVendorImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
-	// todo
 	if arc.arch.Allow.DepOnAnyVendor {
 		return true
 	}
@@ -108,7 +115,7 @@ func (arc *Checker) checkVendorImport(component *spec.Component, resolvedImport 
 		return true
 	}
 
-	return false
+	return arc.checkImportPath(component, resolvedImport)
 }
 
 func (arc *Checker) checkProjectImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
@@ -116,6 +123,10 @@ func (arc *Checker) checkProjectImport(component *spec.Component, resolvedImport
 		return true
 	}
 
+	return arc.checkImportPath(component, resolvedImport)
+}
+
+func (arc *Checker) checkImportPath(component *spec.Component, resolvedImport files.ResolvedImport) bool {
 	for _, allowedImport := range component.AllowedImports {
 		if allowedImport.ImportPath == resolvedImport.Name {
 			return true

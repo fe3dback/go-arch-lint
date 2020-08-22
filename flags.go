@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	archFileName  = ".go-arch-lint.yaml"
+	archFileName  = ".go-arch-lint.yml"
 	goModFileName = "go.mod"
 )
 

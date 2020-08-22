@@ -1,16 +1,14 @@
 package spec
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"reflect"
 
-	pathresolv "github.com/fe3dback/go-arch-lint/path"
-
-	"gopkg.in/validator.v2"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
+	structvalidator "gopkg.in/validator.v2"
 )
 
 const supportedVersion = 1
@@ -21,29 +19,31 @@ type (
 	yamlExcludeLocalPath = string
 
 	YamlSpec struct {
-		Version            int                                 `yaml:"version" validate:"nonnil, min=1"`
-		Allow              YamlAllow                           `yaml:"allow" validate:"nonnil"`
+		Version            int                                 `yaml:"version"`
+		Allow              YamlAllow                           `yaml:"allow"`
 		Vendors            map[yamlVendorName]YamlVendor       `yaml:"vendors"`
-		Exclude            []yamlExcludeLocalPath              `yaml:"exclude" validate:"xPathSlice"`
+		Exclude            []yamlExcludeLocalPath              `yaml:"exclude"`
 		ExcludeFilesRegExp []string                            `yaml:"excludeFiles"`
-		Components         map[yamlComponentName]YamlComponent `yaml:"components" validate:"nonnil, xMapNameIsKnownComponent"`
-		Dependencies       map[yamlComponentName]YamlRules     `yaml:"deps" validate:"nonnil, xMapNameIsKnownComponent"`
+		Components         map[yamlComponentName]YamlComponent `yaml:"components"`
+		Dependencies       map[yamlComponentName]YamlRules     `yaml:"deps"`
+		Common             []yamlComponentName                 `yaml:"common"`
 	}
 
 	YamlAllow struct {
-		DepOnAnyVendor bool `yaml:"depOnAnyVendor" validate:"nonnil"`
+		DepOnAnyVendor bool `yaml:"depOnAnyVendor"`
 	}
 
 	YamlVendor struct {
-		ImportPath string `yaml:"in" validate:"min=1, xVendorPath"`
+		ImportPath string `yaml:"in"`
 	}
 
 	YamlComponent struct {
-		LocalPath string `yaml:"in" validate:"min=1, xPath"`
+		LocalPath string `yaml:"in"`
 	}
 
 	YamlRules struct {
-		MayDependOn    []yamlComponentName `yaml:"mayDependOn" validate:"xKnownComponentSlice"`
+		MayDependOn    []yamlComponentName `yaml:"mayDependOn"`
+		CanUse         []yamlVendorName    `yaml:"canUse"`
 		AnyProjectDeps bool                `yaml:"anyProjectDeps"`
 		anyVendorDeps  bool                `yaml:"anyVendorDeps"`
 	}
@@ -62,17 +62,21 @@ func newSpec(archFile string, rootDirectory string) (YamlSpec, error) {
 		return spec, fmt.Errorf("can`t open '%s': %v", archFile, err)
 	}
 
-	err = yaml.Unmarshal(data, &spec)
+	reader := bytes.NewBuffer(data)
+	decoder := yaml.NewDecoder(
+		reader,
+		yaml.DisallowDuplicateKey(),
+		yaml.DisallowUnknownField(),
+		yaml.Strict(),
+	)
+
+	err = decoder.Decode(&spec)
 	if err != nil {
 		return spec, fmt.Errorf("can`t parse yaml in '%s': %v", archFile, err)
 	}
 
-	specValidator := yamlSpecValidator{
-		spec:          spec,
-		rootDirectory: rootDirectory,
-	}
-
-	err = specValidator.validateSpec(spec)
+	specValidator := newValidator(spec, data, rootDirectory)
+	err = specValidator.validate()
 	if err != nil {
 		return spec, fmt.Errorf("spec '%s' invalid: %v", archFile, err)
 	}
@@ -80,31 +84,22 @@ func newSpec(archFile string, rootDirectory string) (YamlSpec, error) {
 	return spec, nil
 }
 
-func (sv *yamlSpecValidator) validateSpec(spec YamlSpec) error {
+func (sv *yamlSpecValidator) validateStruct(spec YamlSpec) error {
 	var validators = map[string]func(interface{}, string) error{
 		"xVendorPath":              sv.vendorPath,
-		"xPath":                    sv.validatePath,
-		"xPathSlice":               sv.validatePathSlice,
 		"xKnownComponent":          sv.validateIsKnownComponentName,
 		"xKnownComponentSlice":     sv.validateIsKnownComponentNameSlice,
 		"xMapNameIsKnownComponent": sv.validateMapNameIsKnownComponentName,
 	}
 
 	for name, fn := range validators {
-		err := validator.SetValidationFunc(name, fn)
+		err := structvalidator.SetValidationFunc(name, fn)
 		if err != nil {
 			return fmt.Errorf("failed to create validator '%s': %v", name, err)
 		}
 	}
 
-	if spec.Version > supportedVersion {
-		return fmt.Errorf("archFile has newer version %d, current support version: %d",
-			spec.Version,
-			supportedVersion,
-		)
-	}
-
-	err := validator.Validate(spec)
+	err := structvalidator.Validate(spec)
 	if err != nil {
 		return fmt.Errorf("archFile invalid: %v", err)
 	}
@@ -119,36 +114,6 @@ func (sv *yamlSpecValidator) vendorPath(value interface{}, _ string) error {
 	}
 
 	return sv.checkDirectory(fmt.Sprintf("%s/vendor/%s", sv.rootDirectory, path))
-}
-
-func (sv *yamlSpecValidator) validatePath(value interface{}, _ string) error {
-	localPath, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("should by string field")
-	}
-
-	absPath := filepath.Clean(fmt.Sprintf("%s/%s", sv.rootDirectory, localPath))
-	resolved, err := pathresolv.ResolvePath(absPath)
-	if err != nil {
-		return fmt.Errorf("failed to resolv path: %v", err)
-	}
-
-	return sv.checkDirectory(resolved...)
-}
-
-func (sv *yamlSpecValidator) validatePathSlice(value interface{}, param string) error {
-	pathSlice, ok := value.([]string)
-	if !ok {
-		return fmt.Errorf("should by list of string's")
-	}
-
-	for _, path := range pathSlice {
-		if err := sv.validatePath(path, param); err != nil {
-			return fmt.Errorf("invalid path '%s': %v", path, err)
-		}
-	}
-
-	return nil
 }
 
 func (sv *yamlSpecValidator) validateIsKnownComponentName(value interface{}, _ string) error {

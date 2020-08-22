@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/fe3dback/go-arch-lint/checker"
@@ -10,6 +11,13 @@ import (
 )
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(fmt.Sprintf("panic: %s\n", err))
+			os.Exit(1)
+		}
+	}()
+
 	flags, err := flagsParse()
 	if err != nil {
 		panic(err)

@@ -2,6 +2,7 @@ package spec
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -20,11 +21,13 @@ type (
 	}
 
 	ComponentName = string
+	VendorName    = string
 	Component     struct {
 		Name           ComponentName
 		LocalPathMask  string
 		ResolvedPaths  []*ResolvedPath
 		MayDependOn    []ComponentName
+		CanUse         []VendorName
 		AllowedImports []*ResolvedPath
 		SpecialFlags   *SpecialFlags
 	}
@@ -83,12 +86,17 @@ func (a *Arch) assembleComponents(spec YamlSpec) error {
 			mayDependOn = append(mayDependOn, name)
 		}
 
+		canUse := make([]VendorName, 0)
+		for _, name := range depMeta.CanUse {
+			canUse = append(canUse, name)
+		}
+
 		resolvedPath, err := a.assembleResolvedPaths(yamlComponent.LocalPath)
 		if err != nil {
 			return fmt.Errorf("failed to assemble component path's: %v", err)
 		}
 
-		allowedImports, err := a.assembleAllowedImports(spec, mayDependOn)
+		allowedImports, err := a.assembleAllowedImports(spec, mayDependOn, canUse)
 		if err != nil {
 			return fmt.Errorf("failed to assemble component path's: %v", err)
 		}
@@ -98,6 +106,7 @@ func (a *Arch) assembleComponents(spec YamlSpec) error {
 			LocalPathMask:  yamlComponent.LocalPath,
 			ResolvedPaths:  resolvedPath,
 			MayDependOn:    mayDependOn,
+			CanUse:         canUse,
 			AllowedImports: allowedImports,
 			SpecialFlags: &SpecialFlags{
 				AllowAllProjectDeps: depMeta.AnyProjectDeps,
@@ -150,19 +159,27 @@ func (a *Arch) assembleResolvedPaths(localPathMask string) ([]*ResolvedPath, err
 		importPath := fmt.Sprintf("%s/%s", a.moduleName, localPath)
 
 		list = append(list, &ResolvedPath{
-			ImportPath: importPath,
-			LocalPath:  localPath,
-			AbsPath:    absResolvedPath,
+			ImportPath: strings.TrimRight(importPath, "/"),
+			LocalPath:  strings.TrimRight(localPath, "/"),
+			AbsPath:    filepath.Clean(strings.TrimRight(absResolvedPath, "/")),
 		})
 	}
 
 	return list, nil
 }
 
-func (a *Arch) assembleAllowedImports(spec YamlSpec, componentNames []ComponentName) ([]*ResolvedPath, error) {
+func (a *Arch) assembleAllowedImports(
+	spec YamlSpec,
+	componentNames []ComponentName,
+	vendorNames []VendorName,
+) ([]*ResolvedPath, error) {
 	list := make([]*ResolvedPath, 0)
 
-	for _, name := range componentNames {
+	allowedComponents := make([]ComponentName, 0)
+	allowedComponents = append(allowedComponents, componentNames...)
+	allowedComponents = append(allowedComponents, spec.Common...)
+
+	for _, name := range allowedComponents {
 		maskPath := spec.Components[name].LocalPath
 
 		resolved, err := a.assembleResolvedPaths(maskPath)
@@ -173,6 +190,18 @@ func (a *Arch) assembleAllowedImports(spec YamlSpec, componentNames []ComponentN
 		for _, resolvedPath := range resolved {
 			list = append(list, resolvedPath)
 		}
+	}
+
+	for _, name := range vendorNames {
+		importPath := spec.Vendors[name].ImportPath
+		localPath := fmt.Sprintf("vendor/%s", importPath)
+		absPath := fmt.Sprintf("%s/%s", a.rootDirectory, localPath)
+
+		list = append(list, &ResolvedPath{
+			ImportPath: importPath,
+			LocalPath:  localPath,
+			AbsPath:    absPath,
+		})
 	}
 
 	return list, nil

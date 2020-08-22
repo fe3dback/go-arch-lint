@@ -1,0 +1,48 @@
+version: 1
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - .idea
+  - vendor
+
+excludeFiles:
+  - "^.*_test\\.go$"
+
+vendors:
+  loader-yaml:
+    in: gopkg.in/yaml.v2
+
+components:
+  main:
+    in: .
+  engine:
+    in: engine
+  engine_vendor_events:
+    in: engine/vendor/*/event
+  game:
+    in: game
+  game_component:
+    in: game/components/**
+  utils:
+    in: utils
+
+common:
+  - utils
+
+deps:
+  engine_vendor_events:
+    mayDependOn:
+      - engine
+    canUse:
+      - loader-yaml
+
+  game:
+    mayDependOn:
+      - engine
+      - game_component
+
+  main:
+    mayDependOn:
+      - game
+      - engine

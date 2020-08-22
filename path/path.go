@@ -3,6 +3,7 @@ package path
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type (
@@ -14,16 +15,16 @@ type (
 )
 
 func ResolvePath(path string) ([]string, error) {
-	dirs := make([]string, 0)
+	if strings.HasSuffix(path, ".") {
+		path = strings.TrimSuffix(path, ".")
+	}
 
 	matches, err := glob(path)
 	if err != nil {
-		return nil, fmt.Errorf("can`t match path mask '%s': %v",
-			path,
-			err,
-		)
+		return nil, fmt.Errorf("can`t match path mask '%s': %v", path, err)
 	}
 
+	dirs := make([]string, 0)
 	for _, match := range matches {
 		fileInfo, err := os.Stat(match)
 		if err != nil {
