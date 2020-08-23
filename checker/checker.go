@@ -2,7 +2,6 @@ package checker
 
 import (
 	"fmt"
-	"io"
 	"path/filepath"
 	"strings"
 
@@ -14,33 +13,38 @@ type Checker struct {
 	rootDirectory string
 	arch          spec.Arch
 	projectFiles  files.ResolveResult
-	errorsLog     io.Writer
+	result        *CheckResult
 }
 
 func NewChecker(
 	rootDirectory string,
 	arch *spec.Arch,
 	projectFiles files.ResolveResult,
-	errorsLog io.Writer,
 ) *Checker {
 	return &Checker{
 		rootDirectory: rootDirectory,
 		arch:          *arch,
 		projectFiles:  projectFiles,
-		errorsLog:     errorsLog,
+		result:        newCheckResult(),
 	}
 }
 
-func (arc *Checker) Check() {
+func (arc *Checker) Check() CheckResult {
 	for _, file := range arc.projectFiles.Files {
 		component := arc.resolveComponent(file.Path)
 		if component == nil {
-			arc.logWarning(fmt.Sprintf("File '%s' not attached to any component in archfile", file.Path))
+			arc.result.addNotMatchedWarning(WarningNotMatched{
+				FileRelativePath: strings.TrimPrefix(file.Path, arc.rootDirectory),
+				FileAbsolutePath: file.Path,
+			})
+
 			continue
 		}
 
 		arc.checkFile(component, file)
 	}
+
+	return *arc.result
 }
 
 func (arc *Checker) resolveComponent(filePath string) *spec.Component {
@@ -81,15 +85,17 @@ func (arc *Checker) longestPathComponent(matched map[string]*spec.Component) *sp
 
 func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFile) {
 	for _, resolvedImport := range file.Imports {
-		allowed := arc.checkImport(component, resolvedImport)
-		if !allowed {
-			arc.logWarning(fmt.Sprintf("Component '%s': file '%s' shouldn't depend on '%s'",
-				component.Name,
-				strings.TrimPrefix(file.Path, arc.rootDirectory),
-				resolvedImport.Name,
-			))
+		if arc.checkImport(component, resolvedImport) {
 			continue
 		}
+
+		arc.result.addDependencyWarning(WarningDep{
+			ComponentName:      component.Name,
+			FileRelativePath:   strings.TrimPrefix(file.Path, arc.rootDirectory),
+			FileAbsolutePath:   file.Path,
+			ResolvedImportName: resolvedImport.Name,
+		})
+		break
 	}
 }
 
@@ -134,9 +140,4 @@ func (arc *Checker) checkImportPath(component *spec.Component, resolvedImport fi
 	}
 
 	return false
-}
-
-func (arc *Checker) logWarning(warn string) {
-	msg := fmt.Sprintf("[WARNING] %s\n", warn)
-	_, _ = arc.errorsLog.Write([]byte(msg))
 }

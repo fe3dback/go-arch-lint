@@ -5,7 +5,7 @@ Check all project imports and compare to arch rules defined in yml file
 ## Install
 
 ```bash
-go get github.com/fe3dback/go-arch-lint
+go get -u github.com/fe3dback/go-arch-lint
 ```
 
 go will download and install binary to bin folder, usually
@@ -18,6 +18,15 @@ to your project, for example:
 ```
 go-arch-lint --project-path ~/go/src/github.com/fe3dback/galaxy
 ```
+
+flags:
+
+| Flag              | Req?  | Default  | Example             |
+| ----------------- | ----- | -------- | ------------------- |
+| project-path      | +     | n/a      | --project-path ~/go/src/github.com/fe3dback/galaxy |
+| max-warnings      | -     | 512      | --max-warnings=32 |
+| color-output      | -     | true     | --color-output=false |
+
 ## Archfile Syntax
 
 | Path              | Req?  | Type  | Description         |
