@@ -16,16 +16,22 @@ const (
 )
 
 const (
-	flagNamePath = "project-path"
+	flagNamePath              = "project-path"
+	flagNameMaxWarningsOutput = "max-warnings"
+	flagNameColorOutput       = "color-output"
 )
 
 var flagPath = flag.String(flagNamePath, "", "Absolute path to go project, like '~/go/src/github.com/google/project'")
+var flagMaxWarningsOutput = flag.Int(flagNameMaxWarningsOutput, 512, "Max number of warnings to output")
+var flagColorOutput = flag.Bool(flagNameColorOutput, true, "Use colors stdout/stderr output")
 
 type flags struct {
 	pathProjectDirectory string
 	pathGoModFile        string
 	pathArchFile         string
 	moduleName           string
+	maxWarningsOutput    int
+	useColorsOutput      bool
 }
 
 func flagsParse() (flags, error) {
@@ -34,6 +40,9 @@ func flagsParse() (flags, error) {
 
 	// collectors - path's
 	flags.collectArchFilePath()
+
+	// collectors - params
+	flags.collectParams()
 
 	// collectors - go mod
 	err := flags.collectGoMod()
@@ -70,6 +79,25 @@ func (f *flags) collectArchFilePath() {
 	}
 }
 
+func (f *flags) collectParams() {
+	const warningsRangeMin = 1
+	const warningsRangeMax = 32768
+
+	maxWarnings := *flagMaxWarningsOutput
+	if maxWarnings < warningsRangeMin || maxWarnings > warningsRangeMax {
+		panic(fmt.Sprintf("flag '%s' should by in range [%d .. %d]",
+			flagNameMaxWarningsOutput,
+			warningsRangeMin,
+			warningsRangeMax,
+		))
+	}
+
+	f.maxWarningsOutput = maxWarnings
+
+	//
+	f.useColorsOutput = *flagColorOutput
+}
+
 func (f *flags) collectGoMod() error {
 	gomod, err := f.parseGoMod(f.pathGoModFile)
 	if err != nil {
@@ -101,4 +129,5 @@ func (f *flags) parseGoMod(path string) (*modfile.File, error) {
 func (f *flags) logCollected() {
 	fmt.Printf("used arch file: %s\n", f.pathArchFile)
 	fmt.Printf("        module: %s\n", f.moduleName)
+	fmt.Println("")
 }
