@@ -1,0 +1,23 @@
+version: 1
+allow:
+  depOnAnyVendor: true
+excludeFiles:
+  - "^.*_test\\.go$"
+components:
+  a:
+    in: a
+  b:
+    in: b/*/target
+  c:
+    in: c/**
+  utils:
+    in: utils/**
+commonComponents:
+  - utils
+deps:
+  a:
+    mayDependOn:
+      - b
+  b:
+    mayDependOn:
+      - c
