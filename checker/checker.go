@@ -66,26 +66,12 @@ func (arc *Checker) resolveComponent(filePath string) *spec.Component {
 		}
 	}
 
-	return arc.longestPathComponent(matched)
-}
-
-func (arc *Checker) longestPathComponent(matched map[string]*spec.Component) *spec.Component {
-	longest := ""
-	var targetComponent *spec.Component
-
-	for path, component := range matched {
-		if len(path) > len(longest) {
-			longest = path
-			targetComponent = component
-		}
-	}
-
-	return targetComponent
+	return longestPathComponent(matched)
 }
 
 func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFile) {
 	for _, resolvedImport := range file.Imports {
-		if arc.checkImport(component, resolvedImport) {
+		if checkImport(component, resolvedImport, arc.arch.Allow.DepOnAnyVendor) {
 			continue
 		}
 
@@ -99,40 +85,58 @@ func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFil
 	}
 }
 
-func (arc *Checker) checkImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func longestPathComponent(matched map[string]*spec.Component) *spec.Component {
+	longest := ""
+	var targetComponent *spec.Component
+
+	for path, component := range matched {
+		if len(path) > len(longest) {
+			longest = path
+			targetComponent = component
+		}
+	}
+
+	return targetComponent
+}
+
+func checkImport(
+	component *spec.Component,
+	resolvedImport files.ResolvedImport,
+	allowDependOnAnyVendor bool,
+) bool {
 	switch resolvedImport.ImportType {
 	case files.ImportTypeStdLib:
 		return true
 	case files.ImportTypeVendor:
-		return arc.checkVendorImport(component, resolvedImport)
+		if allowDependOnAnyVendor {
+			return true
+		}
+
+		return checkVendorImport(component, resolvedImport)
 	case files.ImportTypeProject:
-		return arc.checkProjectImport(component, resolvedImport)
+		return checkProjectImport(component, resolvedImport)
 	default:
 		panic(fmt.Sprintf("unknown import type: %+v", resolvedImport))
 	}
 }
 
-func (arc *Checker) checkVendorImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
-	if arc.arch.Allow.DepOnAnyVendor {
-		return true
-	}
-
+func checkVendorImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllVendorDeps {
 		return true
 	}
 
-	return arc.checkImportPath(component, resolvedImport)
+	return checkImportPath(component, resolvedImport)
 }
 
-func (arc *Checker) checkProjectImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func checkProjectImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllProjectDeps {
 		return true
 	}
 
-	return arc.checkImportPath(component, resolvedImport)
+	return checkImportPath(component, resolvedImport)
 }
 
-func (arc *Checker) checkImportPath(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func checkImportPath(component *spec.Component, resolvedImport files.ResolvedImport) bool {
 	for _, allowedImport := range component.AllowedImports {
 		if allowedImport.ImportPath == resolvedImport.Name {
 			return true
