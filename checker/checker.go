@@ -81,7 +81,6 @@ func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFil
 			FileAbsolutePath:   file.Path,
 			ResolvedImportName: resolvedImport.Name,
 		})
-		break
 	}
 }
 
