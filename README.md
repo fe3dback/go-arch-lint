@@ -1,5 +1,7 @@
 # golang architecture linter
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/fe3dback/go-arch-lint)](https://goreportcard.com/report/github.com/fe3dback/go-arch-lint)
+
 Check all project imports and compare to arch rules defined in yml file
 
 ![Logo image](https://user-images.githubusercontent.com/2073883/93022069-84124480-f5ef-11ea-93b6-614015a3d6d6.png)
@@ -35,7 +37,7 @@ flags:
 | -------------     | ----- | ----- | ------------------- |
 | version           | +     | int   | schema version, currently support "1"  |
 | allow             | -     | map   | global rules |
-| └depOnAnyVendor   | -     | bool  | allow import any vendor code to any project file |
+| . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
 | exclude           | -     | list  | list of directories (relative path) for exclude from analyse |
 | excludeFiles      | -     | list  | regExp rules for file names, for exclude from analyse |
 | components        | +     | map   | project components used for split real modules and packages to abstract thing |
