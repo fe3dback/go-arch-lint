@@ -33,7 +33,7 @@ func makeTestResolvedPath(localPath string) *spec.ResolvedPath {
 
 func makeTestResolvedProjectImport(localPath string) *files.ResolvedImport {
 	return &files.ResolvedImport{
-		Name:       "github.com/fe3dback/go-arch-lint/" + localPath,
+		Name:       testModulePath + "/" + localPath,
 		ImportType: files.ImportTypeProject,
 	}
 }
@@ -553,11 +553,11 @@ func TestChecker_Check(t *testing.T) {
 				},
 			},
 			{
-				Path:    makeTestAbsPath("d/unknown.go"),
+				Path:    makeTestAbsPath("d/unknown.go"), // rejected
 				Imports: []files.ResolvedImport{},
 			},
 			{
-				Path:    makeTestAbsPath("a/sub-unknown/unknown.go"),
+				Path:    makeTestAbsPath("a/sub-unknown/unknown.go"), // rejected
 				Imports: []files.ResolvedImport{},
 			},
 		},
@@ -582,12 +582,17 @@ func TestChecker_Check(t *testing.T) {
 
 	// -----------------
 
+	fmt.Printf("Check result's on virtual arch FS:\n")
+
 	result := checker.Check()
 	for _, warn := range result.NotMatchedWarnings() {
-		t.Logf("info: notMatched: %+v", warn)
+		fmt.Printf("    - virtual fs info: notMatched: '%+v'\n", warn.FileRelativePath)
 	}
 	for _, warn := range result.DependencyWarnings() {
-		t.Logf("info: dep: %+v", warn)
+		fmt.Printf("    - virtual fs info: dep: '%s' should depend on '%s'\n",
+			warn.FileRelativePath,
+			warn.ResolvedImportName,
+		)
 	}
 
 	if result.TotalCount() != 13 {
