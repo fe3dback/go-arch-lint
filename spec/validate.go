@@ -34,7 +34,6 @@ func (v *validator) validate() error {
 	// validators
 	v.validateVersion()
 	v.validateComponents()
-	v.validateExclude()
 	v.validateExcludeFiles()
 	v.validateDeps()
 	v.validateVendors()
@@ -80,14 +79,6 @@ func (v *validator) validateComponents() {
 
 		return nil
 	})
-}
-
-func (v *validator) validateExclude() {
-	for index, path := range v.spec.Exclude {
-		v.check(fmt.Sprintf("$.exclude[%d]", index), func() error {
-			return v.isValidPath(path)
-		})
-	}
 }
 
 func (v *validator) validateExcludeFiles() {

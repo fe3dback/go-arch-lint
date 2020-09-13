@@ -12,8 +12,6 @@ import (
 	"sync"
 )
 
-const maxConcurrency = 16
-
 const (
 	ImportTypeStdLib ImportType = iota
 	ImportTypeProject
@@ -21,11 +19,6 @@ const (
 )
 
 type (
-	filePath = string
-	chQueue  = chan filePath
-	chError  = chan error
-	chDone   = chan struct{}
-
 	Resolver struct {
 		projectDirectory    string
 		moduleName          string
@@ -63,29 +56,15 @@ func NewResolver(
 		moduleName:          moduleName,
 		excludePaths:        excludePaths,
 		excludeFileMatchers: excludeFileMatchers,
-		result:              &ResolveResult{},
-		tokenSet:            token.NewFileSet(),
-		mux:                 sync.Mutex{},
+		result: &ResolveResult{
+			Files: []*ResolvedFile{},
+		},
+		tokenSet: token.NewFileSet(),
+		mux:      sync.Mutex{},
 	}
 }
 
 func (r *Resolver) Resolve() (ResolveResult, error) {
-	chDone := make(chDone)
-	chErrors := make(chError)
-
-	chQueue := r.walk(chErrors)
-	r.handleQueue(chQueue, chErrors, chDone)
-
-	select {
-	case err := <-chErrors:
-		return ResolveResult{}, err
-	case <-chDone:
-		return *r.result, nil
-	}
-}
-
-func (r *Resolver) walk(chErr chError) chQueue {
-	queue := make(chQueue, 40000)
 	walkFn := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -111,53 +90,27 @@ func (r *Resolver) walk(chErr chError) chQueue {
 			}
 		}
 
-		queue <- path
+		err = r.parse(path)
+		if err != nil {
+			return fmt.Errorf("failed to parse '%s': %v", path, err)
+		}
+
 		return nil
 	}
 
-	go func() {
-		err := filepath.Walk(r.projectDirectory, walkFn)
-		if err != nil {
-			chErr <- fmt.Errorf("failed to walk project tree: %v", err)
-		}
+	err := filepath.Walk(r.projectDirectory, walkFn)
+	if err != nil {
+		return ResolveResult{}, fmt.Errorf("failed to walk project tree: %v", err)
+	}
 
-		close(queue)
-	}()
-
-	return queue
+	return *r.result, nil
 }
 
 func (r *Resolver) isGoFile(path string) bool {
 	return filepath.Ext(path) == ".go"
 }
 
-func (r *Resolver) handleQueue(queue chQueue, chErr chError, done chDone) {
-	concurrency := make(chan struct{}, maxConcurrency)
-
-	go func() {
-		var wg sync.WaitGroup
-		for path := range queue {
-			concurrency <- struct{}{}
-			go func(path filePath) {
-				wg.Add(1)
-				defer wg.Done()
-
-				err := r.parse(path)
-				if err != nil {
-					chErr <- fmt.Errorf("failed to parse '%s': %v", path, err)
-					return
-				}
-
-				<-concurrency
-			}(path)
-		}
-
-		wg.Wait()
-		done <- struct{}{}
-	}()
-}
-
-func (r *Resolver) parse(path filePath) error {
+func (r *Resolver) parse(path string) error {
 	fileAst, err := parser.ParseFile(r.tokenSet, path, nil, parser.ImportsOnly)
 	if err != nil {
 		return fmt.Errorf("failed to parse go at '%s': %v", path, err)
