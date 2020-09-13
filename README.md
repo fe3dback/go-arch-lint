@@ -27,7 +27,8 @@ flags:
 | ----------------- | ----- | -------- | ------------------- |
 | project-path      | +     | n/a      | --project-path ~/go/src/github.com/fe3dback/galaxy |
 | max-warnings      | -     | 512      | --max-warnings=32 |
-| color-output      | -     | true     | --color-output=false |
+| output-color      | -     | true     | --output-color=false |
+| output-type       | -     | ascii    | --output-color=json |
 
 ## Archfile Syntax
 
@@ -35,7 +36,7 @@ flags:
 | -------------     | ----- | ----- | ------------------- |
 | version           | +     | int   | schema version, currently support "1"  |
 | allow             | -     | map   | global rules |
-| └depOnAnyVendor   | -     | bool  | allow import any vendor code to any project file |
+| . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
 | exclude           | -     | list  | list of directories (relative path) for exclude from analyse |
 | excludeFiles      | -     | list  | regExp rules for file names, for exclude from analyse |
 | components        | +     | map   | project components used for split real modules and packages to abstract thing |
@@ -152,9 +153,40 @@ This linter will return:
 | 1           | Found warnings |
 
 ```
-λ ~/ go-arch-lint --project-path ~/go/src/github.com/fe3dback/galaxy
+λ ~/ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy
 used arch file: /home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml
         module: github.com/fe3dback/galaxy
 [WARNING] File '/home/neo/go/src/github.com/fe3dback/galaxy/engine/lib/sound/manager.go' not attached to any component in archfile
 [WARNING] Component 'engine_loader': file '/engine/loader/assets_loader.go' shouldn't depend on 'github.com/fe3dback/galaxy/engine'
+```
+
+### json
+
+Same warnings in json format
+
+```
+λ ~/ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy --output-type=json
+```
+
+```json
+{
+  "Type": "cmd.checkPayload",
+  "Payload": {
+    "HasWarnings": true,
+    "WarningsDeps": [
+      {
+        "ComponentName": "engine_loader",
+        "FileRelativePath": "/engine/loader/assets_loader.go",
+        "FileAbsolutePath": "/home/neo/go/src/github.com/fe3dback/galaxy/engine/loader/assets_loader.go",
+        "ResolvedImportName": "github.com/fe3dback/galaxy/engine"
+      }
+    ],
+    "WarningsNotMatched": [
+      {
+        "FileRelativePath": "/engine/lib/sound/manager.go",
+        "FileAbsolutePath": "/home/neo/go/src/github.com/fe3dback/galaxy/engine/lib/sound/manager.go"
+      }
+    ]
+  }
+}
 ```
