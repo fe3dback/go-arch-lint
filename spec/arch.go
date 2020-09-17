@@ -44,10 +44,10 @@ type (
 	}
 )
 
-func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, error) {
-	spec, err := newSpec(archFile, rootDirectory)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse archfile: %v", err)
+func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, error, []Warning) {
+	spec, specParseErr := newSpec(archFile, rootDirectory)
+	if specParseErr.Err != nil {
+		return nil, fmt.Errorf("failed to parse archfile: %v", specParseErr.Err), specParseErr.Warnings
 	}
 
 	arch := Arch{
@@ -59,22 +59,22 @@ func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, e
 		ExcludeFilesMatcher: make([]*regexp.Regexp, 0),
 	}
 
-	err = arch.assembleComponents(spec)
+	err := arch.assembleComponents(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch components: %v", err)
+		return nil, fmt.Errorf("failed to assemble arch components: %v", err), nil
 	}
 
 	err = arch.assembleExclude(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch components: %v", err)
+		return nil, fmt.Errorf("failed to assemble arch components: %v", err), nil
 	}
 
 	err = arch.assembleExcludeFilesMatcher(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch excludeFiles: %v", err)
+		return nil, fmt.Errorf("failed to assemble arch excludeFiles: %v", err), nil
 	}
 
-	return &arch, nil
+	return &arch, nil, nil
 }
 
 func (a *Arch) assembleComponents(spec YamlSpec) error {

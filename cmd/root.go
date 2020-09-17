@@ -30,6 +30,7 @@ const (
 	flagNameOutputType        = "output-type"
 	flagNameMaxWarnings       = "max-warnings"
 	flagNameProjectPath       = "project-path"
+	flagNameAliasJson         = "json"
 )
 
 var (
@@ -39,6 +40,7 @@ var (
 	flagOutputJsonOneLine bool
 	flagMaxWarnings       int
 	flagProjectPath       string
+	flagAliasJson         bool
 
 	// global services
 	au aurora.Aurora
@@ -53,8 +55,9 @@ type (
 )
 
 const (
-	outputTypeASCII = "ascii"
-	outputTypeJSON  = "json"
+	outputTypeDefault = "default"
+	outputTypeASCII   = "ascii"
+	outputTypeJSON    = "json"
 )
 
 const (
@@ -63,7 +66,7 @@ const (
 )
 
 func Execute() {
-	setDefaultCommandIfNonePresent(rootCmd, cmdNameCheck)
+	setDefaultCommandIfNonePresent("--help")
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -82,20 +85,12 @@ func Execute() {
 	os.Exit(0)
 }
 
-func setDefaultCommandIfNonePresent(rootCmd *cobra.Command, defaultCommand string) {
-	if len(os.Args) == 0 {
+func setDefaultCommandIfNonePresent(defaultCommand string) {
+	if len(os.Args) != 1 {
 		return
 	}
 
-	for _, arg := range os.Args {
-		for _, command := range rootCmd.Commands() {
-			if command.Use == arg {
-				return
-			}
-		}
-	}
-
-	os.Args = append([]string{os.Args[0], defaultCommand}, os.Args[1:]...)
+	os.Args = append(os.Args, defaultCommand)
 }
 
 func init() {
@@ -119,8 +114,17 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(
 		&flagOutputType,
 		flagNameOutputType,
-		outputTypeASCII,
+		outputTypeDefault,
 		fmt.Sprintf("type of command output, variants: [%s]", strings.Join(outputTypeVariants, ", ")),
+	)
+	rootCmd.PersistentFlags().BoolVar(
+		&flagAliasJson,
+		flagNameAliasJson,
+		false,
+		fmt.Sprintf("(alias for --%s=%s)",
+			flagNameOutputType,
+			outputTypeJSON,
+		),
 	)
 
 	// max warnings
@@ -143,12 +147,36 @@ func init() {
 	cobra.OnInitialize(func() {
 		au = aurora.NewAurora(flagUseColors)
 
+		processAliases()
 		assertFlagOutputTypeValid()
 		assertFlagMaxWarningsValid()
 	})
 }
 
+func processAliases() {
+	processAliasJson()
+}
+
+func processAliasJson() {
+	if !flagAliasJson {
+		return
+	}
+
+	if flagOutputType != outputTypeDefault && flagOutputType != outputTypeJSON {
+		panic(fmt.Sprintf("flag --%s not compatible with --%s",
+			flagNameAliasJson,
+			flagNameOutputType,
+		))
+	}
+
+	flagOutputType = outputTypeJSON
+}
+
 func assertFlagOutputTypeValid() {
+	if flagOutputType == outputTypeDefault {
+		flagOutputType = outputTypeASCII
+	}
+
 	for _, variant := range outputTypeVariants {
 		if flagOutputType == variant {
 			return

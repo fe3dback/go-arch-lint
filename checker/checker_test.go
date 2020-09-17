@@ -564,7 +564,7 @@ func TestChecker_Check(t *testing.T) {
 	}
 
 	root := makeTestProjectRoot()
-	arch, err := spec.NewArch(
+	arch, err, _ := spec.NewArch(
 		root+"/"+testArchFileV1,
 		testModulePath,
 		root,

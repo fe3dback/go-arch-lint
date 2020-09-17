@@ -7,7 +7,6 @@ import (
 	"regexp"
 
 	pathresolv "github.com/fe3dback/go-arch-lint/path"
-
 	"github.com/goccy/go-yaml"
 )
 
@@ -17,7 +16,20 @@ type (
 		rootDirectory string
 		spec          YamlSpec
 		source        []byte
-		warnings      []string
+		warnings      []Warning
+	}
+
+	Warning struct {
+		Text       string
+		Path       string
+		Line       int
+		Offset     int
+		SourceCode *WarningSourceCode `json:"-"`
+	}
+
+	WarningSourceCode struct {
+		FormatText          []byte
+		FormatTextHighlight []byte
 	}
 )
 
@@ -26,11 +38,11 @@ func newValidator(spec YamlSpec, source []byte, rootDirectory string) *validator
 		rootDirectory: rootDirectory,
 		spec:          spec,
 		source:        source,
-		warnings:      []string{},
+		warnings:      make([]Warning, 0),
 	}
 }
 
-func (v *validator) validate() error {
+func (v *validator) validate() []Warning {
 	// validators
 	v.validateVersion()
 	v.validateComponents()
@@ -40,16 +52,7 @@ func (v *validator) validate() error {
 	v.validateCommonComponents()
 	v.validateCommonVendors()
 
-	// display warnings
-	if warnings, ok := v.getWarnings(); !ok {
-		for _, warning := range warnings {
-			fmt.Printf("[Archfile] %s\n", warning)
-		}
-
-		return fmt.Errorf("syntax error")
-	}
-
-	return nil
+	return v.warnings
 }
 
 func (v *validator) validateVersion() {
@@ -151,7 +154,10 @@ func (v *validator) validateCommonVendors() {
 func (v *validator) check(path string, fn validateFn) {
 	defer func() {
 		if err := recover(); err != nil {
-			v.warnings = append(v.warnings, fmt.Sprintf("not found path '%s': %v", path, err))
+			v.warnings = append(v.warnings, Warning{
+				Text: fmt.Sprintf("not found path '%s': %v", path, err),
+				Path: path,
+			})
 			return
 		}
 	}()
@@ -163,26 +169,43 @@ func (v *validator) check(path string, fn validateFn) {
 
 	sourceLine, err := yaml.PathString(path)
 	if err != nil {
-		v.warnings = append(v.warnings, fmt.Sprintf("failed check '%s': %v", path, err))
+		v.warnings = append(v.warnings, Warning{
+			Text: fmt.Sprintf("failed check '%s': %v", path, err),
+			Path: path,
+		})
+		return
+	}
+
+	textSource, err := sourceLine.AnnotateSource(v.source, false)
+	if err != nil {
+		v.warnings = append(v.warnings, Warning{
+			Text: fmt.Sprintf("failed annotate '%s': %v", path, err),
+			Path: path,
+		})
 		return
 	}
 
 	highlightSource, err := sourceLine.AnnotateSource(v.source, true)
 	if err != nil {
-		v.warnings = append(v.warnings, fmt.Sprintf("failed annotate '%s': %v", path, err))
+		v.warnings = append(v.warnings, Warning{
+			Text: fmt.Sprintf("failed annotate '%s': %v", path, err),
+			Path: path,
+		})
 		return
 	}
 
-	warnings := fmt.Sprintf("path '%s': %v\n%s", path, checkError, highlightSource)
-	v.warnings = append(v.warnings, warnings)
-}
+	sourceMarker := parseSourceError(string(textSource))
 
-func (v *validator) getWarnings() ([]string, bool) {
-	if len(v.warnings) == 0 {
-		return nil, true
-	}
-
-	return v.warnings, false
+	v.warnings = append(v.warnings, Warning{
+		Text:   fmt.Sprintf("path '%s': %v", path, checkError),
+		Path:   path,
+		Line:   sourceMarker.line,
+		Offset: sourceMarker.pos,
+		SourceCode: &WarningSourceCode{
+			FormatText:          textSource,
+			FormatTextHighlight: highlightSource,
+		},
+	})
 }
 
 func (v *validator) isValidImportPath(importPath string) error {

@@ -45,14 +45,22 @@ type (
 		AnyProjectDeps bool                `yaml:"anyProjectDeps"`
 		AnyVendorDeps  bool                `yaml:"anyVendorDeps"`
 	}
+
+	YamlParseError struct {
+		Err      error
+		Warnings []Warning
+	}
 )
 
-func newSpec(archFile string, rootDirectory string) (YamlSpec, error) {
+func newSpec(archFile string, rootDirectory string) (YamlSpec, YamlParseError) {
 	spec := YamlSpec{}
 
 	data, err := ioutil.ReadFile(archFile)
 	if err != nil {
-		return spec, fmt.Errorf("can`t open '%s': %v", archFile, err)
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("can`t open '%s': %v", archFile, err),
+			Warnings: []Warning{},
+		}
 	}
 
 	reader := bytes.NewBuffer(data)
@@ -65,14 +73,20 @@ func newSpec(archFile string, rootDirectory string) (YamlSpec, error) {
 
 	err = decoder.Decode(&spec)
 	if err != nil {
-		return spec, fmt.Errorf("can`t parse yaml in '%s': %v", archFile, err)
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("can`t parse yaml in '%s': %v", archFile, err),
+			Warnings: []Warning{},
+		}
 	}
 
 	specValidator := newValidator(spec, data, rootDirectory)
-	err = specValidator.validate()
-	if err != nil {
-		return spec, fmt.Errorf("spec '%s' invalid: %v", archFile, err)
+	warnings := specValidator.validate()
+	if len(warnings) > 0 {
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("spec '%s' has warnings", archFile),
+			Warnings: warnings,
+		}
 	}
 
-	return spec, nil
+	return spec, YamlParseError{}
 }

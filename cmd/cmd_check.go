@@ -20,9 +20,12 @@ var (
 
 type (
 	checkPayload struct {
-		HasWarnings        bool
-		WarningsDeps       []checker.WarningDep
-		WarningsNotMatched []checker.WarningNotMatched
+		ExecutionWarnings []spec.Warning
+		ExecutionError    string
+
+		ArchHasWarnings        bool
+		ArchWarningsDeps       []checker.WarningDep
+		ArchWarningsNotMatched []checker.WarningNotMatched
 	}
 )
 
@@ -49,14 +52,31 @@ func checkCmdOutputAscii(payload checkPayload) {
 	fmt.Printf("used arch file: %s\n", au.Green(settingsGoArchFilePath))
 	fmt.Printf("        module: %s\n", au.Green(settingsModuleName))
 
-	if !payload.HasWarnings {
+	if payload.ExecutionError != "" {
+		for _, warning := range payload.ExecutionWarnings {
+			if src := warning.SourceCode; src != nil {
+				fmt.Printf("[Archfile] %s:\n%s\n",
+					au.Yellow(warning.Text),
+					src.FormatTextHighlight,
+				)
+
+				continue
+			}
+
+			fmt.Printf("[Archfile] %s\n", au.Yellow(warning.Text))
+		}
+
+		halt(fmt.Errorf(payload.ExecutionError))
+	}
+
+	if !payload.ArchHasWarnings {
 		fmt.Printf("%s\n", au.Green("OK - No warnings found"))
 
 		return
 	}
 
 	outputCount := 0
-	for _, warning := range payload.WarningsDeps {
+	for _, warning := range payload.ArchWarningsDeps {
 		fmt.Printf("[WARN] Component '%s': file '%s' shouldn't depend on '%s'\n",
 			au.Green(warning.ComponentName),
 			au.Cyan(warning.FileRelativePath),
@@ -65,20 +85,20 @@ func checkCmdOutputAscii(payload checkPayload) {
 		outputCount++
 	}
 
-	for _, warning := range payload.WarningsNotMatched {
+	for _, warning := range payload.ArchWarningsNotMatched {
 		fmt.Printf("[WARN] File '%s' not attached to any component in archfile\n",
 			au.Cyan(warning.FileRelativePath),
 		)
 		outputCount++
 	}
 
-	truncatedWarnings := len(payload.WarningsDeps) - outputCount
+	truncatedWarnings := len(payload.ArchWarningsDeps) - outputCount
 	if truncatedWarnings >= 1 {
 		fmt.Printf("%d warning truncated..\n", truncatedWarnings)
 	}
 
 	fmt.Println()
-	halt(fmt.Errorf("warnings found: %d", au.Yellow(len(payload.WarningsDeps))))
+	halt(fmt.Errorf("warnings found: %d", au.Yellow(len(payload.ArchWarningsDeps))))
 }
 
 func checkCmdAssertFlagProjectPathValid() {
@@ -114,19 +134,32 @@ func checkCmdAssertFlagGoModuleValid() {
 }
 
 func checkCmdArch() checkPayload {
-	arch, err := spec.NewArch(
+	payload := checkPayload{
+		ExecutionWarnings:      []spec.Warning{},
+		ExecutionError:         "",
+		ArchHasWarnings:        false,
+		ArchWarningsDeps:       []checker.WarningDep{},
+		ArchWarningsNotMatched: []checker.WarningNotMatched{},
+	}
+
+	arch, err, parseWarnings := spec.NewArch(
 		settingsGoArchFilePath,
 		settingsModuleName,
 		settingsProjectDirectory,
 	)
 	if err != nil {
-		panic(err)
+		payload.ExecutionError = err.Error()
+		payload.ExecutionWarnings = parseWarnings
+
+		return payload
 	}
 
 	resolver := checkCmdCreateResolver(arch)
 	projectFiles, err := resolver.Resolve()
 	if err != nil {
-		panic(err)
+		payload.ExecutionError = err.Error()
+
+		return payload
 	}
 
 	archChecker := checker.NewChecker(
@@ -134,12 +167,6 @@ func checkCmdArch() checkPayload {
 		arch,
 		projectFiles,
 	)
-
-	payload := checkPayload{
-		HasWarnings:        false,
-		WarningsDeps:       []checker.WarningDep{},
-		WarningsNotMatched: []checker.WarningNotMatched{},
-	}
 
 	result := archChecker.Check()
 	if result.IsOk() {
@@ -165,7 +192,7 @@ func checkCmdWriteWarnings(res checker.CheckResult, payload *checkPayload, maxWa
 			break
 		}
 
-		payload.WarningsDeps = append(payload.WarningsDeps, dep)
+		payload.ArchWarningsDeps = append(payload.ArchWarningsDeps, dep)
 		outputCount++
 	}
 
@@ -175,12 +202,12 @@ func checkCmdWriteWarnings(res checker.CheckResult, payload *checkPayload, maxWa
 			break
 		}
 
-		payload.WarningsNotMatched = append(payload.WarningsNotMatched, notMatched)
+		payload.ArchWarningsNotMatched = append(payload.ArchWarningsNotMatched, notMatched)
 		outputCount++
 	}
 
 	if outputCount > 0 {
-		payload.HasWarnings = true
+		payload.ArchHasWarnings = true
 	}
 }
 
