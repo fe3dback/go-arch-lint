@@ -1,4 +1,4 @@
-package spec
+package annotate
 
 import (
 	"reflect"
@@ -30,8 +30,8 @@ func Test_parseSourceError(t *testing.T) {
 			},
 			want: sourceMarker{
 				valid: true,
-				line:  183,
-				pos:   9,
+				Line:  183,
+				Pos:   9,
 			},
 		},
 		{
@@ -45,8 +45,8 @@ func Test_parseSourceError(t *testing.T) {
 			},
 			want: sourceMarker{
 				valid: true,
-				line:  1,
-				pos:   10,
+				Line:  1,
+				Pos:   10,
 			},
 		},
 		{
@@ -56,14 +56,14 @@ func Test_parseSourceError(t *testing.T) {
 			},
 			want: sourceMarker{
 				valid: false,
-				line:  0,
-				pos:   0,
+				Line:  0,
+				Pos:   0,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseSourceError(tt.args.sourceText); !reflect.DeepEqual(got, tt.want) {
+			if got := ParseSourceError(tt.args.sourceText); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("parseSourceError() = %v, want %v", got, tt.want)
 			}
 		})

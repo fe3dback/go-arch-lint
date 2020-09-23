@@ -455,11 +455,22 @@ func Test_longestPathComponent(t *testing.T) {
 			expectNil: false,
 		},
 		{
-			name: "two elements, same len, expect first",
+			name: "two elements, same len, expect first (because cat < dog in alpha order)",
 			args: args{
 				matched: map[string]string{
 					makeTestAbsPath("cat"): "cat",
 					makeTestAbsPath("dog"): "dog",
+				},
+			},
+			wantId:    "cat",
+			expectNil: false,
+		},
+		{
+			name: "two elements, same len, expect second (because cat < dog in alpha order)",
+			args: args{
+				matched: map[string]string{
+					makeTestAbsPath("dog"): "dog",
+					makeTestAbsPath("cat"): "cat",
 				},
 			},
 			wantId:    "cat",

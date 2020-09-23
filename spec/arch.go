@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	pathresolv "github.com/fe3dback/go-arch-lint/path"
+	"github.com/fe3dback/go-arch-lint/spec/archfile"
 )
 
 type (
@@ -14,7 +15,7 @@ type (
 		rootDirectory string
 		moduleName    string
 
-		Allow               YamlAllow
+		Allow               archfile.YamlAllow
 		Components          []*Component
 		Exclude             []*ResolvedPath
 		ExcludeFilesMatcher []*regexp.Regexp
@@ -44,7 +45,7 @@ type (
 	}
 )
 
-func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, error, []Warning) {
+func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, error, []YamlAnnotatedWarning) {
 	spec, specParseErr := newSpec(archFile, rootDirectory)
 	if specParseErr.Err != nil {
 		return nil, fmt.Errorf("failed to parse archfile: %v", specParseErr.Err), specParseErr.Warnings
@@ -77,7 +78,7 @@ func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, e
 	return &arch, nil, nil
 }
 
-func (a *Arch) assembleComponents(spec YamlSpec) error {
+func (a *Arch) assembleComponents(spec archfile.YamlSpec) error {
 	for yamlName, yamlComponent := range spec.Components {
 		depMeta := spec.Dependencies[yamlName]
 
@@ -118,7 +119,7 @@ func (a *Arch) assembleComponents(spec YamlSpec) error {
 	return nil
 }
 
-func (a *Arch) assembleExclude(spec YamlSpec) error {
+func (a *Arch) assembleExclude(spec archfile.YamlSpec) error {
 	for _, yamlRelativePath := range spec.Exclude {
 		resolvedPath, err := a.assembleResolvedPaths(yamlRelativePath)
 		if err != nil {
@@ -131,7 +132,7 @@ func (a *Arch) assembleExclude(spec YamlSpec) error {
 	return nil
 }
 
-func (a *Arch) assembleExcludeFilesMatcher(spec YamlSpec) error {
+func (a *Arch) assembleExcludeFilesMatcher(spec archfile.YamlSpec) error {
 	for _, regString := range spec.ExcludeFilesRegExp {
 		matcher, err := regexp.Compile(regString)
 		if err != nil {
@@ -169,7 +170,7 @@ func (a *Arch) assembleResolvedPaths(localPathMask string) ([]*ResolvedPath, err
 }
 
 func (a *Arch) assembleAllowedImports(
-	spec YamlSpec,
+	spec archfile.YamlSpec,
 	componentNames []ComponentName,
 	vendorNames []VendorName,
 ) ([]*ResolvedPath, error) {

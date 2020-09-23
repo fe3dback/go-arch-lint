@@ -1,4 +1,4 @@
-package spec
+package annotate
 
 import (
 	"regexp"
@@ -9,8 +9,8 @@ import (
 type (
 	sourceMarker struct {
 		valid bool
-		line  int
-		pos   int
+		Line  int
+		Pos   int
 	}
 )
 
@@ -26,7 +26,7 @@ const sourceMarkerPosition = "^"
 //	  185 |       - game_component
 //	  186 |       - game_utils
 //	  187 |
-func parseSourceError(sourceText string) sourceMarker {
+func ParseSourceError(sourceText string) sourceMarker {
 	notValid := sourceMarker{valid: false}
 
 	if !strings.Contains(sourceText, sourceMarkerLine) {
@@ -39,8 +39,8 @@ func parseSourceError(sourceText string) sourceMarker {
 
 	marker := sourceMarker{
 		valid: false,
-		line:  0,
-		pos:   0,
+		Line:  0,
+		Pos:   0,
 	}
 
 	lineFound := false
@@ -51,7 +51,7 @@ func parseSourceError(sourceText string) sourceMarker {
 			// in marker pos line
 			// `                ^`
 
-			marker.pos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
+			marker.Pos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
 			marker.valid = true
 			break
 		}
@@ -73,7 +73,7 @@ func parseSourceError(sourceText string) sourceMarker {
 			return notValid
 		}
 
-		marker.line = lineNumber
+		marker.Line = lineNumber
 		lineFound = true
 		leftOffset = strings.Index(sourceLine, `|`) + 1
 	}

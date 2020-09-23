@@ -20,7 +20,7 @@ var (
 
 type (
 	checkPayload struct {
-		ExecutionWarnings []spec.Warning
+		ExecutionWarnings []spec.YamlAnnotatedWarning
 		ExecutionError    string
 
 		ArchHasWarnings        bool
@@ -135,7 +135,7 @@ func checkCmdAssertFlagGoModuleValid() {
 
 func checkCmdArch() checkPayload {
 	payload := checkPayload{
-		ExecutionWarnings:      []spec.Warning{},
+		ExecutionWarnings:      []spec.YamlAnnotatedWarning{},
 		ExecutionError:         "",
 		ArchHasWarnings:        false,
 		ArchWarningsDeps:       []checker.WarningDep{},
