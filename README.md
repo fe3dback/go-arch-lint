@@ -4,7 +4,7 @@
 
 Check all project imports and compare to arch rules defined in yml file
 
-![Logo image](https://user-images.githubusercontent.com/2073883/93022069-84124480-f5ef-11ea-93b6-614015a3d6d6.png)
+![Logo image](https://user-images.githubusercontent.com/2073883/94179282-f82cd200-fea4-11ea-85c5-bf685293220e.png)
 
 ## Install
 
