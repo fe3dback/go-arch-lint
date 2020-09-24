@@ -55,9 +55,9 @@ type (
 )
 
 const (
-	outputTypeDefault = "default"
-	outputTypeASCII   = "ascii"
-	outputTypeJSON    = "json"
+	outputTypeDefault outputType = "default"
+	outputTypeASCII   outputType = "ascii"
+	outputTypeJSON    outputType = "json"
 )
 
 const (
@@ -107,7 +107,7 @@ func init() {
 		&flagOutputJsonOneLine,
 		flagNameOutputJsonOneLine,
 		false,
-		"format JSON as multiline payload, only for json output type",
+		"format JSON as single line payload (without line breaks), only for json output type",
 	)
 
 	// output-type

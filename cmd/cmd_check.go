@@ -18,17 +18,6 @@ var (
 	settingsModuleName       string
 )
 
-type (
-	checkPayload struct {
-		ExecutionWarnings []spec.YamlAnnotatedWarning
-		ExecutionError    string
-
-		ArchHasWarnings        bool
-		ArchWarningsDeps       []checker.WarningDep
-		ArchWarningsNotMatched []checker.WarningNotMatched
-	}
-)
-
 func init() {
 	rootCmd.AddCommand(checkCmd)
 }
@@ -42,13 +31,13 @@ var checkCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		payload := checkCmdArch()
-		output(payload, func() {
+		output(outputPayloadTypeCommandCheck, payload, func() {
 			checkCmdOutputAscii(payload)
 		})
 	},
 }
 
-func checkCmdOutputAscii(payload checkPayload) {
+func checkCmdOutputAscii(payload payloadTypeCommandCheck) {
 	fmt.Printf("used arch file: %s\n", au.Green(settingsGoArchFilePath))
 	fmt.Printf("        module: %s\n", au.Green(settingsModuleName))
 
@@ -133,8 +122,8 @@ func checkCmdAssertFlagGoModuleValid() {
 	settingsModuleName = moduleName
 }
 
-func checkCmdArch() checkPayload {
-	payload := checkPayload{
+func checkCmdArch() payloadTypeCommandCheck {
+	payload := payloadTypeCommandCheck{
 		ExecutionWarnings:      []spec.YamlAnnotatedWarning{},
 		ExecutionError:         "",
 		ArchHasWarnings:        false,
@@ -183,7 +172,7 @@ func checkCmdArch() checkPayload {
 
 }
 
-func checkCmdWriteWarnings(res checker.CheckResult, payload *checkPayload, maxWarnings int) {
+func checkCmdWriteWarnings(res checker.CheckResult, payload *payloadTypeCommandCheck, maxWarnings int) {
 	outputCount := 0
 
 	// append deps

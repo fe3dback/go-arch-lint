@@ -16,9 +16,9 @@ type (
 	}
 )
 
-func output(payload interface{}, asciiFn func()) {
+func output(payloadType outputPayloadType, payload interface{}, asciiFn func()) {
 	payload = combinedPayload{
-		Type:    fmt.Sprintf("%T", payload),
+		Type:    payloadType,
 		Payload: payload,
 	}
 
@@ -48,11 +48,22 @@ func output(payload interface{}, asciiFn func()) {
 }
 
 func halt(err error) {
-	if flagUseColors && au != nil {
-		fmt.Printf("%s\n", au.Yellow(err.Error()))
-	} else {
-		fmt.Println(err.Error())
+	if flagOutputType == outputTypeDefault {
+		// cobra error before parsing args
+		// for example "Error: unknown flag --example"
+
+		// output in default ascii mode
+		flagOutputType = outputTypeASCII
 	}
+
+	payload := payloadTypeHalt{Error: err.Error()}
+	output(outputPayloadTypeHalt, payload, func() {
+		if flagUseColors && au != nil {
+			fmt.Printf("%s\n", au.Yellow(err.Error()))
+		} else {
+			fmt.Println(err.Error())
+		}
+	})
 
 	os.Exit(1)
 	return
