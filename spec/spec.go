@@ -5,74 +5,105 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/fe3dback/go-arch-lint/spec/annotate"
+	"github.com/fe3dback/go-arch-lint/spec/archfile"
+	specValidator "github.com/fe3dback/go-arch-lint/spec/validator"
 	"github.com/goccy/go-yaml"
 )
 
-const supportedVersion = 1
-
 type (
-	yamlVendorName       = string
-	yamlComponentName    = string
-	yamlExcludeLocalPath = string
-
-	YamlSpec struct {
-		Version            int                                 `yaml:"version"`
-		Allow              YamlAllow                           `yaml:"allow"`
-		Vendors            map[yamlVendorName]YamlVendor       `yaml:"vendors"`
-		Exclude            []yamlExcludeLocalPath              `yaml:"exclude"`
-		ExcludeFilesRegExp []string                            `yaml:"excludeFiles"`
-		Components         map[yamlComponentName]YamlComponent `yaml:"components"`
-		Dependencies       map[yamlComponentName]YamlRules     `yaml:"deps"`
-		CommonComponents   []yamlComponentName                 `yaml:"commonComponents"`
-		CommonVendors      []yamlVendorName                    `yaml:"commonVendors"`
+	YamlParseError struct {
+		Err      error
+		Warnings []YamlAnnotatedWarning
 	}
 
-	YamlAllow struct {
-		DepOnAnyVendor bool `yaml:"depOnAnyVendor"`
+	YamlAnnotatedWarning struct {
+		Text       string
+		Path       string
+		Line       int
+		Offset     int
+		SourceCode *YamlAnnotatedWarningSource `json:"-"`
 	}
 
-	YamlVendor struct {
-		ImportPath string `yaml:"in"`
-	}
-
-	YamlComponent struct {
-		LocalPath string `yaml:"in"`
-	}
-
-	YamlRules struct {
-		MayDependOn    []yamlComponentName `yaml:"mayDependOn"`
-		CanUse         []yamlVendorName    `yaml:"canUse"`
-		AnyProjectDeps bool                `yaml:"anyProjectDeps"`
-		AnyVendorDeps  bool                `yaml:"anyVendorDeps"`
+	YamlAnnotatedWarningSource struct {
+		FormatText          []byte
+		FormatTextHighlight []byte
 	}
 )
 
-func newSpec(archFile string, rootDirectory string) (YamlSpec, error) {
-	spec := YamlSpec{}
+func newSpec(archFile string, rootDirectory string) (archfile.YamlSpec, YamlParseError) {
+	spec := archfile.YamlSpec{}
 
-	data, err := ioutil.ReadFile(archFile)
+	sourceCode, err := ioutil.ReadFile(archFile)
 	if err != nil {
-		return spec, fmt.Errorf("can`t open '%s': %v", archFile, err)
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("can`t open '%s': %v", archFile, err),
+			Warnings: nil,
+		}
 	}
 
-	reader := bytes.NewBuffer(data)
+	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
 		yaml.DisallowDuplicateKey(),
 		yaml.DisallowUnknownField(),
 		yaml.Strict(),
 	)
-
 	err = decoder.Decode(&spec)
 	if err != nil {
-		return spec, fmt.Errorf("can`t parse yaml in '%s': %v", archFile, err)
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("can`t parse yaml in '%s': %v", archFile, err),
+			Warnings: nil,
+		}
 	}
 
-	specValidator := newValidator(spec, data, rootDirectory)
-	err = specValidator.validate()
-	if err != nil {
-		return spec, fmt.Errorf("spec '%s' invalid: %v", archFile, err)
+	validator := specValidator.NewArchFileValidator(spec, rootDirectory)
+	warnings, err := annotateWarnings(sourceCode, validator.Validate())
+
+	if len(warnings) > 0 {
+		return spec, YamlParseError{
+			Err:      fmt.Errorf("spec '%s' has warnings", archFile),
+			Warnings: warnings,
+		}
 	}
 
-	return spec, nil
+	return spec, YamlParseError{}
+}
+
+func annotateWarnings(sourceCode []byte, warnings []specValidator.Warning) ([]YamlAnnotatedWarning, error) {
+	annotatedWarnings := make([]YamlAnnotatedWarning, 0)
+
+	for _, warning := range warnings {
+		path := warning.Path
+
+		sourceLine, err := yaml.PathString(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed check '%s': %v", path, err)
+		}
+
+		textSource, err := sourceLine.AnnotateSource(sourceCode, false)
+		if err != nil {
+			return nil, fmt.Errorf("failed annotate '%s': %v", path, err)
+		}
+
+		highlightSource, err := sourceLine.AnnotateSource(sourceCode, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed annotate '%s': %v", path, err)
+		}
+
+		sourceMarker := annotate.ParseSourceError(string(textSource))
+
+		annotatedWarnings = append(annotatedWarnings, YamlAnnotatedWarning{
+			Text:   warning.Warning.Error(),
+			Path:   warning.Path,
+			Line:   sourceMarker.Line,
+			Offset: sourceMarker.Pos,
+			SourceCode: &YamlAnnotatedWarningSource{
+				FormatText:          textSource,
+				FormatTextHighlight: highlightSource,
+			},
+		})
+	}
+
+	return annotatedWarnings, nil
 }

@@ -3,6 +3,7 @@ package checker
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/files"
@@ -85,17 +86,27 @@ func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFil
 }
 
 func longestPathComponent(matched map[string]*spec.Component) *spec.Component {
-	longest := ""
-	var targetComponent *spec.Component
+	// work only with keys
+	sortedPaths := make([]string, len(matched))
+	for path := range matched {
+		sortedPaths = append(sortedPaths, path)
+	}
 
-	for path, component := range matched {
+	sort.Strings(sortedPaths)
+
+	// find longest
+	longest := ""
+	for _, path := range sortedPaths {
 		if len(path) > len(longest) {
 			longest = path
-			targetComponent = component
 		}
 	}
 
-	return targetComponent
+	if longest == "" {
+		return nil
+	}
+
+	return matched[longest]
 }
 
 func checkImport(
