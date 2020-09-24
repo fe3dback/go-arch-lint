@@ -1,5 +1,7 @@
 # golang architecture linter
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/fe3dback/go-arch-lint)](https://goreportcard.com/report/github.com/fe3dback/go-arch-lint)
+
 Check all project imports and compare to arch rules defined in yml file
 
 ![Logo image](https://user-images.githubusercontent.com/2073883/93022069-84124480-f5ef-11ea-93b6-614015a3d6d6.png)
