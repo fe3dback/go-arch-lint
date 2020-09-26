@@ -10,20 +10,20 @@ import (
 )
 
 type (
-	utils struct {
+	Utils struct {
 		rootDirectory string
-		spec          archfile.YamlSpec
+		spec          *archfile.YamlSpec
 	}
 )
 
-func newUtils(spec archfile.YamlSpec, rootDirectory string) *utils {
-	return &utils{
+func NewUtils(spec *archfile.YamlSpec, rootDirectory string) *Utils {
+	return &Utils{
 		rootDirectory: rootDirectory,
 		spec:          spec,
 	}
 }
 
-func (u *utils) isValidImportPath(importPath string) error {
+func (u *Utils) isValidImportPath(importPath string) error {
 	localPath := fmt.Sprintf("vendor/%s", importPath)
 	err := u.isValidPath(localPath)
 	if err != nil {
@@ -36,7 +36,7 @@ func (u *utils) isValidImportPath(importPath string) error {
 	return nil
 }
 
-func (u *utils) isValidPath(localPath string) error {
+func (u *Utils) isValidPath(localPath string) error {
 	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localPath))
 	resolved, err := pathresolv.ResolvePath(absPath)
 	if err != nil {
@@ -50,7 +50,7 @@ func (u *utils) isValidPath(localPath string) error {
 	return u.isValidDirectories(resolved...)
 }
 
-func (u *utils) isValidDirectories(paths ...string) error {
+func (u *Utils) isValidDirectories(paths ...string) error {
 	for _, path := range paths {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			return fmt.Errorf("directory '%s' not exist", path)
@@ -60,7 +60,7 @@ func (u *utils) isValidDirectories(paths ...string) error {
 	return nil
 }
 
-func (u *utils) isKnownComponent(name string) error {
+func (u *Utils) isKnownComponent(name string) error {
 	for knownName := range u.spec.Components {
 		if name == knownName {
 			return nil
@@ -70,7 +70,7 @@ func (u *utils) isKnownComponent(name string) error {
 	return fmt.Errorf("unknown component '%s'", name)
 }
 
-func (u *utils) isKnownVendor(name string) error {
+func (u *Utils) isKnownVendor(name string) error {
 	for knownName := range u.spec.Vendors {
 		if name == knownName {
 			return nil
