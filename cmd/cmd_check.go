@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fe3dback/go-arch-lint/spec/validator"
+	"github.com/fe3dback/go-arch-lint/cmd/container"
 
 	"github.com/fe3dback/go-arch-lint/checker"
+	"github.com/fe3dback/go-arch-lint/spec/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -131,13 +132,13 @@ func checkCmdArch() payloadTypeCommandCheck {
 		ArchWarningsNotMatched: []checker.WarningNotMatched{},
 	}
 
-	container := newContainer(
+	di := container.NewContainer(
 		settingsGoArchFilePath,
 		settingsProjectDirectory,
 		settingsModuleName,
 	)
 
-	annotatedValidator := container.provideArchSpecAnnotatedValidator()
+	annotatedValidator := di.ProvideSpecAnnotatedValidator()
 	warnings, err := annotatedValidator.Validate()
 	if err != nil {
 		payload.ExecutionError = err.Error()
@@ -150,7 +151,7 @@ func checkCmdArch() payloadTypeCommandCheck {
 		return payload
 	}
 
-	archChecker := container.provideChecker()
+	archChecker := di.ProvideChecker()
 	result := archChecker.Check()
 	if result.IsOk() {
 		return payload

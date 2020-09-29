@@ -7,8 +7,6 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-const SupportedVersion = 1
-
 type (
 	YamlVendorName       = string
 	YamlComponentName    = string

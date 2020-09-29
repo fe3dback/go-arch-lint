@@ -1,21 +1,30 @@
-package annotate
+package warnparser
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-type (
-	sourceMarker struct {
-		valid bool
-		Line  int
-		Pos   int
-	}
-)
-
 const sourceMarkerLine = ">"
 const sourceMarkerPosition = "^"
+
+type WarningSourceParser struct {
+}
+
+func NewWarningSourceParser() *WarningSourceParser {
+	return &WarningSourceParser{}
+}
+
+func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error) {
+	marker := parseSourceWarning(sourceText)
+	if !marker.valid {
+		return 0, 0, fmt.Errorf("failed to parse warning source text")
+	}
+
+	return marker.sourceLine, marker.sourcePos, nil
+}
 
 // Example of sourceText
 //	  181 |   game_component:
@@ -26,8 +35,8 @@ const sourceMarkerPosition = "^"
 //	  185 |       - game_component
 //	  186 |       - game_utils
 //	  187 |
-func ParseSourceError(sourceText string) sourceMarker {
-	notValid := sourceMarker{valid: false}
+func parseSourceWarning(sourceText string) SourceMarker {
+	notValid := SourceMarker{valid: false}
 
 	if !strings.Contains(sourceText, sourceMarkerLine) {
 		return notValid
@@ -37,10 +46,10 @@ func ParseSourceError(sourceText string) sourceMarker {
 		return notValid
 	}
 
-	marker := sourceMarker{
-		valid: false,
-		Line:  0,
-		Pos:   0,
+	marker := SourceMarker{
+		valid:      false,
+		sourceLine: 0,
+		sourcePos:  0,
 	}
 
 	lineFound := false
@@ -51,7 +60,7 @@ func ParseSourceError(sourceText string) sourceMarker {
 			// in marker pos line
 			// `                ^`
 
-			marker.Pos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
+			marker.sourcePos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
 			marker.valid = true
 			break
 		}
@@ -73,7 +82,7 @@ func ParseSourceError(sourceText string) sourceMarker {
 			return notValid
 		}
 
-		marker.Line = lineNumber
+		marker.sourceLine = lineNumber
 		lineFound = true
 		leftOffset = strings.Index(sourceLine, `|`) + 1
 	}

@@ -17,21 +17,30 @@ type (
 
 type (
 	ArchFileValidator struct {
-		rootDirectory string
-		yamlSpec      *archfile.YamlSpec
+		rootDirectory  string
+		yamlSpec       *archfile.YamlSpec
+		validatorUtils *validatorUtils
 	}
 )
 
-func NewArchFileValidator(yamlSpec *archfile.YamlSpec, rootDirectory string) *ArchFileValidator {
+func NewArchFileValidator(
+	pathResolver PathResolver,
+	yamlSpec *archfile.YamlSpec,
+	rootDirectory string,
+) *ArchFileValidator {
 	return &ArchFileValidator{
 		rootDirectory: rootDirectory,
 		yamlSpec:      yamlSpec,
+		validatorUtils: newValidatorUtils(
+			pathResolver,
+			yamlSpec,
+			rootDirectory,
+		),
 	}
 }
 
 func (v *ArchFileValidator) Validate() []Warning {
-	utils := NewUtils(v.yamlSpec, v.rootDirectory)
-	registry := newArchFileCheckerRegistry(v.yamlSpec, utils)
+	registry := newArchFileCheckerRegistry(v.yamlSpec, v.validatorUtils)
 	warnings := make([]Warning, 0)
 
 	for _, checker := range registry.createdCheckers {

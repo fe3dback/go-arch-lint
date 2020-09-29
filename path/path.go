@@ -12,16 +12,23 @@ type (
 		PathType Type
 		Paths    []string
 	}
+
+	Resolver struct {
+	}
 )
 
-func ResolvePath(path string) ([]string, error) {
-	if strings.HasSuffix(path, ".") {
-		path = strings.TrimSuffix(path, ".")
+func NewResolver() *Resolver {
+	return &Resolver{}
+}
+
+func (r Resolver) Resolve(absPath string) (resolvePaths []string, err error) {
+	if strings.HasSuffix(absPath, ".") {
+		absPath = strings.TrimSuffix(absPath, ".")
 	}
 
-	matches, err := glob(path)
+	matches, err := glob(absPath)
 	if err != nil {
-		return nil, fmt.Errorf("can`t match path mask '%s': %v", path, err)
+		return nil, fmt.Errorf("can`t match path mask '%s': %v", absPath, err)
 	}
 
 	dirs := make([]string, 0)

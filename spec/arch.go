@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	pathresolv "github.com/fe3dback/go-arch-lint/path"
 	"github.com/fe3dback/go-arch-lint/spec/archfile"
 )
 
 type (
 	Arch struct {
+		pathResolver  PathResolver
 		rootDirectory string
 		moduleName    string
 
@@ -45,8 +45,14 @@ type (
 	}
 )
 
-func NewArch(spec *archfile.YamlSpec, moduleName string, rootDirectory string) (*Arch, error) {
+func NewArch(
+	pathResolver PathResolver,
+	spec *archfile.YamlSpec,
+	moduleName string,
+	rootDirectory string,
+) (*Arch, error) {
 	arch := Arch{
+		pathResolver:        pathResolver,
 		rootDirectory:       rootDirectory,
 		moduleName:          moduleName,
 		Allow:               spec.Allow,
@@ -144,7 +150,7 @@ func (a *Arch) assembleResolvedPaths(localPathMask string) ([]*ResolvedPath, err
 	list := make([]*ResolvedPath, 0)
 
 	absPath := fmt.Sprintf("%s/%s", a.rootDirectory, localPathMask)
-	resolved, err := pathresolv.ResolvePath(absPath)
+	resolved, err := a.pathResolver.Resolve(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve path '%s'", absPath)
 	}

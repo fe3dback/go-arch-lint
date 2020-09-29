@@ -3,7 +3,6 @@ package validator
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/spec/annotate"
 	"github.com/goccy/go-yaml"
 )
 
@@ -22,21 +21,27 @@ type (
 	}
 
 	AnnotatedValidator struct {
-		validator  *ArchFileValidator
-		sourceCode []byte
+		innerValidator *ArchFileValidator
+		warningParser  AnnotatedWarningParser
+		sourceCode     []byte
 	}
 )
 
-func NewAnnotatedValidator(validator *ArchFileValidator, sourceCode []byte) *AnnotatedValidator {
+func NewAnnotatedValidator(
+	innerValidator *ArchFileValidator,
+	annotatedWarningParser AnnotatedWarningParser,
+	sourceCode []byte,
+) *AnnotatedValidator {
 	return &AnnotatedValidator{
-		validator:  validator,
-		sourceCode: sourceCode,
+		innerValidator: innerValidator,
+		warningParser:  annotatedWarningParser,
+		sourceCode:     sourceCode,
 	}
 }
 
 func (av *AnnotatedValidator) Validate() ([]YamlAnnotatedWarning, error) {
 	return av.annotateWarnings(
-		av.validator.Validate(),
+		av.innerValidator.Validate(),
 	)
 }
 
@@ -61,13 +66,16 @@ func (av *AnnotatedValidator) annotateWarnings(warnings []Warning) ([]YamlAnnota
 			return nil, fmt.Errorf("failed annotate '%s': %v", path, err)
 		}
 
-		sourceMarker := annotate.ParseSourceError(string(textSource))
+		line, pos, err := av.warningParser.Parse(string(textSource))
+		if err != nil {
+			return nil, fmt.Errorf("failed parse source warning text for path '%s': %v", path, err)
+		}
 
 		annotatedWarnings = append(annotatedWarnings, YamlAnnotatedWarning{
 			Text:   warning.Warning().Error(),
 			Path:   path,
-			Line:   sourceMarker.Line,
-			Offset: sourceMarker.Pos,
+			Line:   line,
+			Offset: pos,
 			SourceCode: &YamlAnnotatedWarningSource{
 				FormatText:          textSource,
 				FormatTextHighlight: highlightSource,

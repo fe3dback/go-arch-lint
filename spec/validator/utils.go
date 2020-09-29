@@ -5,25 +5,30 @@ import (
 	"os"
 	"path/filepath"
 
-	pathresolv "github.com/fe3dback/go-arch-lint/path"
 	"github.com/fe3dback/go-arch-lint/spec/archfile"
 )
 
 type (
-	Utils struct {
+	validatorUtils struct {
+		pathResolver  PathResolver
 		rootDirectory string
 		spec          *archfile.YamlSpec
 	}
 )
 
-func NewUtils(spec *archfile.YamlSpec, rootDirectory string) *Utils {
-	return &Utils{
+func newValidatorUtils(
+	pathResolver PathResolver,
+	spec *archfile.YamlSpec,
+	rootDirectory string,
+) *validatorUtils {
+	return &validatorUtils{
+		pathResolver:  pathResolver,
 		rootDirectory: rootDirectory,
 		spec:          spec,
 	}
 }
 
-func (u *Utils) isValidImportPath(importPath string) error {
+func (u *validatorUtils) isValidImportPath(importPath string) error {
 	localPath := fmt.Sprintf("vendor/%s", importPath)
 	err := u.isValidPath(localPath)
 	if err != nil {
@@ -36,9 +41,9 @@ func (u *Utils) isValidImportPath(importPath string) error {
 	return nil
 }
 
-func (u *Utils) isValidPath(localPath string) error {
+func (u *validatorUtils) isValidPath(localPath string) error {
 	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localPath))
-	resolved, err := pathresolv.ResolvePath(absPath)
+	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %v", err)
 	}
@@ -50,7 +55,7 @@ func (u *Utils) isValidPath(localPath string) error {
 	return u.isValidDirectories(resolved...)
 }
 
-func (u *Utils) isValidDirectories(paths ...string) error {
+func (u *validatorUtils) isValidDirectories(paths ...string) error {
 	for _, path := range paths {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			return fmt.Errorf("directory '%s' not exist", path)
@@ -60,7 +65,7 @@ func (u *Utils) isValidDirectories(paths ...string) error {
 	return nil
 }
 
-func (u *Utils) isKnownComponent(name string) error {
+func (u *validatorUtils) isKnownComponent(name string) error {
 	for knownName := range u.spec.Components {
 		if name == knownName {
 			return nil
@@ -70,7 +75,7 @@ func (u *Utils) isKnownComponent(name string) error {
 	return fmt.Errorf("unknown component '%s'", name)
 }
 
-func (u *Utils) isKnownVendor(name string) error {
+func (u *validatorUtils) isKnownVendor(name string) error {
 	for knownName := range u.spec.Vendors {
 		if name == knownName {
 			return nil
