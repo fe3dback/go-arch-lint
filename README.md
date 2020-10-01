@@ -3,6 +3,7 @@
 Check all project imports and compare to arch rules defined in yml file
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/fe3dback/go-arch-lint)](https://goreportcard.com/report/github.com/fe3dback/go-arch-lint)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/fe3dback/go-arch-lint)
 
 ## Quick start
 
