@@ -4,7 +4,9 @@ Check all project imports and compare to arch rules defined in yml file
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/fe3dback/go-arch-lint)](https://goreportcard.com/report/github.com/fe3dback/go-arch-lint)
 
-## Install
+## Quick start
+
+### Install globally and run
 
 ```bash
 go get -u github.com/fe3dback/go-arch-lint
@@ -13,12 +15,19 @@ go get -u github.com/fe3dback/go-arch-lint
 go will download and install binary to bin folder, usually
 is ~/go/bin
 
-## Run
-
 Run binary with flag "check --project-path" and absolutely path
 to your project, for example:
-```
+
+```bash
 go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy
+```
+
+### alternative - Run with docker
+
+```bash
+docker run --rm \
+    -v /home/user/go/src/github.com/fe3dback/galaxy:/app \
+    fe3dback/go-arch-lint:release-v1.3.0 check --project-path /app
 ```
 
 ## Usage

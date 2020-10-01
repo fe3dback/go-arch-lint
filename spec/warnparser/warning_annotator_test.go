@@ -1,4 +1,4 @@
-package annotate
+package warnparser
 
 import (
 	"reflect"
@@ -29,9 +29,9 @@ func Test_parseSourceError(t *testing.T) {
 `,
 			},
 			want: sourceMarker{
-				valid: true,
-				Line:  183,
-				Pos:   9,
+				valid:      true,
+				sourceLine: 183,
+				sourcePos:  9,
 			},
 		},
 		{
@@ -44,9 +44,9 @@ func Test_parseSourceError(t *testing.T) {
    4 |`,
 			},
 			want: sourceMarker{
-				valid: true,
-				Line:  1,
-				Pos:   10,
+				valid:      true,
+				sourceLine: 1,
+				sourcePos:  10,
 			},
 		},
 		{
@@ -55,15 +55,15 @@ func Test_parseSourceError(t *testing.T) {
 				sourceText: "",
 			},
 			want: sourceMarker{
-				valid: false,
-				Line:  0,
-				Pos:   0,
+				valid:      false,
+				sourceLine: 0,
+				sourcePos:  0,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ParseSourceError(tt.args.sourceText); !reflect.DeepEqual(got, tt.want) {
+			if got := parseSourceWarning(tt.args.sourceText); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("parseSourceError() = %v, want %v", got, tt.want)
 			}
 		})

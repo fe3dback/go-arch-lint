@@ -5,21 +5,21 @@ import "github.com/fe3dback/go-arch-lint/spec/archfile"
 type (
 	checkerRegistry interface {
 		applyChecker(path string, fn ArchFileValidatorFn)
-		utils() *utils
-		spec() archfile.YamlSpec
+		utils() *validatorUtils
+		spec() *archfile.YamlSpec
 	}
 
 	archFileCheckerRegistry struct {
 		createdCheckers []ArchFileRuleChecker
-		validatorUtils  *utils
-		archFileSpec    archfile.YamlSpec
+		validatorUtils  *validatorUtils
+		archFileSpec    *archfile.YamlSpec
 	}
 
 	checkerFactoryFn func(checkerRegistry)
 	factories        []checkerFactoryFn
 )
 
-func newArchFileCheckerRegistry(spec archfile.YamlSpec, validatorUtils *utils) *archFileCheckerRegistry {
+func newArchFileCheckerRegistry(spec *archfile.YamlSpec, validatorUtils *validatorUtils) *archFileCheckerRegistry {
 	factories := factories{
 		withCheckerCommonComponents,
 		withCheckerCommonVendors,
@@ -50,10 +50,10 @@ func (v *archFileCheckerRegistry) applyChecker(path string, fn ArchFileValidator
 	})
 }
 
-func (v *archFileCheckerRegistry) utils() *utils {
+func (v *archFileCheckerRegistry) utils() *validatorUtils {
 	return v.validatorUtils
 }
 
-func (v *archFileCheckerRegistry) spec() archfile.YamlSpec {
+func (v *archFileCheckerRegistry) spec() *archfile.YamlSpec {
 	return v.archFileSpec
 }

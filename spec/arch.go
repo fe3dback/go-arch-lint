@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	pathresolv "github.com/fe3dback/go-arch-lint/path"
 	"github.com/fe3dback/go-arch-lint/spec/archfile"
 )
 
 type (
 	Arch struct {
+		pathResolver  PathResolver
 		rootDirectory string
 		moduleName    string
 
@@ -45,13 +45,14 @@ type (
 	}
 )
 
-func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, error, []YamlAnnotatedWarning) {
-	spec, specParseErr := newSpec(archFile, rootDirectory)
-	if specParseErr.Err != nil {
-		return nil, fmt.Errorf("failed to parse archfile: %v", specParseErr.Err), specParseErr.Warnings
-	}
-
+func NewArch(
+	pathResolver PathResolver,
+	spec *archfile.YamlSpec,
+	moduleName string,
+	rootDirectory string,
+) (*Arch, error) {
 	arch := Arch{
+		pathResolver:        pathResolver,
 		rootDirectory:       rootDirectory,
 		moduleName:          moduleName,
 		Allow:               spec.Allow,
@@ -62,23 +63,23 @@ func NewArch(archFile string, moduleName string, rootDirectory string) (*Arch, e
 
 	err := arch.assembleComponents(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch components: %v", err), nil
+		return nil, fmt.Errorf("failed to assemble arch components: %v", err)
 	}
 
 	err = arch.assembleExclude(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch components: %v", err), nil
+		return nil, fmt.Errorf("failed to assemble arch components: %v", err)
 	}
 
 	err = arch.assembleExcludeFilesMatcher(spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble arch excludeFiles: %v", err), nil
+		return nil, fmt.Errorf("failed to assemble arch excludeFiles: %v", err)
 	}
 
-	return &arch, nil, nil
+	return &arch, nil
 }
 
-func (a *Arch) assembleComponents(spec archfile.YamlSpec) error {
+func (a *Arch) assembleComponents(spec *archfile.YamlSpec) error {
 	for yamlName, yamlComponent := range spec.Components {
 		depMeta := spec.Dependencies[yamlName]
 
@@ -119,7 +120,7 @@ func (a *Arch) assembleComponents(spec archfile.YamlSpec) error {
 	return nil
 }
 
-func (a *Arch) assembleExclude(spec archfile.YamlSpec) error {
+func (a *Arch) assembleExclude(spec *archfile.YamlSpec) error {
 	for _, yamlRelativePath := range spec.Exclude {
 		resolvedPath, err := a.assembleResolvedPaths(yamlRelativePath)
 		if err != nil {
@@ -132,7 +133,7 @@ func (a *Arch) assembleExclude(spec archfile.YamlSpec) error {
 	return nil
 }
 
-func (a *Arch) assembleExcludeFilesMatcher(spec archfile.YamlSpec) error {
+func (a *Arch) assembleExcludeFilesMatcher(spec *archfile.YamlSpec) error {
 	for _, regString := range spec.ExcludeFilesRegExp {
 		matcher, err := regexp.Compile(regString)
 		if err != nil {
@@ -149,7 +150,7 @@ func (a *Arch) assembleResolvedPaths(localPathMask string) ([]*ResolvedPath, err
 	list := make([]*ResolvedPath, 0)
 
 	absPath := fmt.Sprintf("%s/%s", a.rootDirectory, localPathMask)
-	resolved, err := pathresolv.ResolvePath(absPath)
+	resolved, err := a.pathResolver.Resolve(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve path '%s'", absPath)
 	}
@@ -170,7 +171,7 @@ func (a *Arch) assembleResolvedPaths(localPathMask string) ([]*ResolvedPath, err
 }
 
 func (a *Arch) assembleAllowedImports(
-	spec archfile.YamlSpec,
+	spec *archfile.YamlSpec,
 	componentNames []ComponentName,
 	vendorNames []VendorName,
 ) ([]*ResolvedPath, error) {

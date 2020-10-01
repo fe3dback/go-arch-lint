@@ -5,9 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fe3dback/go-arch-lint/spec/annotated_validator"
+
+	"github.com/fe3dback/go-arch-lint/cmd/container"
+
 	"github.com/fe3dback/go-arch-lint/checker"
-	"github.com/fe3dback/go-arch-lint/files"
-	"github.com/fe3dback/go-arch-lint/spec"
 	"github.com/spf13/cobra"
 )
 
@@ -124,55 +126,45 @@ func checkCmdAssertFlagGoModuleValid() {
 
 func checkCmdArch() payloadTypeCommandCheck {
 	payload := payloadTypeCommandCheck{
-		ExecutionWarnings:      []spec.YamlAnnotatedWarning{},
+		ExecutionWarnings:      []annotated_validator.YamlAnnotatedWarning{},
 		ExecutionError:         "",
 		ArchHasWarnings:        false,
 		ArchWarningsDeps:       []checker.WarningDep{},
 		ArchWarningsNotMatched: []checker.WarningNotMatched{},
 	}
 
-	arch, err, parseWarnings := spec.NewArch(
+	di := container.NewContainer(
 		settingsGoArchFilePath,
+		settingsProjectDirectory,
 		settingsModuleName,
-		settingsProjectDirectory,
 	)
+
+	annotatedValidator := di.ProvideSpecAnnotatedValidator()
+	warnings, err := annotatedValidator.Validate()
 	if err != nil {
 		payload.ExecutionError = err.Error()
-		payload.ExecutionWarnings = parseWarnings
-
 		return payload
 	}
 
-	resolver := checkCmdCreateResolver(arch)
-	projectFiles, err := resolver.Resolve()
-	if err != nil {
-		payload.ExecutionError = err.Error()
-
+	if len(warnings) > 0 {
+		payload.ExecutionError = "arch file invalid syntax"
+		payload.ExecutionWarnings = warnings
 		return payload
 	}
 
-	archChecker := checker.NewChecker(
-		settingsProjectDirectory,
-		arch,
-		projectFiles,
-	)
-
+	archChecker := di.ProvideChecker()
 	result := archChecker.Check()
 	if result.IsOk() {
 		return payload
 	}
 
-	checkCmdWriteWarnings(
-		result,
-		&payload,
-		flagMaxWarnings,
-	)
+	writeWarnings(&payload, result, flagMaxWarnings)
 
 	return payload
 
 }
 
-func checkCmdWriteWarnings(res checker.CheckResult, payload *payloadTypeCommandCheck, maxWarnings int) {
+func writeWarnings(payload *payloadTypeCommandCheck, res checker.CheckResult, maxWarnings int) {
 	outputCount := 0
 
 	// append deps
@@ -198,20 +190,4 @@ func checkCmdWriteWarnings(res checker.CheckResult, payload *payloadTypeCommandC
 	if outputCount > 0 {
 		payload.ArchHasWarnings = true
 	}
-}
-
-func checkCmdCreateResolver(arch *spec.Arch) *files.Resolver {
-	excludePaths := make([]string, 0)
-	for _, excludeDir := range arch.Exclude {
-		excludePaths = append(excludePaths, excludeDir.AbsPath)
-	}
-
-	resolver := files.NewResolver(
-		settingsProjectDirectory,
-		settingsModuleName,
-		excludePaths,
-		arch.ExcludeFilesMatcher,
-	)
-
-	return resolver
 }

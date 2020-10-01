@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/fe3dback/go-arch-lint/models"
+
 	"github.com/fe3dback/go-arch-lint/files"
 	"github.com/fe3dback/go-arch-lint/spec"
 )
@@ -31,31 +33,31 @@ func makeTestResolvedPath(localPath string) *spec.ResolvedPath {
 	}
 }
 
-func makeTestResolvedProjectImport(localPath string) *files.ResolvedImport {
-	return &files.ResolvedImport{
+func makeTestResolvedProjectImport(localPath string) *models.ResolvedImport {
+	return &models.ResolvedImport{
 		Name:       testModulePath + "/" + localPath,
-		ImportType: files.ImportTypeProject,
+		ImportType: models.ImportTypeProject,
 	}
 }
 
-func makeTestResolvedVendorImport(localPath string) *files.ResolvedImport {
-	return &files.ResolvedImport{
+func makeTestResolvedVendorImport(localPath string) *models.ResolvedImport {
+	return &models.ResolvedImport{
 		Name:       "github.com/vendor/lib/" + localPath,
-		ImportType: files.ImportTypeVendor,
+		ImportType: models.ImportTypeVendor,
 	}
 }
 
-func makeTestResolvedStdlibImport() *files.ResolvedImport {
-	return &files.ResolvedImport{
+func makeTestResolvedStdlibImport() *models.ResolvedImport {
+	return &models.ResolvedImport{
 		Name:       "fmt",
-		ImportType: files.ImportTypeStdLib,
+		ImportType: models.ImportTypeStdLib,
 	}
 }
 
 func Test_checkImportPath(t *testing.T) {
 	type args struct {
 		componentImports []*spec.ResolvedPath
-		resolvedImport   files.ResolvedImport
+		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
 		name string
@@ -123,7 +125,7 @@ func Test_checkProjectImport(t *testing.T) {
 	type args struct {
 		componentImports []*spec.ResolvedPath
 		componentFlags   *spec.SpecialFlags
-		resolvedImport   files.ResolvedImport
+		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
 		name string
@@ -262,7 +264,7 @@ func Test_checkVendorImport(t *testing.T) {
 	type args struct {
 		componentImports []*spec.ResolvedPath
 		componentFlags   *spec.SpecialFlags
-		resolvedImport   files.ResolvedImport
+		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
 		name string
@@ -337,7 +339,7 @@ func Test_checkVendorImport(t *testing.T) {
 
 func TestChecker_checkImport(t *testing.T) {
 	type args struct {
-		resolvedImport    files.ResolvedImport
+		resolvedImport    models.ResolvedImport
 		dependOnAnyVendor bool
 	}
 	tests := []struct {
@@ -419,7 +421,7 @@ func TestChecker_checkImport(t *testing.T) {
 			}
 		}()
 
-		resolvedImport := files.ResolvedImport{
+		resolvedImport := models.ResolvedImport{
 			Name:       "something",
 			ImportType: 100,
 		}
@@ -519,10 +521,10 @@ func Test_longestPathComponent(t *testing.T) {
 
 func TestChecker_Check(t *testing.T) {
 	projectFiles := files.ResolveResult{
-		Files: []*files.ResolvedFile{
+		Files: []*models.ResolvedFile{
 			{
 				Path: makeTestAbsPath("a/file.go"),
-				Imports: []files.ResolvedImport{
+				Imports: []models.ResolvedImport{
 					*makeTestResolvedProjectImport("b/subA/target"), // accepted
 					*makeTestResolvedProjectImport("b/subB/target"), // accepted
 					*makeTestResolvedProjectImport("a"),             // rejected
@@ -532,7 +534,7 @@ func TestChecker_Check(t *testing.T) {
 			},
 			{
 				Path: makeTestAbsPath("b/subA/target/file.go"),
-				Imports: []files.ResolvedImport{
+				Imports: []models.ResolvedImport{
 					*makeTestResolvedProjectImport("a"),                  // rejected
 					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
 					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
@@ -543,7 +545,7 @@ func TestChecker_Check(t *testing.T) {
 			},
 			{
 				Path: makeTestAbsPath("b/subB/target/file.go"),
-				Imports: []files.ResolvedImport{
+				Imports: []models.ResolvedImport{
 					*makeTestResolvedProjectImport("a"),                  // rejected
 					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
 					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
@@ -554,7 +556,7 @@ func TestChecker_Check(t *testing.T) {
 			},
 			{
 				Path: makeTestAbsPath("c/file.go"),
-				Imports: []files.ResolvedImport{
+				Imports: []models.ResolvedImport{
 					*makeTestResolvedProjectImport("a"),                  // rejected
 					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
 					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
@@ -565,11 +567,11 @@ func TestChecker_Check(t *testing.T) {
 			},
 			{
 				Path:    makeTestAbsPath("d/unknown.go"), // rejected
-				Imports: []files.ResolvedImport{},
+				Imports: []models.ResolvedImport{},
 			},
 			{
 				Path:    makeTestAbsPath("a/sub-unknown/unknown.go"), // rejected
-				Imports: []files.ResolvedImport{},
+				Imports: []models.ResolvedImport{},
 			},
 		},
 	}

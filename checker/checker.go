@@ -6,21 +6,21 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fe3dback/go-arch-lint/files"
+	"github.com/fe3dback/go-arch-lint/models"
 	"github.com/fe3dback/go-arch-lint/spec"
 )
 
 type Checker struct {
 	rootDirectory string
 	arch          spec.Arch
-	projectFiles  files.ResolveResult
+	projectFiles  []*models.ResolvedFile
 	result        *CheckResult
 }
 
 func NewChecker(
 	rootDirectory string,
 	arch *spec.Arch,
-	projectFiles files.ResolveResult,
+	projectFiles []*models.ResolvedFile,
 ) *Checker {
 	return &Checker{
 		rootDirectory: rootDirectory,
@@ -31,7 +31,7 @@ func NewChecker(
 }
 
 func (arc *Checker) Check() CheckResult {
-	for _, file := range arc.projectFiles.Files {
+	for _, file := range arc.projectFiles {
 		component := arc.resolveComponent(file.Path)
 		if component == nil {
 			arc.result.addNotMatchedWarning(WarningNotMatched{
@@ -70,7 +70,7 @@ func (arc *Checker) resolveComponent(filePath string) *spec.Component {
 	return longestPathComponent(matched)
 }
 
-func (arc *Checker) checkFile(component *spec.Component, file *files.ResolvedFile) {
+func (arc *Checker) checkFile(component *spec.Component, file *models.ResolvedFile) {
 	for _, resolvedImport := range file.Imports {
 		if checkImport(component, resolvedImport, arc.arch.Allow.DepOnAnyVendor) {
 			continue
@@ -111,26 +111,26 @@ func longestPathComponent(matched map[string]*spec.Component) *spec.Component {
 
 func checkImport(
 	component *spec.Component,
-	resolvedImport files.ResolvedImport,
+	resolvedImport models.ResolvedImport,
 	allowDependOnAnyVendor bool,
 ) bool {
 	switch resolvedImport.ImportType {
-	case files.ImportTypeStdLib:
+	case models.ImportTypeStdLib:
 		return true
-	case files.ImportTypeVendor:
+	case models.ImportTypeVendor:
 		if allowDependOnAnyVendor {
 			return true
 		}
 
 		return checkVendorImport(component, resolvedImport)
-	case files.ImportTypeProject:
+	case models.ImportTypeProject:
 		return checkProjectImport(component, resolvedImport)
 	default:
 		panic(fmt.Sprintf("unknown import type: %+v", resolvedImport))
 	}
 }
 
-func checkVendorImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func checkVendorImport(component *spec.Component, resolvedImport models.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllVendorDeps {
 		return true
 	}
@@ -138,7 +138,7 @@ func checkVendorImport(component *spec.Component, resolvedImport files.ResolvedI
 	return checkImportPath(component, resolvedImport)
 }
 
-func checkProjectImport(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func checkProjectImport(component *spec.Component, resolvedImport models.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllProjectDeps {
 		return true
 	}
@@ -146,7 +146,7 @@ func checkProjectImport(component *spec.Component, resolvedImport files.Resolved
 	return checkImportPath(component, resolvedImport)
 }
 
-func checkImportPath(component *spec.Component, resolvedImport files.ResolvedImport) bool {
+func checkImportPath(component *spec.Component, resolvedImport models.ResolvedImport) bool {
 	for _, allowedImport := range component.AllowedImports {
 		if allowedImport.ImportPath == resolvedImport.Name {
 			return true

@@ -1,0 +1,93 @@
+version: 1
+
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - vendor
+  - examples
+  - docs
+  - checker/test
+
+excludeFiles:
+  - "^.*_test\\.go$"
+
+vendors:
+  go-modfile:
+    in: golang.org/x/mod/modfile
+  3rd-cobra:
+    in: github.com/spf13/cobra
+  3rd-yaml:
+    in: github.com/goccy/go-yaml
+  3rd-color-fmt:
+    in: github.com/logrusorgru/aurora/v3
+
+components:
+  main:
+    in: .
+  cmd:
+    in: cmd
+  container:
+    in: cmd/container
+
+  checker:
+    in: checker
+  files_resolver:
+    in: files
+  path_resolver:
+    in: path
+  models:
+    in: models
+
+  spec:
+    in: spec
+  spec_archfile:
+    in: spec/archfile
+  spec_inner_validator:
+    in: spec/validator
+  spec_annotated_validator:
+    in: spec/annotated_validator
+  spec_warnparser:
+    in: spec/warnparser
+
+commonComponents:
+  - models
+
+deps:
+  main:
+    mayDependOn:
+      - cmd
+  cmd:
+    mayDependOn:
+      - container
+      - checker
+      - spec_annotated_validator
+    canUse:
+      - go-modfile
+      - 3rd-cobra
+      - 3rd-color-fmt
+
+  container:
+    anyProjectDeps: true
+
+  checker:
+    mayDependOn:
+      - spec
+
+  spec:
+    mayDependOn:
+      - spec_archfile
+
+  spec_archfile:
+    canUse:
+      - 3rd-yaml
+
+  spec_inner_validator:
+    mayDependOn:
+      - spec_archfile
+    canUse:
+      - 3rd-yaml
+
+  spec_annotated_validator:
+    canUse:
+      - 3rd-yaml
