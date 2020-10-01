@@ -27,7 +27,7 @@ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy
 ```bash
 docker run --rm \
     -v /home/user/go/src/github.com/fe3dback/galaxy:/app \
-    fe3dback/go-arch-lint:latest check --project-path /app
+    fe3dback/go-arch-lint:release-v1.3.0 check --project-path /app
 ```
 
 ## Usage
