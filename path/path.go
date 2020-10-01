@@ -7,12 +7,6 @@ import (
 )
 
 type (
-	Type         uint8
-	ResolvedPath struct {
-		PathType Type
-		Paths    []string
-	}
-
 	Resolver struct {
 	}
 )

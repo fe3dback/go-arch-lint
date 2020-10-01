@@ -6,6 +6,9 @@ import (
 
 func withCheckerDependencies(reg checkerRegistry) {
 	for name, rules := range reg.spec().Dependencies {
+		name := name
+		rules := rules
+
 		reg.applyChecker(fmt.Sprintf("$.deps.%s", name), func() error {
 			return reg.utils().isKnownComponent(name)
 		})

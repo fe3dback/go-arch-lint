@@ -3,6 +3,8 @@ package validator
 import (
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint/models"
+
 	"github.com/fe3dback/go-arch-lint/spec/archfile"
 )
 
@@ -39,9 +41,9 @@ func NewArchFileValidator(
 	}
 }
 
-func (v *ArchFileValidator) Validate() []Warning {
+func (v *ArchFileValidator) Validate() []models.ArchFileSyntaxWarning {
 	registry := newArchFileCheckerRegistry(v.yamlSpec, v.validatorUtils)
-	warnings := make([]Warning, 0)
+	warnings := make([]models.ArchFileSyntaxWarning, 0)
 
 	for _, checker := range registry.createdCheckers {
 		if warning := v.check(checker); warning != nil {
@@ -52,23 +54,23 @@ func (v *ArchFileValidator) Validate() []Warning {
 	return warnings
 }
 
-func (v *ArchFileValidator) check(checker ArchFileRuleChecker) (warn *Warning) {
+func (v *ArchFileValidator) check(checker ArchFileRuleChecker) (warn *models.ArchFileSyntaxWarning) {
 	defer func() {
 		if err := recover(); err != nil {
-			warn = &Warning{
-				yamlPath:    checker.path,
-				yamlWarning: fmt.Errorf("not found path '%s': %v", checker.path, err),
-			}
+			warn = models.NewArchFileSyntaxWarning(
+				checker.path,
+				fmt.Errorf("not found path '%s': %v", checker.path, err),
+			)
 
 			return
 		}
 	}()
 
 	if err := checker.checker(); err != nil {
-		return &Warning{
-			yamlPath:    checker.path,
-			yamlWarning: fmt.Errorf("path '%s': %v", checker.path, err),
-		}
+		return models.NewArchFileSyntaxWarning(
+			checker.path,
+			fmt.Errorf("path '%s': %v", checker.path, err),
+		)
 	}
 
 	return nil

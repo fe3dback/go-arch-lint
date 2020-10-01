@@ -35,8 +35,8 @@ func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error)
 //	  185 |       - game_component
 //	  186 |       - game_utils
 //	  187 |
-func parseSourceWarning(sourceText string) SourceMarker {
-	notValid := SourceMarker{valid: false}
+func parseSourceWarning(sourceText string) sourceMarker {
+	notValid := sourceMarker{valid: false}
 
 	if !strings.Contains(sourceText, sourceMarkerLine) {
 		return notValid
@@ -46,7 +46,7 @@ func parseSourceWarning(sourceText string) SourceMarker {
 		return notValid
 	}
 
-	marker := SourceMarker{
+	marker := sourceMarker{
 		valid:      false,
 		sourceLine: 0,
 		sourcePos:  0,

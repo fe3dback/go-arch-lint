@@ -1,8 +1,9 @@
-package validator
+package annotated_validator
 
 import (
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint/models"
 	"github.com/goccy/go-yaml"
 )
 
@@ -21,14 +22,14 @@ type (
 	}
 
 	AnnotatedValidator struct {
-		innerValidator *ArchFileValidator
+		innerValidator Validator
 		warningParser  AnnotatedWarningParser
 		sourceCode     []byte
 	}
 )
 
 func NewAnnotatedValidator(
-	innerValidator *ArchFileValidator,
+	innerValidator Validator,
 	annotatedWarningParser AnnotatedWarningParser,
 	sourceCode []byte,
 ) *AnnotatedValidator {
@@ -45,7 +46,7 @@ func (av *AnnotatedValidator) Validate() ([]YamlAnnotatedWarning, error) {
 	)
 }
 
-func (av *AnnotatedValidator) annotateWarnings(warnings []Warning) ([]YamlAnnotatedWarning, error) {
+func (av *AnnotatedValidator) annotateWarnings(warnings []models.ArchFileSyntaxWarning) ([]YamlAnnotatedWarning, error) {
 	annotatedWarnings := make([]YamlAnnotatedWarning, 0)
 
 	for _, warning := range warnings {

@@ -1,71 +1,93 @@
 version: 1
 
-# ------------------------------------------------------------------
-# Global settings
-# ------------------------------------------------------------------
 allow:
   depOnAnyVendor: false
 
-# ------------------------------------------------------------------
-# Excluded folders from analyse
-# ------------------------------------------------------------------
 exclude:
   - vendor
   - examples
   - docs
   - checker/test
 
-# ------------------------------------------------------------------
-# Excluded files by regexp mask
-# ------------------------------------------------------------------
 excludeFiles:
   - "^.*_test\\.go$"
 
-# ------------------------------------------------------------------
-# Vendor libs
-# ------------------------------------------------------------------
 vendors:
-  cobra:
+  go-modfile:
+    in: golang.org/x/mod/modfile
+  3rd-cobra:
     in: github.com/spf13/cobra
+  3rd-yaml:
+    in: github.com/goccy/go-yaml
+  3rd-color-fmt:
+    in: github.com/logrusorgru/aurora/v3
 
-# ------------------------------------------------------------------
-# Project components
-#
-# Used for split real modules and packages to abstract thing
-# ------------------------------------------------------------------
 components:
   main:
     in: .
-
   cmd:
     in: cmd
-
   container:
     in: cmd/container
 
-# ------------------------------------------------------------------
-# All components can import any packages from "common" list
-# ------------------------------------------------------------------
+  checker:
+    in: checker
+  files_resolver:
+    in: files
+  path_resolver:
+    in: path
+  models:
+    in: models
+
+  spec:
+    in: spec
+  spec_archfile:
+    in: spec/archfile
+  spec_inner_validator:
+    in: spec/validator
+  spec_annotated_validator:
+    in: spec/annotated_validator
+  spec_warnparser:
+    in: spec/warnparser
+
 commonComponents:
+  - models
 
-# ------------------------------------------------------------------
-# All components can import any vendors from "common" list
-# ------------------------------------------------------------------
-commonVendors:
-
-# ------------------------------------------------------------------
-# Dependency rules
-# ------------------------------------------------------------------
 deps:
   main:
     mayDependOn:
       - cmd
-
   cmd:
     mayDependOn:
       - container
+      - checker
+      - spec_annotated_validator
     canUse:
-      - cobra
+      - go-modfile
+      - 3rd-cobra
+      - 3rd-color-fmt
 
   container:
     anyProjectDeps: true
+
+  checker:
+    mayDependOn:
+      - spec
+
+  spec:
+    mayDependOn:
+      - spec_archfile
+
+  spec_archfile:
+    canUse:
+      - 3rd-yaml
+
+  spec_inner_validator:
+    mayDependOn:
+      - spec_archfile
+    canUse:
+      - 3rd-yaml
+
+  spec_annotated_validator:
+    canUse:
+      - 3rd-yaml

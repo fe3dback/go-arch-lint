@@ -12,7 +12,7 @@ func Test_parseSourceError(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want SourceMarker
+		want sourceMarker
 	}{
 		{
 			name: "valid 183",
@@ -28,7 +28,7 @@ func Test_parseSourceError(t *testing.T) {
   187 |     
 `,
 			},
-			want: SourceMarker{
+			want: sourceMarker{
 				valid:      true,
 				sourceLine: 183,
 				sourcePos:  9,
@@ -43,7 +43,7 @@ func Test_parseSourceError(t *testing.T) {
    3 |   depOnAnyVendor: false
    4 |`,
 			},
-			want: SourceMarker{
+			want: sourceMarker{
 				valid:      true,
 				sourceLine: 1,
 				sourcePos:  10,
@@ -54,7 +54,7 @@ func Test_parseSourceError(t *testing.T) {
 			args: args{
 				sourceText: "",
 			},
-			want: SourceMarker{
+			want: sourceMarker{
 				valid:      false,
 				sourceLine: 0,
 				sourcePos:  0,

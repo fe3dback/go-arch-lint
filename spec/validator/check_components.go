@@ -14,6 +14,8 @@ func withCheckerComponents(reg checkerRegistry) {
 	})
 
 	for name, component := range reg.spec().Components {
+		component := component
+
 		reg.applyChecker(
 			fmt.Sprintf("$.components.%s.in", name),
 			func() error {

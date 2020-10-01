@@ -4,6 +4,8 @@ import "fmt"
 
 func withCheckerCommonComponents(reg checkerRegistry) {
 	for index, componentName := range reg.spec().CommonComponents {
+		componentName := componentName
+
 		reg.applyChecker(
 			fmt.Sprintf("$.commonComponents[%d]", index),
 			func() error {

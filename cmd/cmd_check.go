@@ -5,10 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fe3dback/go-arch-lint/spec/annotated_validator"
+
 	"github.com/fe3dback/go-arch-lint/cmd/container"
 
 	"github.com/fe3dback/go-arch-lint/checker"
-	"github.com/fe3dback/go-arch-lint/spec/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -125,7 +126,7 @@ func checkCmdAssertFlagGoModuleValid() {
 
 func checkCmdArch() payloadTypeCommandCheck {
 	payload := payloadTypeCommandCheck{
-		ExecutionWarnings:      []validator.YamlAnnotatedWarning{},
+		ExecutionWarnings:      []annotated_validator.YamlAnnotatedWarning{},
 		ExecutionError:         "",
 		ArchHasWarnings:        false,
 		ArchWarningsDeps:       []checker.WarningDep{},
