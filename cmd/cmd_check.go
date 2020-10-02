@@ -57,7 +57,7 @@ func checkCmdOutputAscii(payload payloadTypeCommandCheck) {
 			fmt.Printf("[Archfile] %s\n", au.Yellow(warning.Text))
 		}
 
-		halt(fmt.Errorf(payload.ExecutionError))
+		panic(fmt.Errorf(payload.ExecutionError))
 	}
 
 	if !payload.ArchHasWarnings {
@@ -88,8 +88,8 @@ func checkCmdOutputAscii(payload payloadTypeCommandCheck) {
 		fmt.Printf("%d warning truncated..\n", truncatedWarnings)
 	}
 
-	fmt.Println()
-	halt(fmt.Errorf("warnings found: %d", au.Yellow(len(payload.ArchWarningsDeps))))
+	fmt.Println() // write empty line
+	panic(fmt.Errorf("warnings found: %d", au.Yellow(len(payload.ArchWarningsDeps))))
 }
 
 func checkCmdAssertFlagProjectPathValid() {

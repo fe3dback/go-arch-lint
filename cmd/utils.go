@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"golang.org/x/mod/modfile"
 )
@@ -64,9 +63,6 @@ func halt(err error) {
 			fmt.Println(err.Error())
 		}
 	})
-
-	os.Exit(1)
-	return
 }
 
 func getModuleNameFromGoModFile(goModPath string) (string, error) {

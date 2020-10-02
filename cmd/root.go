@@ -65,7 +65,7 @@ const (
 	goModFileName = "go.mod"
 )
 
-func Execute() {
+func Execute() (exitCode int) {
 	setDefaultCommandIfNonePresent("--help")
 
 	defer func() {
@@ -75,14 +75,17 @@ func Execute() {
 			} else {
 				halt(fmt.Errorf("panic: %s", err))
 			}
+
+			exitCode = 1
 		}
 	}()
 
 	if err := rootCmd.Execute(); err != nil {
 		halt(fmt.Errorf("error: %s", err))
+		return 1
 	}
 
-	os.Exit(0)
+	return 0
 }
 
 func setDefaultCommandIfNonePresent(defaultCommand string) {
