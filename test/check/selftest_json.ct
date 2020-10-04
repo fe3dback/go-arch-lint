@@ -1,0 +1,11 @@
+$ go-arch-lint check --project-path ${PWD} --json
+{
+  "Type": "command.check",
+  "Payload": {
+    "ExecutionWarnings": [],
+    "ExecutionError": "",
+    "ArchHasWarnings": false,
+    "ArchWarningsDeps": [],
+    "ArchWarningsNotMatched": []
+  }
+}

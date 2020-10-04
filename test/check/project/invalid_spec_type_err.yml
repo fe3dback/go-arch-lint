@@ -1,0 +1,5 @@
+version: 1
+
+allow:
+  # type error
+  depOnAnyVendore: false

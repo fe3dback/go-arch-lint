@@ -1,5 +1,11 @@
-test:
+tests:
 	go test ./...
+
+tests-functional:
+	go test
+
+tests-functional-update-ct:
+	go test --update
 
 arch:
 	go-arch-lint check --project-path ${PWD}

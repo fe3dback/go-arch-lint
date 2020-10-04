@@ -5,14 +5,21 @@ type (
 		archFilePath         string
 		projectRootDirectory string
 		moduleName           string
+		useColors            bool
 	}
 )
 
-func NewContainer(archFilePath, projectRootDirectory, moduleName string) *Container {
+func NewContainer(
+	archFilePath string,
+	projectRootDirectory string,
+	moduleName string,
+	useColors bool,
+) *Container {
 	return &Container{
 		archFilePath:         archFilePath,
 		projectRootDirectory: projectRootDirectory,
 		moduleName:           moduleName,
+		useColors:            useColors,
 	}
 }
 
@@ -26,4 +33,8 @@ func (c *Container) provideModuleName() string {
 
 func (c *Container) provideProjectRootDirectory() string {
 	return c.projectRootDirectory
+}
+
+func (c *Container) provideFlagUseColors() bool {
+	return c.useColors
 }

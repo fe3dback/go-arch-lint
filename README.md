@@ -58,8 +58,6 @@ Flags:
 Make archfile called '.go-arch-lint.yml' in root directory
 of your project, and put some arch rules to it
 
-See full examples in /examples
-
 ```yaml
 version: 1
 allow:
@@ -142,6 +140,8 @@ deps:
       - engine
 ```
 
+This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-lint.yml)
+
 ## Archfile Syntax
 
 | Path              | Req?  | Type  | Description         |
@@ -178,8 +178,7 @@ This linter will return:
 
 ```text
 $ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy
-used arch file: /home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml
-        module: github.com/fe3dback/galaxy
+Module: github.com/fe3dback/galaxy
 [WARN] Component 'game_entities_factory': file '/game/entities/factory/bullet.go' shouldn't depend on 'github.com/fe3dback/galaxy/game/entities/components/game'
 [WARN] Component 'game_loader': file '/game/loader/weaponloader/loader.go' shouldn't depend on 'github.com/fe3dback/galaxy/engine'
 [WARN] File '/shared/ui/layer_shared_fps.go' not attached to any component in archfile

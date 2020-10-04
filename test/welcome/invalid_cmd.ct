@@ -1,0 +1,2 @@
+$ go-arch-lint invalid --> FAIL
+error: unknown command "invalid" for "go-arch-lint"

@@ -23,5 +23,6 @@ func (c *Container) ProvideSpecAnnotatedValidator() *annotated_validator.Annotat
 		c.provideSpecValidator(),
 		c.provideSpecWarnParser(),
 		c.provideArchFileSourceCode(),
+		c.provideFlagUseColors(),
 	)
 }
