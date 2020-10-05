@@ -7,7 +7,9 @@ import (
 func cmdCheck(cmd *cobra.Command, _ []string) {
 	rootFlags := mustFetchFlags(cmd.Context())
 	cmdInput := checkCmdAssembleCommandInput(rootFlags)
-	cmdOutput := checkCmdProcess(rootFlags, cmdInput)
+	cmdOutput := checkCmdSortOutput(
+		checkCmdProcess(rootFlags, cmdInput),
+	)
 
 	output(
 		rootFlags,

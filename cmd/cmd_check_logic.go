@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"sort"
+
 	"github.com/fe3dback/go-arch-lint/checker"
 	"github.com/fe3dback/go-arch-lint/cmd/container"
 	"github.com/fe3dback/go-arch-lint/spec/annotated_validator"
@@ -44,6 +46,22 @@ func checkCmdProcess(flags *rootInput, input checkCmdInput) payloadTypeCommandCh
 	cmdCheckAssembleWarnings(&payload, result, flags.maxWarnings)
 
 	return payload
+}
+
+func checkCmdSortOutput(output payloadTypeCommandCheck) payloadTypeCommandCheck {
+	sort.Slice(output.ExecutionWarnings, func(i, j int) bool {
+		if output.ExecutionWarnings[i].Line == output.ExecutionWarnings[j].Line {
+			return output.ExecutionWarnings[i].Path < output.ExecutionWarnings[j].Path
+		}
+
+		return output.ExecutionWarnings[i].Line < output.ExecutionWarnings[j].Line
+	})
+
+	sort.Slice(output.ArchWarningsDeps, func(i, j int) bool {
+		return output.ArchWarningsDeps[i].FileAbsolutePath < output.ArchWarningsDeps[j].FileAbsolutePath
+	})
+
+	return output
 }
 
 func cmdCheckAssembleWarnings(payload *payloadTypeCommandCheck, res checker.CheckResult, maxWarnings int) {
