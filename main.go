@@ -1,9 +1,15 @@
 package main
 
 import (
+	"os"
+
 	"github.com/fe3dback/go-arch-lint/cmd"
 )
 
 func main() {
-	cmd.Execute()
+	os.Exit(run())
+}
+
+func run() int {
+	return cmd.Execute()
 }

@@ -1,0 +1,49 @@
+$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file invalid_spec.yml --output-color=false --> FAIL
+module: github.com/fe3dback/go-arch-lint/test/check/project
+[Archfile] path '$.deps.cmd': unknown component 'cmd' (+annotation: failed parse source warning text for path '$.deps.cmd': failed to parse warning source text)
+[Archfile] path '$.deps.main.canUse[0]': unknown vendor '3rd-cobra' (+annotation: failed parse source warning text for path '$.deps.main.canUse[0]': failed to parse warning source text)
+[Archfile] path '$.excludeFiles[0]': error parsing regexp: missing closing ): `(A-Z`:
+   3 |   depOnAnyVendor: false
+   4 | 
+   5 | excludeFiles:
+>  6 |   - "(A-Z"
+           ^
+   8 | vendors:
+   9 |   go-modfile:
+[Archfile] path '$.vendors.go-modfile.in': vendor dep 'golang.org/x/mod/modfile' not installed, run 'go mod vendor' first: not found directories for 'vendor/golang.org/x/mod/modfile' in '${ROOTDIR}/test/check/project/vendor/golang.org/x/mod/modfile':
+   8 | vendors:
+   9 |   go-modfile:
+> 10 |     in: golang.org/x/mod/modfile
+               ^
+  13 | components:
+[Archfile] path '$.components.not_exist.in': not found directories for 'not_exist' in '${ROOTDIR}/test/check/project/not_exist':
+  14 |   main:
+  15 |     in: .
+  16 |   not_exist:
+> 17 |     in: not_exist
+               ^
+  19 |   a:
+  20 |     in: a
+  21 | 
+[Archfile] path '$.commonComponents[0]': unknown component 'models':
+  20 |     in: a
+  21 | 
+  22 | commonComponents:
+> 23 |   - models
+           ^
+  25 | deps:
+  26 |   main:
+[Archfile] path '$.deps.main.mayDependOn[0]': unknown component 'cmd':
+  25 |  
+  26 | deps:
+  27 |   main:
+> 28 |     mayDependOn:
+  29 |       - cmd
+               ^
+  29 |     canUse:
+  30 |       - 3rd-cobra 
+[Archfile] path '$.deps.a': should have ref in 'MayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']:
+> 36 | null:
+           ^
+
+panic: cmd: arch file invalid syntax

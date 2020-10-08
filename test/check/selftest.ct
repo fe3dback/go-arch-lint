@@ -1,0 +1,3 @@
+$ go-arch-lint check --project-path ${PWD} --output-color=false
+module: github.com/fe3dback/go-arch-lint
+OK - No warnings found

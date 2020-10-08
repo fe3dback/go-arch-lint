@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/fe3dback/go-arch-lint/models"
+
 	"github.com/fe3dback/go-arch-lint/spec"
 )
 
@@ -15,7 +17,7 @@ func (c *Container) provideArch() *spec.Arch {
 		c.provideProjectRootDirectory(),
 	)
 	if err != nil {
-		panic(fmt.Errorf("failed provide arch: %w", err))
+		panic(models.NewUserSpaceError(fmt.Sprintf("failed provide arch: %s", err)))
 	}
 
 	return arch
@@ -26,7 +28,7 @@ func (c *Container) provideArchFileSourceCode() []byte {
 		c.provideArchFilePath(),
 	)
 	if err != nil {
-		panic(fmt.Errorf("failed to provide source code of archfile: %w", err))
+		panic(models.NewUserSpaceError(fmt.Sprintf("failed to provide source code of archfile: %s", err)))
 	}
 
 	return sourceCode

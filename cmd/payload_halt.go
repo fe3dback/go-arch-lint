@@ -1,5 +1,5 @@
 package cmd
 
 type payloadTypeHalt struct {
-	Error string `json:"error"`
+	Error string
 }

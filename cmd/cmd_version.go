@@ -1,30 +1,27 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
-const linterVersion = "1.1.0"
+const linterVersion = "1.4.0"
 const goArchFileSupported = "1"
 
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}
+func cmdVersion(cmd *cobra.Command, _ []string) {
+	cmdOutput := payloadVersion{
+		LinterVersion:       linterVersion,
+		GoArchFileSupported: goArchFileSupported,
+	}
 
-var versionCmd = &cobra.Command{
-	Use:   cmdNameVersion,
-	Short: "Print go arch linter version",
-	Run: func(cmd *cobra.Command, args []string) {
-		payload := payloadVersion{
-			LinterVersion:       linterVersion,
-			GoArchFileSupported: goArchFileSupported,
-		}
+	rootFlags := mustFetchFlags(cmd.Context())
 
-		output(outputPayloadTypeCommandVersion, payload, func() {
-			fmt.Printf("Linter version: %s\n", au.Yellow(payload.LinterVersion))
-			fmt.Printf("Supported go arch file versions: %s\n", au.Yellow(payload.GoArchFileSupported))
-		})
-	},
+	output(
+		false,
+		rootFlags,
+		outputPayloadTypeCommandVersion,
+		cmdOutput,
+		func() {
+			versionCmdOutput(rootFlags, cmdOutput)
+		},
+	)
 }

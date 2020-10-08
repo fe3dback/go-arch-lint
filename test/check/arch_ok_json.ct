@@ -1,0 +1,11 @@
+$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch_ok.yml --json
+{
+  "Type": "command.check",
+  "Payload": {
+    "ExecutionWarnings": [],
+    "ExecutionError": "",
+    "ArchHasWarnings": false,
+    "ArchWarningsDeps": [],
+    "ArchWarningsNotMatched": []
+  }
+}

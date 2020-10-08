@@ -2,14 +2,17 @@ package checker
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
 
+	"github.com/fe3dback/go-arch-lint/path"
+	"github.com/fe3dback/go-arch-lint/spec/archfile"
+
 	"github.com/fe3dback/go-arch-lint/models"
 
-	"github.com/fe3dback/go-arch-lint/files"
 	"github.com/fe3dback/go-arch-lint/spec"
 )
 
@@ -494,8 +497,8 @@ func Test_longestPathComponent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			list := make(map[string]*spec.Component, 0)
 
-			for path, id := range tt.args.matched {
-				list[path] = &spec.Component{
+			for archPath, id := range tt.args.matched {
+				list[archPath] = &spec.Component{
 					Name: id,
 				}
 			}
@@ -520,65 +523,73 @@ func Test_longestPathComponent(t *testing.T) {
 }
 
 func TestChecker_Check(t *testing.T) {
-	projectFiles := files.ResolveResult{
-		Files: []*models.ResolvedFile{
-			{
-				Path: makeTestAbsPath("a/file.go"),
-				Imports: []models.ResolvedImport{
-					*makeTestResolvedProjectImport("b/subA/target"), // accepted
-					*makeTestResolvedProjectImport("b/subB/target"), // accepted
-					*makeTestResolvedProjectImport("a"),             // rejected
-					*makeTestResolvedProjectImport("utils/foo"),     // accepted
-					*makeTestResolvedProjectImport("utils/bar"),     // accepted
-				},
+	projectFiles := []*models.ResolvedFile{
+		{
+			Path: makeTestAbsPath("a/file.go"),
+			Imports: []models.ResolvedImport{
+				*makeTestResolvedProjectImport("b/subA/target"), // accepted
+				*makeTestResolvedProjectImport("b/subB/target"), // accepted
+				*makeTestResolvedProjectImport("a"),             // rejected
+				*makeTestResolvedProjectImport("utils/foo"),     // accepted
+				*makeTestResolvedProjectImport("utils/bar"),     // accepted
 			},
-			{
-				Path: makeTestAbsPath("b/subA/target/file.go"),
-				Imports: []models.ResolvedImport{
-					*makeTestResolvedProjectImport("a"),                  // rejected
-					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
-					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
-					*makeTestResolvedProjectImport("c/any/path/foo/bar"), // accepted
-					*makeTestResolvedProjectImport("utils/foo"),          // accepted
-					*makeTestResolvedProjectImport("utils/bar/var/any"),  // accepted
-				},
+		},
+		{
+			Path: makeTestAbsPath("b/subA/target/file.go"),
+			Imports: []models.ResolvedImport{
+				*makeTestResolvedProjectImport("a"),                  // rejected
+				*makeTestResolvedProjectImport("b/subA/target"),      // rejected
+				*makeTestResolvedProjectImport("b/subB/target"),      // rejected
+				*makeTestResolvedProjectImport("c/any/path/foo/bar"), // accepted
+				*makeTestResolvedProjectImport("utils/foo"),          // accepted
+				*makeTestResolvedProjectImport("utils/bar/var/any"),  // accepted
 			},
-			{
-				Path: makeTestAbsPath("b/subB/target/file.go"),
-				Imports: []models.ResolvedImport{
-					*makeTestResolvedProjectImport("a"),                  // rejected
-					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
-					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
-					*makeTestResolvedProjectImport("c/any/path/foo/bar"), // accepted
-					*makeTestResolvedProjectImport("utils/foo"),          // accepted
-					*makeTestResolvedProjectImport("utils/bar/var/any"),  // accepted
-				},
+		},
+		{
+			Path: makeTestAbsPath("b/subB/target/file.go"),
+			Imports: []models.ResolvedImport{
+				*makeTestResolvedProjectImport("a"),                  // rejected
+				*makeTestResolvedProjectImport("b/subA/target"),      // rejected
+				*makeTestResolvedProjectImport("b/subB/target"),      // rejected
+				*makeTestResolvedProjectImport("c/any/path/foo/bar"), // accepted
+				*makeTestResolvedProjectImport("utils/foo"),          // accepted
+				*makeTestResolvedProjectImport("utils/bar/var/any"),  // accepted
 			},
-			{
-				Path: makeTestAbsPath("c/file.go"),
-				Imports: []models.ResolvedImport{
-					*makeTestResolvedProjectImport("a"),                  // rejected
-					*makeTestResolvedProjectImport("b/subA/target"),      // rejected
-					*makeTestResolvedProjectImport("b/subB/target"),      // rejected
-					*makeTestResolvedProjectImport("c/any/path/foo/bar"), // rejected
-					*makeTestResolvedProjectImport("utils/foo"),          // accepted
-					*makeTestResolvedProjectImport("utils/bar"),          // accepted
-				},
+		},
+		{
+			Path: makeTestAbsPath("c/file.go"),
+			Imports: []models.ResolvedImport{
+				*makeTestResolvedProjectImport("a"),                  // rejected
+				*makeTestResolvedProjectImport("b/subA/target"),      // rejected
+				*makeTestResolvedProjectImport("b/subB/target"),      // rejected
+				*makeTestResolvedProjectImport("c/any/path/foo/bar"), // rejected
+				*makeTestResolvedProjectImport("utils/foo"),          // accepted
+				*makeTestResolvedProjectImport("utils/bar"),          // accepted
 			},
-			{
-				Path:    makeTestAbsPath("d/unknown.go"), // rejected
-				Imports: []models.ResolvedImport{},
-			},
-			{
-				Path:    makeTestAbsPath("a/sub-unknown/unknown.go"), // rejected
-				Imports: []models.ResolvedImport{},
-			},
+		},
+		{
+			Path:    makeTestAbsPath("d/unknown.go"), // rejected
+			Imports: []models.ResolvedImport{},
+		},
+		{
+			Path:    makeTestAbsPath("a/sub-unknown/unknown.go"), // rejected
+			Imports: []models.ResolvedImport{},
 		},
 	}
 
 	root := makeTestProjectRoot()
-	arch, err, _ := spec.NewArch(
-		root+"/"+testArchFileV1,
+
+	archFilePath := root + "/" + testArchFileV1
+	sourceCode, err := ioutil.ReadFile(archFilePath)
+	if err != nil {
+		t.Fatalf("failed read archfile '%s'", archFilePath)
+	}
+
+	yamlSpec, err := archfile.NewYamlSpec(sourceCode)
+
+	arch, err := spec.NewArch(
+		path.NewResolver(),
+		yamlSpec,
 		testModulePath,
 		root,
 	)
