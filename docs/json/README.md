@@ -5,11 +5,11 @@
 *struct:*
 ```go
 type payloadTypeCommandCheck struct {
-	ExecutionWarnings      []spec.YamlAnnotatedWarning `json:"execution_warnings"`
-	ExecutionError         string                      `json:"execution_error"`
-	ArchHasWarnings        bool                        `json:"arch_has_warnings"`
-	ArchWarningsDeps       []checker.WarningDep        `json:"arch_warnings_deps"`
-	ArchWarningsNotMatched []checker.WarningNotMatched `json:"arch_warnings_not_matched"`
+	ExecutionWarnings      []annotated_validator.YamlAnnotatedWarning
+	ExecutionError         string
+	ArchHasWarnings        bool
+	ArchWarningsDeps       []checker.WarningDep
+	ArchWarningsNotMatched []checker.WarningNotMatched
 }
 ```
 
@@ -18,10 +18,10 @@ type payloadTypeCommandCheck struct {
 {
   "Type": "command.check",
   "Payload": {
-    "execution_warnings": [],
-    "execution_error": "",
-    "arch_has_warnings": true,
-    "arch_warnings_deps": [
+    "ExecutionWarnings": [],
+    "ExecutionError": "",
+    "ArchHasWarnings": true,
+    "ArchWarningsDeps": [
       {
         "ComponentName": "game_loader",
         "FileRelativePath": "/game/loader/weaponloader/parser.go",
@@ -29,7 +29,7 @@ type payloadTypeCommandCheck struct {
         "ResolvedImportName": "github.com/fe3dback/galaxy/engine"
       }
     ],
-    "arch_warnings_not_matched": [
+    "ArchWarningsNotMatched": [
       {
         "FileRelativePath": "/shared/ui/layer_shared_fps.go",
         "FileAbsolutePath": "/home/neo/go/src/github.com/fe3dback/galaxy/shared/ui/layer_shared_fps.go"
@@ -44,7 +44,7 @@ type payloadTypeCommandCheck struct {
 {
   "Type": "command.check",
   "Payload": {
-    "execution_warnings": [
+    "ExecutionWarnings": [
       {
         "Text": "path '$.version': version 2 is not supported, supported: [1]",
         "Path": "$.version",
@@ -52,10 +52,10 @@ type payloadTypeCommandCheck struct {
         "Offset": 10
       }
     ],
-    "execution_error": "failed to parse archfile: spec '/home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml' has warnings",
-    "arch_has_warnings": false,
-    "arch_warnings_deps": [],
-    "arch_warnings_not_matched": []
+    "ExecutionError": "failed to parse archfile: spec '/home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml' has warnings",
+    "ArchHasWarnings": false,
+    "ArchWarningsDeps": [],
+    "ArchWarningsNotMatched": []
   }
 }
 ```
@@ -65,8 +65,8 @@ type payloadTypeCommandCheck struct {
 *struct:*
 ```go
 type payloadVersion struct {
-	LinterVersion       string `json:"linter_version"`
-	GoArchFileSupported string `json:"go_arch_file_supported"`
+	LinterVersion       string
+	GoArchFileSupported string
 }
 ```
 
@@ -75,8 +75,8 @@ type payloadVersion struct {
 {
   "Type": "command.version",
   "Payload": {
-    "linter_version": "1.1.0",
-    "go_arch_file_supported": "1"
+    "LinterVersion": "1.1.0",
+    "GoArchFileSupported": "1"
   }
 }
 ```
@@ -86,7 +86,7 @@ type payloadVersion struct {
 *struct:*
 ```go
 type payloadTypeHalt struct {
-	Error string `json:"error"`
+	Error string
 }
 ```
 
@@ -95,7 +95,7 @@ type payloadTypeHalt struct {
 {
   "Type": "halt",
   "Payload": {
-    "error": "panic: flag 'max-warnings' should by in range [1 .. 32768]"
+    "Error": "panic: cmd: flag 'max-warnings' should by in range [1 .. 32768]"
   }
 }
 ```

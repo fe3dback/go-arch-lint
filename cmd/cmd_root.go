@@ -48,17 +48,18 @@ func Execute() (exitCode int) {
 			exitCode = 1
 
 			// local panic (without trace)
-			if goErr, ok := err.(models.UserSpaceError); ok {
+			switch goErr := err.(type) {
+			case models.UserSpaceError:
 				halt(defaults, fmt.Errorf("panic: %s", goErr))
 				return
+			case models.UserSpaceEmptyError:
+				return
+			default:
+				halt(defaults, fmt.Errorf(
+					"panic: %s\n--\n%s", err, debug.Stack(),
+				))
 			}
 
-			// output panic + trace
-			halt(defaults, fmt.Errorf(
-				"panic: %s\n--\n%s",
-				err,
-				debug.Stack(),
-			))
 			return
 		}
 	}()

@@ -25,7 +25,13 @@ func mustFetchFlags(ctx context.Context) *rootInput {
 	}
 }
 
-func output(flags *rootInput, payloadType outputPayloadType, payload interface{}, rawOutputFn func()) {
+func output(
+	isFailed bool,
+	flags *rootInput,
+	payloadType outputPayloadType,
+	payload interface{},
+	rawOutputFn func(),
+) {
 	payload = combinedPayload{
 		Type:    payloadType,
 		Payload: payload,
@@ -48,6 +54,10 @@ func output(flags *rootInput, payloadType outputPayloadType, payload interface{}
 
 		fmt.Println(string(jsonBuffer))
 
+		if isFailed {
+			panic(models.NewUserSpaceEmptyError())
+		}
+
 	case outputTypeASCII:
 		rawOutputFn()
 
@@ -66,7 +76,7 @@ func halt(flags *rootInput, err error) {
 	}
 
 	payload := payloadTypeHalt{Error: err.Error()}
-	output(flags, outputPayloadTypeHalt, payload, func() {
+	output(false, flags, outputPayloadTypeHalt, payload, func() {
 		if flags.useColors && flags.au != nil {
 			fmt.Printf("%s\n", flags.au.Yellow(err.Error()))
 		} else {

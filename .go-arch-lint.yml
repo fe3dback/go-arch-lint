@@ -8,6 +8,7 @@ exclude:
   - examples
   - docs
   - checker/test
+  - test
 
 excludeFiles:
   - "^.*_test\\.go$"

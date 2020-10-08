@@ -12,6 +12,7 @@ func cmdCheck(cmd *cobra.Command, _ []string) {
 	)
 
 	output(
+		cmdOutput.ExecutionError != "" || cmdOutput.ArchHasWarnings,
 		rootFlags,
 		outputPayloadTypeCommandCheck,
 		cmdOutput,
