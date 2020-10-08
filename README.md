@@ -31,6 +31,8 @@ docker run --rm \
     fe3dback/go-arch-lint:release-v1.4.0 check --project-path /app
 ```
 
+[docker hub](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
+
 ## Usage
 
 ```
