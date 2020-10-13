@@ -25,8 +25,10 @@ commonComponents:
 deps:
   main:
     mayDependOn:
+      - not_exist_too_rnd_order # not exist dep (V)
       - cmd # not exist dep (V)
     canUse:
+      - 3rd-cobra-not-defined-too # not defined vendor (V)
       - 3rd-cobra # not defined vendor (V)
 
   cmd: # not exist component

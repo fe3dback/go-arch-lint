@@ -1,7 +1,5 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file invalid_spec.yml --output-color=false --> FAIL
 module: github.com/fe3dback/go-arch-lint/test/check/project
-[Archfile] path '$.deps.cmd': unknown component 'cmd' (+annotation: failed parse source warning text for path '$.deps.cmd': failed to parse warning source text)
-[Archfile] path '$.deps.main.canUse[0]': unknown vendor '3rd-cobra' (+annotation: failed parse source warning text for path '$.deps.main.canUse[0]': failed to parse warning source text)
 [Archfile] path '$.excludeFiles[0]': error parsing regexp: missing closing ): `(A-Z`:
    3 |   depOnAnyVendor: false
    4 | 
@@ -33,17 +31,42 @@ module: github.com/fe3dback/go-arch-lint/test/check/project
            ^
   25 | deps:
   26 |   main:
-[Archfile] path '$.deps.main.mayDependOn[0]': unknown component 'cmd':
+[Archfile] path '$.deps.main.mayDependOn[1]': unknown component 'cmd':
+  26 |   main:
+  27 |     mayDependOn:
+  28 |       - not_exist_too_rnd_order       - cmd
+               ^
+  30 |     canUse:
+  31 |       - 3rd-cobra-not-defined-too       - 3rd-cobra 
+[Archfile] path '$.deps.main.canUse[0]': unknown vendor '3rd-cobra-not-defined-too':
+  28 |       - not_exist_too_rnd_order       - cmd     canUse:
+  29 |       - 3rd-cobra-not-defined-too
+               ^
+  32 |       - 3rd-cobra 
+  33 |   cmd:
+[Archfile] path '$.deps.main.mayDependOn[0]': unknown component 'not_exist_too_rnd_order':
   25 |  
   26 | deps:
   27 |   main:
 > 28 |     mayDependOn:
-  29 |       - cmd
+  29 |       - not_exist_too_rnd_order
                ^
-  29 |     canUse:
-  30 |       - 3rd-cobra 
+  29 |       - cmd     canUse:
+  30 |       - 3rd-cobra-not-defined-too 
+[Archfile] path '$.deps.main.canUse[1]': unknown vendor '3rd-cobra':
+  29 |        - cmd     canUse:
+  30 |       - 3rd-cobra-not-defined-too       - 3rd-cobra
+               ^
+  34 |   cmd:    canUse:
+[Archfile] path '$.deps.cmd': unknown component 'cmd':
+  32 |        - 3rd-cobra 
+  33 |   cmd:    canUse:
+                 ^
+  36 |       - go-modfile
+  37 | 
+  38 |   a:
 [Archfile] path '$.deps.a': should have ref in 'MayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']:
-> 36 | null:
+> 38 | null:
            ^
 
 panic: cmd: arch file invalid syntax

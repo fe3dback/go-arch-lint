@@ -13,21 +13,6 @@ func withCheckerDependencies(reg checkerRegistry) {
 			return reg.utils().isKnownComponent(name)
 		})
 
-		for index, componentName := range rules.MayDependOn {
-			reg.applyChecker(fmt.Sprintf("$.deps.%s.mayDependOn[%d]", name, index), func() error {
-				return reg.utils().isKnownComponent(componentName)
-			})
-		}
-
-		for index, vendorName := range rules.CanUse {
-			reg.applyChecker(
-				fmt.Sprintf("$.deps.%s.canUse[%d]", name, index),
-				func() error {
-					return reg.utils().isKnownVendor(vendorName)
-				},
-			)
-		}
-
 		if len(rules.MayDependOn) == 0 && len(rules.CanUse) == 0 {
 			reg.applyChecker(
 				fmt.Sprintf("$.deps.%s", name),

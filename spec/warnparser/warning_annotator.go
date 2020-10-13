@@ -7,8 +7,10 @@ import (
 	"strings"
 )
 
-const sourceMarkerLine = ">"
-const sourceMarkerPosition = "^"
+const (
+	sourceMarkerLine     = ">"
+	sourceMarkerPosition = "^"
+)
 
 type WarningSourceParser struct {
 }
@@ -18,9 +20,9 @@ func NewWarningSourceParser() *WarningSourceParser {
 }
 
 func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error) {
-	marker := parseSourceWarning(sourceText)
-	if !marker.valid {
-		return 0, 0, fmt.Errorf("failed to parse warning source text")
+	marker, err := parseSourceWarning(sourceText)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to parse warning source text: %v", err)
 	}
 
 	return marker.sourceLine, marker.sourcePos, nil
@@ -35,57 +37,51 @@ func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error)
 //	  185 |       - game_component
 //	  186 |       - game_utils
 //	  187 |
-func parseSourceWarning(sourceText string) sourceMarker {
-	notValid := sourceMarker{valid: false}
-
-	if !strings.Contains(sourceText, sourceMarkerLine) {
-		return notValid
-	}
+//
+// Another example without line mark:
+// 	   32 |        - 3rd-cobra
+// 	   33 |   cmd:    canUse:
+// 	                  ^
+// 	   36 |       - go-modfile
+// 	   37 |
+// 	   38 |   a:
+func parseSourceWarning(sourceText string) (sourceMarker, error) {
+	notValid := sourceMarker{}
 
 	if !strings.Contains(sourceText, sourceMarkerPosition) {
-		return notValid
+		return notValid, fmt.Errorf("not found position marker")
 	}
 
 	marker := sourceMarker{
-		valid:      false,
 		sourceLine: 0,
 		sourcePos:  0,
 	}
 
-	lineFound := false
 	leftOffset := 0
+	previousLine := ""
 
 	for _, sourceLine := range strings.Split(sourceText, "\n") {
-		if lineFound {
-			// in marker pos line
-			// `                ^`
-
-			marker.sourcePos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
-			marker.valid = true
-			break
-		}
-
-		if !strings.Contains(sourceLine, sourceMarkerLine) {
+		if !strings.Contains(sourceLine, sourceMarkerPosition) {
+			previousLine = sourceLine
 			continue
 		}
 
-		// in marker line
-		// `> 183 |       - engine`
+		// found pos marker line with "^"
+		leftOffset = strings.Index(previousLine, `|`) + 1
+		marker.sourcePos = strings.Index(sourceLine, sourceMarkerPosition) - leftOffset
 
-		matches := regexp.MustCompile(`^>\s+(\d+)\s+\|`).FindStringSubmatch(sourceLine)
+		matches := regexp.MustCompile(`^>?\s+(\d+)\s+\|`).FindStringSubmatch(previousLine)
 		if len(matches) != 2 {
-			return notValid
+			return notValid, fmt.Errorf("not found line number in '%s'", previousLine)
 		}
 
 		lineNumber, err := strconv.Atoi(matches[1])
 		if err != nil {
-			return notValid
+			return notValid, fmt.Errorf("not found line number in first match")
 		}
 
 		marker.sourceLine = lineNumber
-		lineFound = true
-		leftOffset = strings.Index(sourceLine, `|`) + 1
 	}
 
-	return marker
+	return marker, nil
 }
