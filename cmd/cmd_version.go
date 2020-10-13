@@ -4,8 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const linterVersion = "1.4.0"
-const goArchFileSupported = "1"
+const (
+	linterVersion       = "1.4.3"
+	goArchFileSupported = "1"
+)
 
 func cmdVersion(cmd *cobra.Command, _ []string) {
 	cmdOutput := payloadVersion{

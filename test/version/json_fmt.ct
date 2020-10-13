@@ -2,7 +2,7 @@ $ go-arch-lint version --output-type=json
 {
   "Type": "command.version",
   "Payload": {
-    "LinterVersion": "1.4.0",
+    "LinterVersion": "1.4.3",
     "GoArchFileSupported": "1"
   }
 }

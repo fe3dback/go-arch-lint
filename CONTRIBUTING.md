@@ -41,5 +41,4 @@ Before release update version in code places
 
 1. go - cmd/cmd_version.go (const `linterVersion`)
 2. git - tag commit with same version from const
-3. readme.md - version for docker install
 4. fix functional tests (test/version)
