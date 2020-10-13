@@ -10,9 +10,10 @@ func Test_parseSourceError(t *testing.T) {
 		sourceText string
 	}
 	tests := []struct {
-		name string
-		args args
-		want sourceMarker
+		name      string
+		args      args
+		want      sourceMarker
+		wantError bool
 	}{
 		{
 			name: "valid 183",
@@ -29,10 +30,10 @@ func Test_parseSourceError(t *testing.T) {
 `,
 			},
 			want: sourceMarker{
-				valid:      true,
 				sourceLine: 183,
 				sourcePos:  9,
 			},
+			wantError: false,
 		},
 		{
 			name: "valid 1",
@@ -44,10 +45,26 @@ func Test_parseSourceError(t *testing.T) {
    4 |`,
 			},
 			want: sourceMarker{
-				valid:      true,
 				sourceLine: 1,
 				sourcePos:  10,
 			},
+			wantError: false,
+		},
+		{
+			name: "valid, no line marker",
+			args: args{
+				sourceText: `32 |        - 3rd-cobra
+   33 |   cmd:    canUse:
+   			      ^
+   36 |       - go-modfile
+   37 |
+   38 |   a:`,
+			},
+			want: sourceMarker{
+				sourceLine: 33,
+				sourcePos:  5,
+			},
+			wantError: false,
 		},
 		{
 			name: "invalid",
@@ -55,16 +72,28 @@ func Test_parseSourceError(t *testing.T) {
 				sourceText: "",
 			},
 			want: sourceMarker{
-				valid:      false,
 				sourceLine: 0,
 				sourcePos:  0,
 			},
+			wantError: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := parseSourceWarning(tt.args.sourceText); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseSourceError() = %v, want %v", got, tt.want)
+			got, err := parseSourceWarning(tt.args.sourceText)
+
+			if err == nil && tt.wantError {
+				t.Errorf("parseSourceWarning() = expected error, but is not, got = %v", got)
+				return
+			}
+
+			if err != nil && !tt.wantError {
+				t.Errorf("parseSourceWarning() = unexpected err: %v", err)
+				return
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("parseSourceWarning() = %v, want %v", got, tt.want)
 			}
 		})
 	}

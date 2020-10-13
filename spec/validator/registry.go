@@ -25,6 +25,8 @@ func newArchFileCheckerRegistry(spec *archfile.YamlSpec, validatorUtils *validat
 		withCheckerCommonVendors,
 		withCheckerComponents,
 		withCheckerDependencies,
+		withCheckerVendorDependencies,
+		withCheckerComponentDependencies,
 		withCheckerExcludedFiles,
 		withCheckerVendors,
 		withCheckerVersion,

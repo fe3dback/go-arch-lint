@@ -16,8 +16,10 @@ import (
 	"github.com/fe3dback/go-arch-lint/spec"
 )
 
-const testModulePath = "github.com/fe3dback/go-arch-lint/checker/test"
-const testArchFileV1 = ".go-arch-lint-v1.yml"
+const (
+	testModulePath = "github.com/fe3dback/go-arch-lint/checker/test"
+	testArchFileV1 = ".go-arch-lint-v1.yml"
+)
 
 func makeTestProjectRoot() string {
 	_, filename, _, _ := runtime.Caller(0)
@@ -582,10 +584,13 @@ func TestChecker_Check(t *testing.T) {
 	archFilePath := root + "/" + testArchFileV1
 	sourceCode, err := ioutil.ReadFile(archFilePath)
 	if err != nil {
-		t.Fatalf("failed read archfile '%s'", archFilePath)
+		t.Fatal(fmt.Sprintf("failed read archfile '%s'", archFilePath))
 	}
 
 	yamlSpec, err := archfile.NewYamlSpec(sourceCode)
+	if err != nil {
+		t.Fatal(fmt.Sprintf("failed to make spec: %v", err))
+	}
 
 	arch, err := spec.NewArch(
 		path.NewResolver(),
@@ -594,8 +599,7 @@ func TestChecker_Check(t *testing.T) {
 		root,
 	)
 	if err != nil {
-		t.Errorf(fmt.Sprintf("failed to make arch: %v", err))
-		return
+		t.Fatal(fmt.Sprintf("failed to make arch: %v", err))
 	}
 
 	checker := NewChecker(
