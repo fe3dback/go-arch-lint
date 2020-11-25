@@ -2,8 +2,9 @@ package models
 
 type (
 	FlagsCheck struct {
-		MaxWarnings int
-		ProjectPath string
-		ArchFile    string
+		ProjectDirectory string
+		GoArchFilePath   string
+		GoModFilePath    string
+		ModuleName       string
 	}
 )

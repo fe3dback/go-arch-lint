@@ -53,6 +53,10 @@ func (c *CommandAssembler) Assemble() *cobra.Command {
 
 	// apply sub commands
 	for _, command := range c.commands {
+		if err := assertCommandIsValid(command); err != nil {
+			panic(err)
+		}
+
 		cmd.AddCommand(command)
 	}
 
@@ -66,7 +70,7 @@ func (c *CommandAssembler) invoke(cmd *cobra.Command, _ []string) error {
 func (c *CommandAssembler) prePersist(cmd *cobra.Command, _ []string) error {
 	useColors, err := cmd.Flags().GetBool(flagUseColors)
 	if err != nil {
-		return c.failedToGetFlag(err, flagUseColors)
+		return failedToGetFlag(err, flagUseColors)
 	}
 
 	outputType, err := c.prepareOutputType(cmd)
@@ -76,7 +80,7 @@ func (c *CommandAssembler) prePersist(cmd *cobra.Command, _ []string) error {
 
 	outputJsonOneLine, err := cmd.Flags().GetBool(flagOutputJsonOneLine)
 	if err != nil {
-		return c.failedToGetFlag(err, flagOutputJsonOneLine)
+		return failedToGetFlag(err, flagOutputJsonOneLine)
 	}
 
 	// all root cmd flags is global, and we should set it to global container context

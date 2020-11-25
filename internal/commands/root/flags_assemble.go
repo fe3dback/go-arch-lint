@@ -11,12 +11,12 @@ import (
 func (c *CommandAssembler) prepareOutputType(cmd *cobra.Command) (models.OutputType, error) {
 	outputType, err := cmd.Flags().GetString(flagOutputType)
 	if err != nil {
-		return "", c.failedToGetFlag(err, flagOutputType)
+		return "", failedToGetFlag(err, flagOutputType)
 	}
 
 	useJsonAlias, err := cmd.Flags().GetBool(flagAliasJson)
 	if err != nil {
-		return "", c.failedToGetFlag(err, flagAliasJson)
+		return "", failedToGetFlag(err, flagAliasJson)
 	}
 
 	// alias preprocessor

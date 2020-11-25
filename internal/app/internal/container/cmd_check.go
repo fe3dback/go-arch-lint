@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/fe3dback/go-arch-lint/internal/commands/check"
+	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 func (c *Container) ProvideCheckCommand() *cobra.Command {
@@ -12,12 +13,9 @@ func (c *Container) ProvideCheckCommand() *cobra.Command {
 }
 
 func (c *Container) provideCheckCommandAssembler() *check.CommandAssembler {
-	return check.NewCheckCommandAssembler(func() error {
-		return nil
-
-		//renderer := c.ProvideRenderer()
-		//return renderer.RenderModel(
-		//	c.provideVersionService().Behave(),
-		//)
+	return check.NewCheckCommandAssembler(func(input models.FlagsCheck) error {
+		return c.ProvideRenderer().RenderModel(
+			c.provideCheckService(input).Behave(),
+		)
 	})
 }

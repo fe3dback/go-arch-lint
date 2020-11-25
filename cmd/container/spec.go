@@ -2,7 +2,6 @@ package container
 
 import (
 	"fmt"
-	"io/ioutil"
 
 	"github.com/fe3dback/go-arch-lint/models"
 
@@ -24,12 +23,4 @@ func (c *Container) provideArch() *spec.Arch {
 }
 
 func (c *Container) provideArchFileSourceCode() []byte {
-	sourceCode, err := ioutil.ReadFile(
-		c.provideArchFilePath(),
-	)
-	if err != nil {
-		panic(models.NewUserSpaceError(fmt.Sprintf("failed to provide source code of archfile: %s", err)))
-	}
-
-	return sourceCode
 }

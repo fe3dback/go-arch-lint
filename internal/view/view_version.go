@@ -2,7 +2,7 @@ package view
 
 // language=gohtml
 const Version = `
-	Linter version: {{.LinterVersion | colorize "shit" }}
+	Linter version: {{.LinterVersion | colorize "yellow" }}
 	Supported go arch file versions: {{.GoArchFileSupported | colorize "yellow" }}
 	Build time: {{.BuildTime | colorize "yellow" }}
 	Commit hash: {{.CommitHash | colorize "yellow" }}

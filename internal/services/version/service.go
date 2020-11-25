@@ -26,11 +26,11 @@ func NewService(
 	}
 }
 
-func (p *Service) Behave() (models.Version, error) {
+func (s *Service) Behave() (models.Version, error) {
 	return models.Version{
-		LinterVersion:       p.version,
+		LinterVersion:       s.version,
 		GoArchFileSupported: goArchFileSupported,
-		BuildTime:           p.buildTime,
-		CommitHash:          p.commitHash,
+		BuildTime:           s.buildTime,
+		CommitHash:          s.commitHash,
 	}, nil
 }

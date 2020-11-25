@@ -1,4 +1,4 @@
-package path
+package pathresolver
 
 import (
 	"os"
@@ -24,10 +24,10 @@ func glob(pattern string) ([]string, error) {
 
 // expand finds matches for the provided globs.
 func (globs globs) expand() ([]string, error) {
-	var matches = []string{""} // accumulate here
+	matches := []string{""} // accumulate here
 	for _, glob := range globs {
 		var hits []string
-		var hitMap = map[string]bool{}
+		hitMap := map[string]bool{}
 		for _, match := range matches {
 			paths, err := filepath.Glob(match + glob)
 			if err != nil {

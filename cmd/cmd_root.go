@@ -20,14 +20,7 @@ const (
 	ctxRootInputFlags = "rootFlags"
 )
 
-// global defaults
-const (
-	goModFileName = "go.mod"
-)
-
-var (
-	outputTypeVariantsConst = []string{outputTypeASCII, outputTypeJSON}
-)
+var outputTypeVariantsConst = []string{outputTypeASCII, outputTypeJSON}
 
 type (
 	outputType = string

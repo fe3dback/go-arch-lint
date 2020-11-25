@@ -1,4 +1,4 @@
-package path
+package pathresolver
 
 import (
 	"fmt"
@@ -7,15 +7,15 @@ import (
 )
 
 type (
-	Resolver struct {
+	PathResolver struct {
 	}
 )
 
-func NewResolver() *Resolver {
-	return &Resolver{}
+func NewPathResolver() *PathResolver {
+	return &PathResolver{}
 }
 
-func (r Resolver) Resolve(absPath string) (resolvePaths []string, err error) {
+func (r PathResolver) Resolve(absPath string) (resolvePaths []string, err error) {
 	if strings.HasSuffix(absPath, ".") {
 		absPath = strings.TrimSuffix(absPath, ".")
 	}

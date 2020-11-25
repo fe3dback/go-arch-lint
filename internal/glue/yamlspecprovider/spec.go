@@ -1,11 +1,4 @@
-package archfile
-
-import (
-	"bytes"
-	"fmt"
-
-	"github.com/goccy/go-yaml"
-)
+package yamlspecprovider
 
 type (
 	YamlVendorName       = string
@@ -43,21 +36,3 @@ type (
 		AnyVendorDeps  bool                `yaml:"anyVendorDeps"`
 	}
 )
-
-func NewYamlSpec(sourceCode []byte) (*YamlSpec, error) {
-	reader := bytes.NewBuffer(sourceCode)
-	decoder := yaml.NewDecoder(
-		reader,
-		yaml.DisallowDuplicateKey(),
-		yaml.DisallowUnknownField(),
-		yaml.Strict(),
-	)
-
-	spec := YamlSpec{}
-	err := decoder.Decode(&spec)
-	if err != nil {
-		return nil, fmt.Errorf("can`t parse yaml: %w", err)
-	}
-
-	return &spec, nil
-}
