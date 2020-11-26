@@ -29,11 +29,11 @@ func (aia *allowedImportsAssembler) assemble(
 ) ([]models.ResolvedPath, error) {
 	list := make([]models.ResolvedPath, 0)
 
-	allowedComponents := make([]models.ComponentName, 0)
+	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
 	allowedComponents = append(allowedComponents, spec.CommonComponents...)
 
-	allowedVendors := make([]models.VendorName, 0)
+	allowedVendors := make([]string, 0)
 	allowedVendors = append(allowedVendors, vendorNames...)
 	allowedVendors = append(allowedVendors, spec.CommonVendors...)
 

@@ -1,7 +1,7 @@
 package specvalidator
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type SpecValidator struct {
@@ -14,7 +14,7 @@ func NewSpecValidator(validators []validator) *SpecValidator {
 	}
 }
 
-func (v *SpecValidator) Validate(spec models.ArchSpec) {
+func (v *SpecValidator) Validate(spec speca.Spec) {
 	for _, specValidator := range v.validators {
 		// todo: return model
 		specValidator.Validate(spec)
