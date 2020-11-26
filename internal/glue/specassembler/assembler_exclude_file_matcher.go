@@ -5,24 +5,30 @@ import (
 	"regexp"
 
 	yaml "github.com/fe3dback/go-arch-lint/internal/glue/yamlspecprovider"
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type excludeFilesMatcherAssembler struct {
+	provideYamlRef provideYamlRef
 }
 
-func newExcludeFilesMatcherAssembler() *excludeFilesMatcherAssembler {
-	return &excludeFilesMatcherAssembler{}
+func newExcludeFilesMatcherAssembler(provideYamlRef provideYamlRef) *excludeFilesMatcherAssembler {
+	return &excludeFilesMatcherAssembler{
+		provideYamlRef: provideYamlRef,
+	}
 }
 
-func (efa excludeFilesMatcherAssembler) assemble(spec *models.ArchSpec, yamlSpec *yaml.YamlSpec) error {
-	for _, regString := range yamlSpec.ExcludeFilesRegExp {
+func (efa excludeFilesMatcherAssembler) assemble(spec *speca.Spec, yamlSpec *yaml.YamlSpec) error {
+	for ind, regString := range yamlSpec.ExcludeFilesRegExp {
 		matcher, err := regexp.Compile(regString)
 		if err != nil {
 			return fmt.Errorf("failed to compile regular expression '%s': %v", regString, err)
 		}
 
-		spec.ExcludeFilesMatcher = append(spec.ExcludeFilesMatcher, matcher)
+		spec.ExcludeFilesMatcher = append(spec.ExcludeFilesMatcher, speca.NewReferableRegExp(
+			matcher,
+			efa.provideYamlRef(fmt.Sprintf("$.excludeFiles[%d]", ind)),
+		))
 	}
 
 	return nil

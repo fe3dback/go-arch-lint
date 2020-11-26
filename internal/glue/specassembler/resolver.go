@@ -26,8 +26,8 @@ func newResolver(
 	}
 }
 
-func (r *resolver) resolveLocalPath(localPathMask string) ([]*models.ResolvedPath, error) {
-	list := make([]*models.ResolvedPath, 0)
+func (r *resolver) resolveLocalPath(localPathMask string) ([]models.ResolvedPath, error) {
+	list := make([]models.ResolvedPath, 0)
 
 	absPath := fmt.Sprintf("%s/%s", r.rootDirectory, localPathMask)
 	resolved, err := r.pathResolver.Resolve(absPath)
@@ -40,7 +40,7 @@ func (r *resolver) resolveLocalPath(localPathMask string) ([]*models.ResolvedPat
 		localPath = strings.TrimRight(localPath, "/")
 		importPath := fmt.Sprintf("%s/%s", r.moduleName, localPath)
 
-		list = append(list, &models.ResolvedPath{
+		list = append(list, models.ResolvedPath{
 			ImportPath: strings.TrimRight(importPath, "/"),
 			LocalPath:  strings.TrimRight(localPath, "/"),
 			AbsPath:    filepath.Clean(strings.TrimRight(absResolvedPath, "/")),

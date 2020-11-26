@@ -12,6 +12,7 @@ exclude:
 
 excludeFiles:
   - "^.*_test\\.go$"
+  - "^.*_test2333222\\.go$"
 
 vendors:
   go-modfile:

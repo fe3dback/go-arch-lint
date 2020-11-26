@@ -3,34 +3,41 @@ package specassembler
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
-type SpecAssembler struct {
-	provider      YamlSpecProvider
-	pathResolver  PathResolver
-	rootDirectory string
-	moduleName    string
-}
+type (
+	provideYamlRef func(path string) speca.Reference
+
+	SpecAssembler struct {
+		provider              YamlSpecProvider
+		pathResolver          PathResolver
+		yamlReferenceResolver YamlSourceCodeReferenceResolver
+		rootDirectory         string
+		moduleName            string
+	}
+)
 
 func NewSpecAssembler(
 	provider YamlSpecProvider,
 	pathResolver PathResolver,
+	yamlReferenceResolver YamlSourceCodeReferenceResolver,
 	rootDirectory string,
 	moduleName string,
 ) *SpecAssembler {
 	return &SpecAssembler{
-		provider:      provider,
-		pathResolver:  pathResolver,
-		rootDirectory: rootDirectory,
-		moduleName:    moduleName,
+		provider:              provider,
+		pathResolver:          pathResolver,
+		yamlReferenceResolver: yamlReferenceResolver,
+		rootDirectory:         rootDirectory,
+		moduleName:            moduleName,
 	}
 }
 
-func (sa *SpecAssembler) Assemble() (models.ArchSpec, error) {
-	spec := models.ArchSpec{
-		RootDirectory: sa.rootDirectory,
-		ModuleName:    sa.moduleName,
+func (sa *SpecAssembler) Assemble() (speca.Spec, error) {
+	spec := speca.Spec{
+		RootDirectory: speca.NewEmptyReferableString(sa.rootDirectory),
+		ModuleName:    speca.NewEmptyReferableString(sa.moduleName),
 	}
 
 	yamlSpec, err := sa.provider.Provide()
@@ -44,6 +51,10 @@ func (sa *SpecAssembler) Assemble() (models.ArchSpec, error) {
 		sa.moduleName,
 	)
 
+	yamlRefProvider := func(yamlPath string) speca.Reference {
+		return sa.yamlReferenceResolver.Resolve(yamlPath)
+	}
+
 	assembler := newSpecAssembler([]assembler{
 		newComponentsAssembler(
 			resolver,
@@ -51,9 +62,11 @@ func (sa *SpecAssembler) Assemble() (models.ArchSpec, error) {
 				sa.rootDirectory,
 				resolver,
 			),
+			yamlRefProvider,
 		),
-		newExcludeAssembler(resolver),
-		newExcludeFilesMatcherAssembler(),
+		newExcludeAssembler(resolver, yamlRefProvider),
+		newExcludeFilesMatcherAssembler(yamlRefProvider),
+		newAllowAssembler(yamlRefProvider),
 	})
 
 	err = assembler.assemble(&spec, yamlSpec)

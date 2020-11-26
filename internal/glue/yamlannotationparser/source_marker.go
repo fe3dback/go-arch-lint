@@ -1,4 +1,4 @@
-package warnparser
+package yamlannotationparser
 
 type (
 	sourceMarker struct {

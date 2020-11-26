@@ -6,6 +6,8 @@ import (
 
 	"github.com/fe3dback/go-arch-lint/internal/glue/pathresolver"
 	"github.com/fe3dback/go-arch-lint/internal/glue/specassembler"
+	"github.com/fe3dback/go-arch-lint/internal/glue/yamlannotationparser"
+	"github.com/fe3dback/go-arch-lint/internal/glue/yamlresolver"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yamlspecprovider"
 )
 
@@ -13,6 +15,7 @@ func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath st
 	return specassembler.NewSpecAssembler(
 		c.provideYamlSpecProvider(archFilePath),
 		c.providePathResolver(),
+		c.provideSourceCodeReferenceResolver(archFilePath),
 		projectDir,
 		moduleName,
 	)
@@ -35,4 +38,16 @@ func (c *Container) provideSourceCode(filePath string) []byte {
 	}
 
 	return sourceCode
+}
+
+func (c *Container) provideSourceCodeReferenceResolver(filePath string) *yamlresolver.YamlReferenceResolver {
+	return yamlresolver.NewYamlReferenceResolver(
+		c.provideSourceCode(filePath),
+		filePath,
+		c.provideAnnotationParser(),
+	)
+}
+
+func (c *Container) provideAnnotationParser() *yamlannotationparser.AnnotationParser {
+	return yamlannotationparser.NewAnnotationParser()
 }

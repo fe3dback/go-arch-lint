@@ -1,4 +1,4 @@
-package warnparser
+package yamlannotationparser
 
 import (
 	"fmt"
@@ -8,19 +8,18 @@ import (
 )
 
 const (
-	sourceMarkerLine     = ">"
 	sourceMarkerPosition = "^"
 )
 
-type WarningSourceParser struct {
+type AnnotationParser struct {
 }
 
-func NewWarningSourceParser() *WarningSourceParser {
-	return &WarningSourceParser{}
+func NewAnnotationParser() *AnnotationParser {
+	return &AnnotationParser{}
 }
 
-func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error) {
-	marker, err := parseSourceWarning(sourceText)
+func (a AnnotationParser) Parse(sourceText string) (line, pos int, err error) {
+	marker, err := parse(sourceText)
 	if err != nil {
 		return 0, 0, fmt.Errorf("failed to parse warning source text: %v", err)
 	}
@@ -45,7 +44,7 @@ func (a WarningSourceParser) Parse(sourceText string) (line, pos int, err error)
 // 	   36 |       - go-modfile
 // 	   37 |
 // 	   38 |   a:
-func parseSourceWarning(sourceText string) (sourceMarker, error) {
+func parse(sourceText string) (sourceMarker, error) {
 	notValid := sourceMarker{}
 
 	if !strings.Contains(sourceText, sourceMarkerPosition) {

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	yaml "github.com/fe3dback/go-arch-lint/internal/glue/yamlspecprovider"
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	assembler interface {
-		assemble(spec *models.ArchSpec, yamlSpec *yaml.YamlSpec) error
+		assemble(spec *speca.Spec, yamlSpec *yaml.YamlSpec) error
 	}
 
 	specModifier struct {
@@ -23,7 +23,7 @@ func newSpecAssembler(modifiers []assembler) *specModifier {
 	}
 }
 
-func (s specModifier) assemble(spec *models.ArchSpec, yamlSpec *yaml.YamlSpec) error {
+func (s specModifier) assemble(spec *speca.Spec, yamlSpec *yaml.YamlSpec) error {
 	for _, modifier := range s.modifiers {
 		err := modifier.assemble(spec, yamlSpec)
 		if err != nil {

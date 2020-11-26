@@ -4,25 +4,30 @@ import (
 	"fmt"
 
 	yaml "github.com/fe3dback/go-arch-lint/internal/glue/yamlspecprovider"
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
-type componentsAssembler struct {
-	resolver                *resolver
-	allowedImportsAssembler *allowedImportsAssembler
-}
+type (
+	componentsAssembler struct {
+		resolver                *resolver
+		allowedImportsAssembler *allowedImportsAssembler
+		provideYamlRef          provideYamlRef
+	}
+)
 
 func newComponentsAssembler(
 	resolver *resolver,
 	allowedImportsAssembler *allowedImportsAssembler,
+	provideYamlRef provideYamlRef,
 ) *componentsAssembler {
 	return &componentsAssembler{
 		resolver:                resolver,
 		allowedImportsAssembler: allowedImportsAssembler,
+		provideYamlRef:          provideYamlRef,
 	}
 }
 
-func (m componentsAssembler) assemble(spec *models.ArchSpec, yamlSpec *yaml.YamlSpec) error {
+func (m componentsAssembler) assemble(spec *speca.Spec, yamlSpec *yaml.YamlSpec) error {
 	for yamlName, yamlComponent := range yamlSpec.Components {
 		component, err := m.assembleComponent(yamlName, yamlComponent, yamlSpec)
 		if err != nil {
@@ -39,39 +44,73 @@ func (m componentsAssembler) assembleComponent(
 	yamlName yaml.YamlComponentName,
 	yamlComponent yaml.YamlComponent,
 	yamlSpec *yaml.YamlSpec,
-) (*models.Component, error) {
+) (speca.Component, error) {
 	depMeta := yamlSpec.Dependencies[yamlName]
 
-	mayDependOn := make([]models.ComponentName, 0)
-	for _, name := range depMeta.MayDependOn {
-		mayDependOn = append(mayDependOn, name)
+	// components
+	mayDependOn := make([]speca.ReferableString, 0)
+	for index, name := range depMeta.MayDependOn {
+		mayDependOn = append(mayDependOn, speca.NewReferableString(
+			name,
+			m.provideYamlRef(fmt.Sprintf("$.deps.%s.mayDependOn[%d]", yamlName, index)),
+		))
 	}
 
-	canUse := make([]models.VendorName, 0)
-	for _, name := range depMeta.CanUse {
-		canUse = append(canUse, name)
+	// vendors
+	canUse := make([]speca.ReferableString, 0)
+	for index, name := range depMeta.CanUse {
+		canUse = append(canUse, speca.NewReferableString(
+			name,
+			m.provideYamlRef(fmt.Sprintf("$.deps.%s.canUse[%d]", yamlName, index)),
+		))
 	}
 
-	resolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.LocalPath)
+	// component path in
+	tmpResolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.LocalPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble component path's: %v", err)
+		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %v", err)
 	}
+	resolvedPaths := wrapPaths(
+		m.provideYamlRef(fmt.Sprintf("$.components.%s.in", yamlName)),
+		tmpResolvedPath,
+	)
 
-	allowedImports, err := m.allowedImportsAssembler.assemble(yamlSpec, mayDependOn, canUse)
+	// deps import
+	tmpAllowedImports, err := m.allowedImportsAssembler.assemble(
+		yamlSpec,
+		unwrapStrings(mayDependOn),
+		unwrapStrings(canUse),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assemble component path's: %v", err)
+		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %v", err)
 	}
+	allowedImports := wrapPaths(
+		m.provideYamlRef(fmt.Sprintf("$.components.%s", yamlName)),
+		tmpAllowedImports,
+	)
 
-	return &models.Component{
-		Name:           yamlName,
-		LocalPathMask:  yamlComponent.LocalPath,
-		ResolvedPaths:  resolvedPath,
+	return speca.Component{
+		Name: speca.NewReferableString(
+			yamlName,
+			m.provideYamlRef(fmt.Sprintf("$.components.%s", yamlName)),
+		),
+		LocalPathMask: speca.NewReferableString(
+			yamlComponent.LocalPath,
+			m.provideYamlRef(fmt.Sprintf("$.components.%s.in", yamlName)),
+		),
+		ResolvedPaths:  resolvedPaths,
 		MayDependOn:    mayDependOn,
 		CanUse:         canUse,
 		AllowedImports: allowedImports,
-		SpecialFlags: &models.SpecialFlags{
-			AllowAllProjectDeps: depMeta.AnyProjectDeps,
-			AllowAllVendorDeps:  depMeta.AnyVendorDeps,
+		SpecialFlags: speca.SpecialFlags{
+			AllowAllProjectDeps: speca.NewReferableBool(
+				depMeta.AnyProjectDeps,
+				m.provideYamlRef(fmt.Sprintf("$.deps.%s.anyProjectDeps", yamlName)),
+			),
+			AllowAllVendorDeps: speca.NewReferableBool(
+				depMeta.AnyVendorDeps,
+				m.provideYamlRef(fmt.Sprintf("$.deps.%s.anyVendorDeps", yamlName)),
+			),
 		},
 	}, nil
 }

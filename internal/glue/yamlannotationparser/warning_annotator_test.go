@@ -1,4 +1,4 @@
-package warnparser
+package yamlannotationparser
 
 import (
 	"reflect"
@@ -80,20 +80,20 @@ func Test_parseSourceError(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseSourceWarning(tt.args.sourceText)
+			got, err := parse(tt.args.sourceText)
 
 			if err == nil && tt.wantError {
-				t.Errorf("parseSourceWarning() = expected error, but is not, got = %v", got)
+				t.Errorf("parse() = expected error, but is not, got = %v", got)
 				return
 			}
 
 			if err != nil && !tt.wantError {
-				t.Errorf("parseSourceWarning() = unexpected err: %v", err)
+				t.Errorf("parse() = unexpected err: %v", err)
 				return
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseSourceWarning() = %v, want %v", got, tt.want)
+				t.Errorf("parse() = %v, want %v", got, tt.want)
 			}
 		})
 	}

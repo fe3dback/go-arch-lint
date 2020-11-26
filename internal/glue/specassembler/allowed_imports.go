@@ -24,10 +24,10 @@ func newAllowedImportsAssembler(
 
 func (aia *allowedImportsAssembler) assemble(
 	spec *yaml.YamlSpec,
-	componentNames []models.ComponentName,
-	vendorNames []models.VendorName,
-) ([]*models.ResolvedPath, error) {
-	list := make([]*models.ResolvedPath, 0)
+	componentNames []string,
+	vendorNames []string,
+) ([]models.ResolvedPath, error) {
+	list := make([]models.ResolvedPath, 0)
 
 	allowedComponents := make([]models.ComponentName, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
@@ -55,7 +55,7 @@ func (aia *allowedImportsAssembler) assemble(
 		localPath := fmt.Sprintf("vendor/%s", importPath)
 		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
 
-		list = append(list, &models.ResolvedPath{
+		list = append(list, models.ResolvedPath{
 			ImportPath: importPath,
 			LocalPath:  localPath,
 			AbsPath:    absPath,
