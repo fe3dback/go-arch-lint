@@ -21,5 +21,6 @@ func (c *Container) provideCheckService(input models.FlagsCheck) *check.Service 
 			input.ModuleName,
 			input.GoArchFilePath,
 		),
+		c.provideReferenceRender(),
 	)
 }

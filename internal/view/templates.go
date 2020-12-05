@@ -7,6 +7,7 @@ import (
 )
 
 var Templates = map[string]string{
+	tpl(models.Error{}):   Error,
 	tpl(models.Version{}): Version,
 	tpl(models.Check{}):   Check,
 }

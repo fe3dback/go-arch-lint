@@ -3,8 +3,8 @@ package container
 import (
 	"github.com/logrusorgru/aurora/v3"
 
+	"github.com/fe3dback/go-arch-lint/internal/glue/printer"
 	"github.com/fe3dback/go-arch-lint/internal/glue/render"
-	"github.com/fe3dback/go-arch-lint/internal/system/printer"
 	"github.com/fe3dback/go-arch-lint/internal/view"
 )
 

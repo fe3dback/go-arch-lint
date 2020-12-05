@@ -7,15 +7,9 @@ type (
 	}
 
 	WarningDep struct {
-		ComponentName      string
-		FileRelativePath   string
-		FileAbsolutePath   string
-		ResolvedImportName string
 	}
 
 	WarningNotMatched struct {
-		FileRelativePath string
-		FileAbsolutePath string
 	}
 )
 

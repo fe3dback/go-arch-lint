@@ -4,31 +4,47 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/pathresolver"
-	"github.com/fe3dback/go-arch-lint/internal/glue/specassembler"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yamlannotationparser"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yamlresolver"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yamlspecprovider"
+	"github.com/fe3dback/go-arch-lint/internal/glue/code"
+	"github.com/fe3dback/go-arch-lint/internal/glue/path"
+	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
+	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
+	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
+	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
+	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/validator"
 )
 
-func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.SpecAssembler {
-	return specassembler.NewSpecAssembler(
-		c.provideYamlSpecProvider(archFilePath),
+func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.Assembler {
+	return specassembler.NewAssembler(
+		c.provideYamlSpecProvider(projectDir, archFilePath),
 		c.providePathResolver(),
 		c.provideSourceCodeReferenceResolver(archFilePath),
+		c.provideSpecValidator(),
 		projectDir,
 		moduleName,
 	)
 }
 
-func (c *Container) provideYamlSpecProvider(archFilePath string) *yamlspecprovider.YamlSpecProvider {
-	return yamlspecprovider.NewYamlSpecProvider(
+func (c *Container) provideSpecValidator() *specvalidator.Validator {
+	return specvalidator.NewValidator()
+}
+
+func (c *Container) provideYamlSpecProvider(projectDir, archFilePath string) *spec.Provider {
+	return spec.NewProvider(
 		c.provideSourceCode(archFilePath),
+		c.provideYamlValidator(projectDir, archFilePath),
 	)
 }
 
-func (c *Container) providePathResolver() *pathresolver.PathResolver {
-	return pathresolver.NewPathResolver()
+func (c *Container) provideYamlValidator(projectDir, archFilePath string) *validator.Validator {
+	return validator.NewValidator(
+		c.provideSourceCodeReferenceResolver(archFilePath),
+		c.providePathResolver(),
+		projectDir,
+	)
+}
+
+func (c *Container) providePathResolver() *path.Resolver {
+	return path.NewResolver()
 }
 
 func (c *Container) provideSourceCode(filePath string) []byte {
@@ -40,14 +56,15 @@ func (c *Container) provideSourceCode(filePath string) []byte {
 	return sourceCode
 }
 
-func (c *Container) provideSourceCodeReferenceResolver(filePath string) *yamlresolver.YamlReferenceResolver {
-	return yamlresolver.NewYamlReferenceResolver(
+func (c *Container) provideSourceCodeReferenceResolver(filePath string) *reference.Resolver {
+	return reference.NewResolver(
 		c.provideSourceCode(filePath),
 		filePath,
-		c.provideAnnotationParser(),
 	)
 }
 
-func (c *Container) provideAnnotationParser() *yamlannotationparser.AnnotationParser {
-	return yamlannotationparser.NewAnnotationParser()
+func (c *Container) provideReferenceRender() *code.Render {
+	return code.NewRender(
+		c.provideColorPrinter(),
+	)
 }

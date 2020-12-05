@@ -20,10 +20,6 @@ type (
 		outputJsonOneLine bool
 		asciiTemplates    map[string]string
 	}
-
-	errorModel struct {
-		Error string
-	}
 )
 
 func NewRenderer(
@@ -42,7 +38,7 @@ func NewRenderer(
 
 func (r *Renderer) RenderModel(model interface{}, err error) error {
 	if err != nil {
-		model = errorModel{
+		model = models.Error{
 			Error: fmt.Sprintf("%s", err),
 		}
 	}
