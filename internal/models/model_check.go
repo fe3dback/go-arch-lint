@@ -18,14 +18,21 @@ type (
 	}
 
 	CheckArchWarningDependency struct {
-		ComponentName      string `json:"ComponentName"`
-		FileRelativePath   string `json:"FileRelativePath"`
-		FileAbsolutePath   string `json:"FileAbsolutePath"`
-		ResolvedImportName string `json:"ResolvedImportName"`
+		ComponentName      string    `json:"ComponentName"`
+		FileRelativePath   string    `json:"FileRelativePath"`
+		FileAbsolutePath   string    `json:"FileAbsolutePath"`
+		ResolvedImportName string    `json:"ResolvedImportName"`
+		Reference          Reference `json:"-"`
 	}
 
 	CheckArchWarningMatch struct {
-		FileRelativePath string `json:"FileRelativePath"`
-		FileAbsolutePath string `json:"FileAbsolutePath"`
+		FileRelativePath string    `json:"FileRelativePath"`
+		FileAbsolutePath string    `json:"FileAbsolutePath"`
+		Reference        Reference `json:"-"`
+	}
+
+	CheckResult struct {
+		DependencyWarnings []CheckArchWarningDependency
+		MatchWarnings      []CheckArchWarningMatch
 	}
 )

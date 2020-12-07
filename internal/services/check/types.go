@@ -13,4 +13,8 @@ type (
 	ReferenceRender interface {
 		SourceCode(ref models.Reference, height int, highlight bool) []byte
 	}
+
+	SpecChecker interface {
+		Check(spec speca.Spec) models.CheckResult
+	}
 )

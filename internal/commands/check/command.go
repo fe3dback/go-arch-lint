@@ -138,5 +138,6 @@ func (c *CommandAssembler) assembleInput() (models.FlagsCheck, error) {
 		GoArchFilePath:   settingsGoArchFilePath,
 		GoModFilePath:    settingsGoModFilePath,
 		ModuleName:       moduleName,
+		MaxWarnings:      c.localFlags.MaxWarnings,
 	}, nil
 }

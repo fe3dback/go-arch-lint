@@ -10,7 +10,7 @@ func preprocessRawAsciiTemplate(tpl string) string {
 
 	for _, line := range lines {
 		processedLine := preprocessTemplateLine(line)
-		if processedLine == "" {
+		if strings.TrimSpace(processedLine) == "" {
 			continue
 		}
 
@@ -21,9 +21,5 @@ func preprocessRawAsciiTemplate(tpl string) string {
 }
 
 func preprocessTemplateLine(row string) string {
-	return strings.ReplaceAll(
-		strings.TrimPrefix(row, "\t"),
-		"\t",
-		"  ",
-	)
+	return strings.TrimLeft(row, "\t")
 }

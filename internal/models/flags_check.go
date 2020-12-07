@@ -6,5 +6,6 @@ type (
 		GoArchFilePath   string
 		GoModFilePath    string
 		ModuleName       string
+		MaxWarnings      int
 	}
 )

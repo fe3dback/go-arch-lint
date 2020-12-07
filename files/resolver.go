@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/fe3dback/go-arch-lint/models"
+	models2 "github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 type (
@@ -20,7 +20,7 @@ type (
 		moduleName          string
 		excludePaths        []string
 		excludeFileMatchers []*regexp.Regexp
-		resolvedFiles       []*models.ResolvedFile
+		resolvedFiles       []*models2.ResolvedFile
 		tokenSet            *token.FileSet
 		mux                 sync.Mutex
 	}
@@ -37,13 +37,13 @@ func NewResolver(
 		moduleName:          moduleName,
 		excludePaths:        excludePaths,
 		excludeFileMatchers: excludeFileMatchers,
-		resolvedFiles:       make([]*models.ResolvedFile, 0),
+		resolvedFiles:       make([]*models2.ResolvedFile, 0),
 		tokenSet:            token.NewFileSet(),
 		mux:                 sync.Mutex{},
 	}
 }
 
-func (r *Resolver) Resolve() ([]*models.ResolvedFile, error) {
+func (r *Resolver) Resolve() ([]*models2.ResolvedFile, error) {
 	err := filepath.Walk(r.projectDirectory, r.resolveFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to walk project tree: %v", err)
@@ -93,7 +93,7 @@ func (r *Resolver) parse(path string) error {
 	imports := r.extractImports(fileAst)
 
 	r.mux.Lock()
-	r.resolvedFiles = append(r.resolvedFiles, &models.ResolvedFile{
+	r.resolvedFiles = append(r.resolvedFiles, &models2.ResolvedFile{
 		Path:    path,
 		Imports: imports,
 	})
@@ -102,12 +102,12 @@ func (r *Resolver) parse(path string) error {
 	return nil
 }
 
-func (r *Resolver) extractImports(fileAst *ast.File) []models.ResolvedImport {
-	imports := make([]models.ResolvedImport, 0)
+func (r *Resolver) extractImports(fileAst *ast.File) []models2.ResolvedImport {
+	imports := make([]models2.ResolvedImport, 0)
 
 	for _, goImport := range fileAst.Imports {
 		importPath := strings.Trim(goImport.Path.Value, "\"")
-		imports = append(imports, models.ResolvedImport{
+		imports = append(imports, models2.ResolvedImport{
 			Name:       importPath,
 			ImportType: r.getImportType(importPath),
 		})
@@ -116,14 +116,14 @@ func (r *Resolver) extractImports(fileAst *ast.File) []models.ResolvedImport {
 	return imports
 }
 
-func (r *Resolver) getImportType(importPath string) models.ImportType {
+func (r *Resolver) getImportType(importPath string) models2.ImportType {
 	if !strings.Contains(importPath, ".") {
-		return models.ImportTypeStdLib
+		return models2.ImportTypeStdLib
 	}
 
 	if strings.HasPrefix(importPath, r.moduleName) {
-		return models.ImportTypeProject
+		return models2.ImportTypeProject
 	}
 
-	return models.ImportTypeVendor
+	return models2.ImportTypeVendor
 }

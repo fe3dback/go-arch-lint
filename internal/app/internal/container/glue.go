@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/fe3dback/go-arch-lint/internal/glue/checker"
 	"github.com/fe3dback/go-arch-lint/internal/glue/code"
 	"github.com/fe3dback/go-arch-lint/internal/glue/path"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
@@ -67,4 +68,8 @@ func (c *Container) provideReferenceRender() *code.Render {
 	return code.NewRender(
 		c.provideColorPrinter(),
 	)
+}
+
+func (c *Container) provideSpecChecker() *checker.Checker {
+	return checker.NewChecker()
 }
