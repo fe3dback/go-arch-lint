@@ -11,7 +11,22 @@ const Check = `
 		{{ end -}}
 	{{ else -}}
 		{{ if .ArchHasWarnings -}}
-			// has warnings
+			{{ range .ArchWarningsDependency -}}
+				[WARN] Component '{{.ComponentName | colorize "green"}}': file '
+				{{- .FileRelativePath | colorize "cyan"}}' shouldn't depend on '
+				{{- .ResolvedImportName | colorize "yellow"}}'
+				{{ if .SourceCodePreview -}}
+					{{ .SourceCodePreview | printf "%s" -}}
+				{{ end -}}
+			{{ end -}}
+			{{ range .ArchWarningsMatch -}}
+				[WARN] File '{{.FileRelativePath | colorize "cyan"}}' not attached to any component in archfile
+				{{ if .SourceCodePreview -}}
+					{{ .SourceCodePreview | printf "%s" -}}
+				{{ end -}}
+			{{ end }}
+
+			warnings found: {{len .ArchWarningsDependency | printf "%d" | colorize "yellow"}}
 		{{ else -}}
 			{{"OK - No warnings found" | colorize "green" -}}
 		{{ end -}}

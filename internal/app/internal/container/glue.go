@@ -7,6 +7,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/glue/checker"
 	"github.com/fe3dback/go-arch-lint/internal/glue/code"
 	"github.com/fe3dback/go-arch-lint/internal/glue/path"
+	"github.com/fe3dback/go-arch-lint/internal/glue/project"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
@@ -70,6 +71,14 @@ func (c *Container) provideReferenceRender() *code.Render {
 	)
 }
 
-func (c *Container) provideSpecChecker() *checker.Checker {
-	return checker.NewChecker()
+func (c *Container) provideSpecChecker(projectDir, moduleName string) *checker.Checker {
+	return checker.NewChecker(
+		c.provideProjectFilesResolver(),
+		projectDir,
+		moduleName,
+	)
+}
+
+func (c *Container) provideProjectFilesResolver() *project.Resolver {
+	return project.NewResolver()
 }

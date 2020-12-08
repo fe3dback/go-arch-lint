@@ -23,12 +23,14 @@ type (
 		FileAbsolutePath   string    `json:"FileAbsolutePath"`
 		ResolvedImportName string    `json:"ResolvedImportName"`
 		Reference          Reference `json:"-"`
+		SourceCodePreview  []byte    `json:"-"`
 	}
 
 	CheckArchWarningMatch struct {
-		FileRelativePath string    `json:"FileRelativePath"`
-		FileAbsolutePath string    `json:"FileAbsolutePath"`
-		Reference        Reference `json:"-"`
+		FileRelativePath  string    `json:"FileRelativePath"`
+		FileAbsolutePath  string    `json:"FileAbsolutePath"`
+		Reference         Reference `json:"-"`
+		SourceCodePreview []byte    `json:"-"`
 	}
 
 	CheckResult struct {

@@ -15,6 +15,6 @@ type (
 	}
 
 	SpecChecker interface {
-		Check(spec speca.Spec) models.CheckResult
+		Check(spec speca.Spec) (models.CheckResult, error)
 	}
 )

@@ -46,6 +46,7 @@ func (c *CommandAssembler) Assemble() *cobra.Command {
 		PersistentPreRunE: c.prePersist,
 		RunE:              c.invoke,
 		SilenceErrors:     true, // redirect to stderr
+		SilenceUsage:      true,
 	}
 
 	// apply root args

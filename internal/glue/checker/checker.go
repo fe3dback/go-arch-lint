@@ -11,24 +11,40 @@ import (
 )
 
 type Checker struct {
-	spec          speca.Spec
-	result        results
-	rootDirectory string
-	projectFiles  []*models.ResolvedFile
+	spec                 speca.Spec
+	projectFilesResolver ProjectFilesResolver
+	result               results
+	rootDirectory        string
+	moduleName           string
 }
 
-func NewChecker(rootDirectory string, projectFiles []*models.ResolvedFile) *Checker {
+func NewChecker(
+	projectFilesResolver ProjectFilesResolver,
+	rootDirectory string,
+	moduleName string,
+) *Checker {
 	return &Checker{
-		result:        newResults(),
-		rootDirectory: rootDirectory,
-		projectFiles:  projectFiles,
+		result:               newResults(),
+		projectFilesResolver: projectFilesResolver,
+		rootDirectory:        rootDirectory,
+		moduleName:           moduleName,
 	}
 }
 
-func (c *Checker) Check(spec speca.Spec) models.CheckResult {
+func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
-	for _, file := range c.projectFiles {
+	projectFiles, err := c.projectFilesResolver.Resolve(
+		c.rootDirectory,
+		c.moduleName,
+		refPathToList(spec.Exclude),
+		refRegExpToList(spec.ExcludeFilesMatcher),
+	)
+	if err != nil {
+		return models.CheckResult{}, fmt.Errorf("failed to resolve project files: %w", err)
+	}
+
+	for _, file := range projectFiles {
 		component := c.resolveComponent(file.Path)
 		if component == nil {
 			c.result.addNotMatchedWarning(models.CheckArchWarningMatch{
@@ -43,7 +59,7 @@ func (c *Checker) Check(spec speca.Spec) models.CheckResult {
 		c.checkFile(component, file)
 	}
 
-	return c.result.assembleSortedResults()
+	return c.result.assembleSortedResults(), nil
 }
 
 func (c *Checker) resolveComponent(filePath string) *speca.Component {
@@ -51,6 +67,8 @@ func (c *Checker) resolveComponent(filePath string) *speca.Component {
 	directory := filepath.Dir(filePath)
 
 	for _, component := range c.spec.Components {
+		component := component
+
 		for _, componentDirectoryRef := range component.ResolvedPaths {
 			componentDirectory := componentDirectoryRef.Value()
 
@@ -70,7 +88,7 @@ func (c *Checker) resolveComponent(filePath string) *speca.Component {
 	return longestPathComponent(matched)
 }
 
-func (c *Checker) checkFile(component *speca.Component, file *models.ResolvedFile) {
+func (c *Checker) checkFile(component *speca.Component, file models.ResolvedFile) {
 	for _, resolvedImport := range file.Imports {
 		if checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value()) {
 			continue

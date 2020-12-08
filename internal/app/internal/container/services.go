@@ -21,7 +21,11 @@ func (c *Container) provideCheckService(input models.FlagsCheck) *check.Service 
 			input.ModuleName,
 			input.GoArchFilePath,
 		),
-		c.provideSpecChecker(),
+		c.provideSpecChecker(
+			input.ProjectDirectory,
+			input.ModuleName,
+		),
 		c.provideReferenceRender(),
+		c.flags.UseColors,
 	)
 }

@@ -3,6 +3,7 @@ package render
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"text/template"
 
@@ -37,20 +38,26 @@ func NewRenderer(
 }
 
 func (r *Renderer) RenderModel(model interface{}, err error) error {
-	if err != nil {
-		model = models.Error{
-			Error: fmt.Sprintf("%s", err),
-		}
+	if err != nil && !errors.Is(err, models.UserSpaceError{}) {
+		return err
 	}
+
+	var renderErr error
 
 	switch r.outputType {
 	case models.OutputTypeJSON:
-		return r.renderJson(model)
+		renderErr = r.renderJson(model)
 	case models.OutputTypeASCII:
-		return r.renderAscii(model)
+		renderErr = r.renderAscii(model)
 	default:
 		panic(fmt.Sprintf("failed to render: unknown output type: %s", r.outputType))
 	}
+
+	if renderErr != nil {
+		return fmt.Errorf("failed to render model: %w", renderErr)
+	}
+
+	return err
 }
 
 func (r *Renderer) renderAscii(model interface{}) error {
@@ -100,10 +107,18 @@ func (r *Renderer) renderJson(model interface{}) error {
 	var jsonBuffer []byte
 	var marshalErr error
 
+	wrapperModel := struct {
+		Type    string      `json:"type"`
+		Payload interface{} `json:"payload"`
+	}{
+		Type:    fmt.Sprintf("%T", model),
+		Payload: model,
+	}
+
 	if r.outputJsonOneLine {
-		jsonBuffer, marshalErr = json.Marshal(model)
+		jsonBuffer, marshalErr = json.Marshal(wrapperModel)
 	} else {
-		jsonBuffer, marshalErr = json.MarshalIndent(model, "", "  ")
+		jsonBuffer, marshalErr = json.MarshalIndent(wrapperModel, "", "  ")
 	}
 
 	if marshalErr != nil {
