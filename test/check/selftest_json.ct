@@ -1,11 +1,11 @@
 $ go-arch-lint check --project-path ${PWD} --json
 {
-  "Type": "command.check",
+  "Type": "models.Check",
   "Payload": {
     "ExecutionWarnings": [],
-    "ExecutionError": "",
     "ArchHasWarnings": false,
     "ArchWarningsDeps": [],
-    "ArchWarningsNotMatched": []
+    "ArchWarningsNotMatched": [],
+    "ModuleName": "github.com/fe3dback/go-arch-lint"
   }
 }

@@ -1,5 +1,4 @@
 $ go-arch-lint
-
 Check all project imports and compare to arch rules defined in yaml file.
 Read full documentation in: https://github.com/fe3dback/go-arch-lint
 
@@ -13,13 +12,10 @@ Available Commands:
   version     Print go arch linter version
 
 Flags:
-      --arch-file string       arch file path (default ".go-arch-lint.yml")
   -h, --help                   help for go-arch-lint
       --json                   (alias for --output-type=json)
-      --max-warnings int       max number of warnings to output (default 512)
       --output-color           use ANSI colors in terminal output (default true)
       --output-json-one-line   format JSON as single line payload (without line breaks), only for json output type
       --output-type string     type of command output, variants: [ascii, json] (default "default")
-      --project-path string    absolute path to project directory (where '.go-arch-lint.yml' is located)
 
 Use "go-arch-lint [command] --help" for more information about a command.

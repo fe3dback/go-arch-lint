@@ -1,9 +1,8 @@
 $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file arch_warnings.yml --> FAIL
 {
-  "Type": "command.check",
+  "Type": "models.Check",
   "Payload": {
     "ExecutionWarnings": [],
-    "ExecutionError": "",
     "ArchHasWarnings": true,
     "ArchWarningsDeps": [
       {
@@ -26,6 +25,7 @@ $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file
         "FileRelativePath": "/not_covered/nc.go",
         "FileAbsolutePath": "${ROOTDIR}/test/check/project/not_covered/nc.go"
       }
-    ]
+    ],
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project"
   }
 }

@@ -516,9 +516,8 @@ func Test_longestPathComponent(t *testing.T) {
 				return
 			}
 
-			want := tt.wantId
-			if !reflect.DeepEqual(got.Name, want) {
-				t.Errorf("longestPathComponent() = %v, want %v", got, want)
+			if !reflect.DeepEqual(got.Name.Value(), tt.wantId) {
+				t.Errorf("longestPathComponent() = %v, want %v", got.Name.Value(), tt.wantId)
 			}
 		})
 	}

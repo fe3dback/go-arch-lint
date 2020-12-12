@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	flagUseColors         = "colors"
+	flagUseColors         = "output-color"
 	flagOutputType        = "output-type"
-	flagAliasJson         = "json"
 	flagOutputJsonOneLine = "output-json-one-line"
+	flagAliasJson         = "json"
 )
 
 type (

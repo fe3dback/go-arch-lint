@@ -17,7 +17,7 @@ func (c *CommandAssembler) assembleFlags(cmd *cobra.Command) {
 }
 
 func (c *CommandAssembler) withColors(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolP(flagUseColors, "", true, "output colors to terminal?")
+	cmd.PersistentFlags().BoolP(flagUseColors, "", true, "use ANSI colors in terminal output")
 }
 
 func (c *CommandAssembler) withOutputType(cmd *cobra.Command) {

@@ -1,8 +1,3 @@
 $ go-arch-lint check --max-warnings=0 --output-type=json --> FAIL
-{
-  "Type": "halt",
-  "Payload": {
-    "Error": "panic: cmd: flag 'max-warnings' should by in range [1 .. 32768]"
-  }
-}
+flag 'max-warnings' should by in range [1 .. 32768]
 

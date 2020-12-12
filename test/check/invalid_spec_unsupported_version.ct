@@ -1,8 +1,5 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file invalid_spec_unsupported_version.yml --output-color=false --> FAIL
 module: github.com/fe3dback/go-arch-lint/test/check/project
-[Archfile] path '$.version': version 2 is not supported, supported: [1]:
->  1 | version: 2
-                ^
-   3 | components:
-   4 |   a:
-panic: cmd: arch file invalid syntax
+[Archfile] version '2' is not supported, supported: [1]
+>    1 | version: 2
+                  ^

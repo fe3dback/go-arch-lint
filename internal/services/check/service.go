@@ -2,6 +2,7 @@ package check
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
@@ -120,6 +121,17 @@ func (s *Service) assembleNotice(integrity speca.Integrity) []models.CheckNotice
 			),
 		})
 	}
+
+	sort.Slice(results, func(i, j int) bool {
+		sI := results[i]
+		sJ := results[j]
+
+		if sI.File == sJ.File {
+			return sI.Line < sJ.Line
+		}
+
+		return sI.File < sJ.File
+	})
 
 	return results
 }

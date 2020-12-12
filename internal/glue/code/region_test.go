@@ -37,9 +37,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				maxLines:     37,
 			},
 			want: codeRegion{
-				lineFirst: 20,
+				lineFirst: 19,
 				lineMain:  22,
-				lineLast:  25,
+				lineLast:  24,
 			},
 		},
 		{
@@ -180,9 +180,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				maxLines:     10,
 			},
 			want: codeRegion{
-				lineFirst: 3,
+				lineFirst: 2,
 				lineMain:  3,
-				lineLast:  4,
+				lineLast:  3,
 			},
 		},
 		{

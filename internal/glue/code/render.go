@@ -123,9 +123,19 @@ func (r *Render) annotate(
 	var resultBuffer bytes.Buffer
 	for sc.Scan() {
 		prefixLine := r.printer.Gray(fmt.Sprintf("%4d |", currentLine))
-		prefixEmpty := r.printer.Gray("     |")
+		prefixEmpty := r.printer.Gray("        ")
+
+		// add line pointer
+		if currentLine == region.lineMain {
+			prefixLine = fmt.Sprintf("> %s", prefixLine)
+		} else {
+			prefixLine = fmt.Sprintf("  %s", prefixLine)
+		}
+
+		// draw line
 		resultBuffer.WriteString(fmt.Sprintf("%s %s\n", prefixLine, sc.Bytes()))
 
+		// add offset pointer
 		if currentLine == region.lineMain && ref.Valid {
 			spaces := strings.Repeat(" ", int(math.Max(0, float64(ref.Offset-1))))
 			resultBuffer.WriteString(fmt.Sprintf("%s %s^\n", prefixEmpty, spaces))

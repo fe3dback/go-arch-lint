@@ -1,0 +1,17 @@
+$ go-arch-lint check --help
+compare project *.go files with arch defined in spec file
+
+Usage:
+  go-arch-lint check [flags]
+
+Flags:
+      --arch-file string      arch file path (default ".go-arch-lint.yml")
+  -h, --help                  help for check
+      --max-warnings int      max number of warnings to output (default 512)
+      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located)
+
+Global Flags:
+      --json                   (alias for --output-type=json)
+      --output-color           use ANSI colors in terminal output (default true)
+      --output-json-one-line   format JSON as single line payload (without line breaks), only for json output type
+      --output-type string     type of command output, variants: [ascii, json] (default "default")

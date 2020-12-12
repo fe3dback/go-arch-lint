@@ -4,15 +4,12 @@ allow:
   depOnAnyVendor: false
 
 exclude:
-  - vendor
-  - examples
   - docs
-  - checker/test
   - test
+  - vendor
 
 excludeFiles:
   - "^.*_test\\.go$"
-  - "^.*_test2333222\\.go$"
 
 vendors:
   go-modfile:
@@ -21,36 +18,68 @@ vendors:
     in: github.com/spf13/cobra
   3rd-yaml:
     in: github.com/goccy/go-yaml
+  3rd-yaml-parser:
+    in: github.com/goccy/go-yaml/parser
   3rd-color-fmt:
     in: github.com/logrusorgru/aurora/v3
+  3rd-chroma-formatters:
+    in: github.com/alecthomas/chroma/formatters
+  3rd-chroma-lexers:
+    in: github.com/alecthomas/chroma/lexers
+  3rd-chroma-styles:
+    in: github.com/alecthomas/chroma/styles
 
 components:
   main:
-    in: .
-  cmd:
-    in: cmd
+    in: /
+
   container:
-    in: cmd/container
+    in: internal/app/internal/container/**
 
-  checker:
-    in: checker
-  files_resolver:
-    in: files
-  path_resolver:
-    in: path
+  app:
+    in: internal/app
+
+  commands:
+    in: internal/commands/*
+
+  glue_checker:
+    in: internal/glue/checker
+
+  glue_code:
+    in: internal/glue/code
+
+  glue_path:
+    in: internal/glue/path
+
+  glue_printer:
+    in: internal/glue/printer
+
+  glue_project:
+    in: internal/glue/project
+
+  glue_render:
+    in: internal/glue/render
+
+  glue_spec:
+    in: internal/glue/spec/**
+
+  glue_yaml_spec:
+    in: internal/glue/yaml/spec
+
+  glue_yaml:
+    in: internal/glue/yaml/*
+
   models:
-    in: models
+    in: internal/models/**
 
-  spec:
-    in: spec
-  spec_archfile:
-    in: spec/archfile
-  spec_inner_validator:
-    in: spec/validator
-  spec_annotated_validator:
-    in: spec/annotated_validator
-  spec_warnparser:
-    in: spec/warnparser
+  services:
+    in: internal/services/*
+
+  version:
+    in: internal/version
+
+  view:
+    in: internal/view
 
 commonComponents:
   - models
@@ -58,38 +87,44 @@ commonComponents:
 deps:
   main:
     mayDependOn:
-      - cmd
-  cmd:
-    mayDependOn:
-      - container
-      - checker
-      - spec_annotated_validator
-    canUse:
-      - go-modfile
-      - 3rd-cobra
-      - 3rd-color-fmt
+      - app
 
   container:
     anyProjectDeps: true
+    anyVendorDeps: true
 
-  checker:
+  app:
     mayDependOn:
-      - spec
+      - container
+      - version
 
-  spec:
+  commands:
+    canUse:
+      - go-modfile
+      - 3rd-cobra
+
+  glue_spec:
     mayDependOn:
-      - spec_archfile
+      - glue_yaml_spec
 
-  spec_archfile:
+  glue_yaml:
+    mayDependOn:
+      - glue_yaml_spec
     canUse:
       - 3rd-yaml
+      - 3rd-yaml-parser
 
-  spec_inner_validator:
-    mayDependOn:
-      - spec_archfile
+  glue_yaml_spec:
     canUse:
       - 3rd-yaml
+      - 3rd-yaml-parser
 
-  spec_annotated_validator:
+  glue_printer:
     canUse:
-      - 3rd-yaml
+      - 3rd-color-fmt
+
+  glue_code:
+    canUse:
+      - 3rd-chroma-formatters
+      - 3rd-chroma-lexers
+      - 3rd-chroma-styles

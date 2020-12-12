@@ -108,8 +108,8 @@ func (r *Renderer) renderJson(model interface{}) error {
 	var marshalErr error
 
 	wrapperModel := struct {
-		Type    string      `json:"type"`
-		Payload interface{} `json:"payload"`
+		Type    string      `json:"Type"`
+		Payload interface{} `json:"Payload"`
 	}{
 		Type:    fmt.Sprintf("%T", model),
 		Payload: model,
