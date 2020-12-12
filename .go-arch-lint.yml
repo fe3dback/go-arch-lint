@@ -1,5 +1,4 @@
 version: 1
-
 allow:
   depOnAnyVendor: false
 
@@ -7,7 +6,6 @@ exclude:
   - docs
   - test
   - vendor
-
 excludeFiles:
   - "^.*_test\\.go$"
 
@@ -32,52 +30,39 @@ vendors:
 components:
   main:
     in: /
-
   container:
     in: internal/app/internal/container/**
-
   app:
     in: internal/app
 
   commands:
     in: internal/commands/*
 
-  glue_checker:
+  glueChecker:
     in: internal/glue/checker
-
-  glue_code:
+  glueCode:
     in: internal/glue/code
-
-  glue_path:
+  gluePath:
     in: internal/glue/path
-
-  glue_printer:
+  gluePrinter:
     in: internal/glue/printer
-
-  glue_project:
+  glueProject:
     in: internal/glue/project
-
-  glue_render:
+  glueRender:
     in: internal/glue/render
-
-  glue_spec:
+  glueSpec:
     in: internal/glue/spec/**
-
-  glue_yaml_spec:
+  glueYamlSpec:
     in: internal/glue/yaml/spec
-
-  glue_yaml:
+  glueYaml:
     in: internal/glue/yaml/*
 
   models:
     in: internal/models/**
-
   services:
     in: internal/services/*
-
   version:
     in: internal/version
-
   view:
     in: internal/view
 
@@ -103,27 +88,27 @@ deps:
       - go-modfile
       - 3rd-cobra
 
-  glue_spec:
+  glueSpec:
     mayDependOn:
-      - glue_yaml_spec
+      - glueYamlSpec
 
-  glue_yaml:
+  glueYaml:
     mayDependOn:
-      - glue_yaml_spec
+      - glueYamlSpec
     canUse:
       - 3rd-yaml
       - 3rd-yaml-parser
 
-  glue_yaml_spec:
+  glueYamlSpec:
     canUse:
       - 3rd-yaml
       - 3rd-yaml-parser
 
-  glue_printer:
+  gluePrinter:
     canUse:
       - 3rd-color-fmt
 
-  glue_code:
+  glueCode:
     canUse:
       - 3rd-chroma-formatters
       - 3rd-chroma-lexers

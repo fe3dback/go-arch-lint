@@ -2,7 +2,7 @@ package version
 
 var (
 	// nolint
-	VERSION = "1.4.3"
+	VERSION = "2.0.0-rc1"
 
 	// nolint
 	BUILD_TIME = "unknown"

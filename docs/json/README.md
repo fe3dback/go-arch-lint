@@ -1,25 +1,24 @@
 # Json output mode
 
-## command.check
+## models.Check
 
 *struct:*
 ```go
-type payloadTypeCommandCheck struct {
-	ExecutionWarnings      []annotated_validator.YamlAnnotatedWarning
-	ExecutionError         string
-	ArchHasWarnings        bool
-	ArchWarningsDeps       []checker.WarningDep
-	ArchWarningsNotMatched []checker.WarningNotMatched
+type Check struct {
+    DocumentNotices        []CheckNotice                `json:"ExecutionWarnings"`
+    ArchHasWarnings        bool                         `json:"ArchHasWarnings"`
+    ArchWarningsDependency []CheckArchWarningDependency `json:"ArchWarningsDeps"`
+    ArchWarningsMatch      []CheckArchWarningMatch      `json:"ArchWarningsNotMatched"`
+    ModuleName             string                       `json:"ModuleName"`
 }
 ```
 
 *example (checker warnings):*
 ```json
 {
-  "Type": "command.check",
+  "Type": "models.Check",
   "Payload": {
     "ExecutionWarnings": [],
-    "ExecutionError": "",
     "ArchHasWarnings": true,
     "ArchWarningsDeps": [
       {
@@ -34,7 +33,8 @@ type payloadTypeCommandCheck struct {
         "FileRelativePath": "/shared/ui/layer_shared_fps.go",
         "FileAbsolutePath": "/home/neo/go/src/github.com/fe3dback/galaxy/shared/ui/layer_shared_fps.go"
       }
-    ]
+    ],
+    "ModuleName": "github.com/fe3dback/galaxy"
   }
 }
 ```
@@ -42,60 +42,45 @@ type payloadTypeCommandCheck struct {
 *example (invalid archfile syntax):*
 ```json
 {
-  "Type": "command.check",
+  "Type": "models.Check",
   "Payload": {
     "ExecutionWarnings": [
       {
-        "Text": "path '$.version': version 2 is not supported, supported: [1]",
-        "Path": "$.version",
+        "Text": "version '333' is not supported, supported: [1]",
+        "File": "/home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml",
         "Line": 1,
         "Offset": 10
       }
     ],
-    "ExecutionError": "failed to parse archfile: spec '/home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml' has warnings",
     "ArchHasWarnings": false,
     "ArchWarningsDeps": [],
-    "ArchWarningsNotMatched": []
+    "ArchWarningsNotMatched": [],
+    "ModuleName": "github.com/fe3dback/galaxy"
   }
 }
 ```
 
-## command.version
+## models.Version
 
 *struct:*
 ```go
-type payloadVersion struct {
-	LinterVersion       string
-	GoArchFileSupported string
+type Version struct {
+    LinterVersion       string `json:"LinterVersion"`
+    GoArchFileSupported string `json:"GoArchFileSupported"`
+    BuildTime           string `json:"BuildTime"`
+    CommitHash          string `json:"CommitHash"`
 }
 ```
 
 *example:*
 ```json
 {
-  "Type": "command.version",
+  "Type": "models.Version",
   "Payload": {
-    "LinterVersion": "1.1.0",
-    "GoArchFileSupported": "1"
-  }
-}
-```
-
-## runtime cli panic/error
-
-*struct:*
-```go
-type payloadTypeHalt struct {
-	Error string
-}
-```
-
-*example:*
-```json
-{
-  "Type": "halt",
-  "Payload": {
-    "Error": "panic: cmd: flag 'max-warnings' should by in range [1 .. 32768]"
+    "LinterVersion": "1.4.3",
+    "GoArchFileSupported": "1",
+    "BuildTime": "unknown",
+    "CommitHash": "unknown"
   }
 }
 ```

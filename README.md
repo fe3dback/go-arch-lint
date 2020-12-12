@@ -37,22 +37,19 @@ docker run --rm \
 
 ```
 Usage:
-  go-arch-lint [flags]
-  go-arch-lint [command]
-
-Available Commands:
-  check       check project architecture by yaml file
-  help        Help about any command
-  version     Print go arch linter version
+  go-arch-lint check [flags]
 
 Flags:
-  -h, --help                   help for go-arch-lint
+      --arch-file string      arch file path (default ".go-arch-lint.yml")
+  -h, --help                  help for check
+      --max-warnings int      max number of warnings to output (default 512)
+      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located)
+
+Global Flags:
       --json                   (alias for --output-type=json)
-      --max-warnings int       max number of warnings to output (default 512)
       --output-color           use ANSI colors in terminal output (default true)
       --output-json-one-line   format JSON as single line payload (without line breaks), only for json output type
       --output-type string     type of command output, variants: [ascii, json] (default "default")
-      --project-path string    absolute path to project directory (where '.go-arch-lint.yml' is located)
 ```
 
 ## Archfile example
@@ -66,7 +63,7 @@ allow:
   depOnAnyVendor: false
 
 # ----------------------------------
-# Excluded folders from analyse
+# Exclude from analyse
 # ----------------------------------
 exclude:
   - .idea
@@ -80,7 +77,7 @@ excludeFiles:
 # Vendor libs
 # ----------------------------------
 vendors:
-  loader-yaml:
+  loaderYaml:
     in: gopkg.in/yaml.v2
   vectors:
     in: github.com/fe3dback/go-vec
@@ -89,18 +86,18 @@ vendors:
 # Project components
 #
 # Used for split real modules and 
-# packages to abstract thing
+# packages to abstract namespaces
 # ----------------------------------
 components:
   main:
     in: .
   engine:
     in: engine
-  engine_vendor_events:
+  engineVendorEvents:
     in: engine/vendor/*/event
   game:
     in: game
-  game_component:
+  gameComponent:
     in: game/components/**
   utils:
     in: utils
@@ -125,16 +122,16 @@ commonVendors:
 deps:
   engine:
     canUse:
-      - loader-yaml  
+      - loaderYaml  
 
-  engine_vendor_events:
+  engineVendorEvents:
     mayDependOn:
       - engine
 
   game:
     mayDependOn:
       - engine
-      - game_component
+      - gameComponent
 
   main:
     mayDependOn:
@@ -148,7 +145,7 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 
 | Path              | Req?  | Type  | Description         |
 | -------------     | ----- | ----- | ------------------- |
-| version           | +     | int   | schema version, currently support "1"  |
+| version           | +     | int   | schema version  |
 | allow             | -     | map   | global rules |
 | . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
 | exclude           | -     | list  | list of directories (relative path) for exclude from analyse |
@@ -198,10 +195,9 @@ $ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy --json
 
 ```json
 {
-  "Type": "command.check",
+  "Type": "models.Check",
   "Payload": {
     "ExecutionWarnings": [],
-    "ExecutionError": "",
     "ArchHasWarnings": true,
     "ArchWarningsDeps": [
       {
@@ -222,7 +218,8 @@ $ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy --json
         "FileRelativePath": "/shared/ui/layer_shared_fps.go",
         "FileAbsolutePath": "/home/neo/go/src/github.com/fe3dback/galaxy/shared/ui/layer_shared_fps.go"
       }
-    ]
+    ],
+    "ModuleName": "github.com/fe3dback/galaxy"
   }
 }
 ```

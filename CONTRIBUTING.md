@@ -39,6 +39,6 @@ Tags must expect the semantic version.
 
 Before release update version in code places
 
-1. go - cmd/cmd_version.go (const `linterVersion`)
+1. go - internal/version/version.go (const `VERSION`)
 2. git - tag commit with same version from const
 4. fix functional tests (test/version)
