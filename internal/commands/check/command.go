@@ -111,11 +111,14 @@ func (c *CommandAssembler) assembleInput() (models.FlagsCheck, error) {
 		return models.FlagsCheck{}, fmt.Errorf("flag '%s' should by set", flagProjectPath)
 	}
 
-	projectPath := filepath.Clean(c.localFlags.ProjectPath)
+	projectPath, err := filepath.Abs(c.localFlags.ProjectPath)
+	if err != nil {
+		return models.FlagsCheck{}, fmt.Errorf("failed to resolve abs path '%s'", c.localFlags.ProjectPath)
+	}
 
 	// check arch file
 	settingsGoArchFilePath := filepath.Clean(fmt.Sprintf("%s/%s", projectPath, c.localFlags.ArchFile))
-	_, err := os.Stat(settingsGoArchFilePath)
+	_, err = os.Stat(settingsGoArchFilePath)
 	if os.IsNotExist(err) {
 		return models.FlagsCheck{}, fmt.Errorf("not found archfile in '%s'", settingsGoArchFilePath)
 	}
