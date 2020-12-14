@@ -1,18 +1,16 @@
 package checker
 
 import (
-	"regexp"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	ProjectFilesResolver interface {
-		Resolve(
-			projectDirectory string,
+		ProjectFiles(
+			rootDirectory string,
 			moduleName string,
-			excludePaths []models.ResolvedPath,
-			excludeFileMatchers []*regexp.Regexp,
-		) ([]models.ResolvedFile, error)
+			spec speca.Spec,
+		) ([]models.FileHold, error)
 	}
 )

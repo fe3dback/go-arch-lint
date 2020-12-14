@@ -41,7 +41,7 @@ func NewCheckCommandAssembler(processorFn processorFn) *CommandAssembler {
 		processorFn: processorFn,
 		localFlags: &localFlags{
 			MaxWarnings: 512,
-			ProjectPath: "",
+			ProjectPath: "./",
 			ArchFile:    defaultArchFileName,
 		},
 	}

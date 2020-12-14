@@ -2,7 +2,6 @@ package checker
 
 import (
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"testing"
 
@@ -114,7 +113,7 @@ func Test_checkImportPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := &speca.Component{
+			cmp := speca.Component{
 				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
 				AllowedImports: tt.args.componentImports,
 			}
@@ -252,7 +251,7 @@ func Test_checkProjectImport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := &speca.Component{
+			cmp := speca.Component{
 				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
 				SpecialFlags:   tt.args.componentFlags,
 				AllowedImports: tt.args.componentImports,
@@ -329,7 +328,7 @@ func Test_checkVendorImport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := &speca.Component{
+			cmp := speca.Component{
 				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
 				SpecialFlags:   tt.args.componentFlags,
 				AllowedImports: tt.args.componentImports,
@@ -402,7 +401,7 @@ func TestChecker_checkImport(t *testing.T) {
 		},
 	}
 
-	cmp := &speca.Component{
+	cmp := speca.Component{
 		Name: speca.NewReferableString("component", speca.NewEmptyReference()),
 		SpecialFlags: speca.SpecialFlags{
 			AllowAllProjectDeps: makeBool(false),
@@ -433,92 +432,4 @@ func TestChecker_checkImport(t *testing.T) {
 
 		_ = checkImport(cmp, resolvedImport, false)
 	})
-}
-
-func Test_longestPathComponent(t *testing.T) {
-	type args struct {
-		matched map[string]string
-	}
-	tests := []struct {
-		name      string
-		args      args
-		wantId    string
-		expectNil bool
-	}{
-		{
-			name:      "empty list",
-			args:      args{},
-			wantId:    "",
-			expectNil: true,
-		},
-		{
-			name: "one element",
-			args: args{
-				matched: map[string]string{
-					makeTestAbsPath("cat"): "cat",
-				},
-			},
-			wantId:    "cat",
-			expectNil: false,
-		},
-		{
-			name: "two elements, same len, expect first (because cat < dog in alpha order)",
-			args: args{
-				matched: map[string]string{
-					makeTestAbsPath("cat"): "cat",
-					makeTestAbsPath("dog"): "dog",
-				},
-			},
-			wantId:    "cat",
-			expectNil: false,
-		},
-		{
-			name: "two elements, same len, expect second (because cat < dog in alpha order)",
-			args: args{
-				matched: map[string]string{
-					makeTestAbsPath("dog"): "dog",
-					makeTestAbsPath("cat"): "cat",
-				},
-			},
-			wantId:    "cat",
-			expectNil: false,
-		},
-		{
-			name: "two elements, second len > first len, expect second",
-			args: args{
-				matched: map[string]string{
-					makeTestAbsPath("cat"):   "cat",
-					makeTestAbsPath("doggy"): "doggy",
-				},
-			},
-			wantId:    "doggy",
-			expectNil: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			list := make(map[string]*speca.Component)
-
-			for archPath, id := range tt.args.matched {
-				list[archPath] = &speca.Component{
-					Name: speca.NewReferableString(id, speca.NewEmptyReference()),
-				}
-			}
-
-			got := longestPathComponent(list)
-
-			if got == nil {
-				if !tt.expectNil {
-					t.Errorf("longestPathComponent() = %v, want nil", got)
-					return
-				}
-
-				return
-			}
-
-			if !reflect.DeepEqual(got.Name.Value(), tt.wantId) {
-				t.Errorf("longestPathComponent() = %v, want %v", got.Name.Value(), tt.wantId)
-			}
-		})
-	}
 }

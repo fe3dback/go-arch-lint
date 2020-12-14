@@ -7,7 +7,9 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/glue/checker"
 	"github.com/fe3dback/go-arch-lint/internal/glue/code"
 	"github.com/fe3dback/go-arch-lint/internal/glue/path"
-	"github.com/fe3dback/go-arch-lint/internal/glue/project"
+	"github.com/fe3dback/go-arch-lint/internal/glue/project/holder"
+	"github.com/fe3dback/go-arch-lint/internal/glue/project/resolver"
+	"github.com/fe3dback/go-arch-lint/internal/glue/project/scanner"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
@@ -79,6 +81,17 @@ func (c *Container) provideSpecChecker(projectDir, moduleName string) *checker.C
 	)
 }
 
-func (c *Container) provideProjectFilesResolver() *project.Resolver {
-	return project.NewResolver()
+func (c *Container) provideProjectFilesResolver() *resolver.Resolver {
+	return resolver.NewResolver(
+		c.provideProjectFilesScanner(),
+		c.provideProjectFilesHolder(),
+	)
+}
+
+func (c *Container) provideProjectFilesScanner() *scanner.Scanner {
+	return scanner.NewScanner()
+}
+
+func (c *Container) provideProjectFilesHolder() *holder.Holder {
+	return holder.NewHolder()
 }

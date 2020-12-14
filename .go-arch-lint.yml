@@ -38,18 +38,12 @@ components:
   commands:
     in: internal/commands/*
 
-  glueChecker:
-    in: internal/glue/checker
+  glue:
+    in: internal/glue/**
   glueCode:
     in: internal/glue/code
-  gluePath:
-    in: internal/glue/path
   gluePrinter:
     in: internal/glue/printer
-  glueProject:
-    in: internal/glue/project
-  glueRender:
-    in: internal/glue/render
   glueSpec:
     in: internal/glue/spec/**
   glueYamlSpec:

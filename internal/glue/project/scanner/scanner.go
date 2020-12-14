@@ -1,4 +1,4 @@
-package project
+package scanner
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 )
 
 type (
-	Resolver struct {
+	Scanner struct {
 	}
 
 	resolveContext struct {
@@ -24,20 +24,20 @@ type (
 		excludeFileMatchers []*regexp.Regexp
 
 		tokenSet *token.FileSet
-		results  []models.ResolvedFile
+		results  []models.ProjectFile
 	}
 )
 
-func NewResolver() *Resolver {
-	return &Resolver{}
+func NewScanner() *Scanner {
+	return &Scanner{}
 }
 
-func (r *Resolver) Resolve(
+func (r *Scanner) Scan(
 	projectDirectory string,
 	moduleName string,
 	excludePaths []models.ResolvedPath,
 	excludeFileMatchers []*regexp.Regexp,
-) ([]models.ResolvedFile, error) {
+) ([]models.ProjectFile, error) {
 	ctx := resolveContext{
 		projectDirectory:    projectDirectory,
 		moduleName:          moduleName,
@@ -45,7 +45,7 @@ func (r *Resolver) Resolve(
 		excludeFileMatchers: excludeFileMatchers,
 
 		tokenSet: token.NewFileSet(),
-		results:  []models.ResolvedFile{},
+		results:  []models.ProjectFile{},
 	}
 
 	err := filepath.Walk(ctx.projectDirectory, func(path string, info os.FileInfo, err error) error {
@@ -96,7 +96,7 @@ func parse(ctx *resolveContext, path string) error {
 		return fmt.Errorf("failed to parse go source code at '%s': %v", path, err)
 	}
 
-	ctx.results = append(ctx.results, models.ResolvedFile{
+	ctx.results = append(ctx.results, models.ProjectFile{
 		Path:    path,
 		Imports: extractImports(ctx, fileAst),
 	})

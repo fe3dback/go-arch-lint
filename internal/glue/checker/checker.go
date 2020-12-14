@@ -2,8 +2,6 @@ package checker
 
 import (
 	"fmt"
-	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -34,61 +32,52 @@ func NewChecker(
 func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
-	projectFiles, err := c.projectFilesResolver.Resolve(
+	projectFiles, err := c.projectFilesResolver.ProjectFiles(
 		c.rootDirectory,
 		c.moduleName,
-		refPathToList(spec.Exclude),
-		refRegExpToList(spec.ExcludeFilesMatcher),
+		spec,
 	)
 	if err != nil {
 		return models.CheckResult{}, fmt.Errorf("failed to resolve project files: %w", err)
 	}
 
-	for _, file := range projectFiles {
-		component := c.resolveComponent(file.Path)
-		if component == nil {
+	components := c.assembleComponentsMap(spec)
+
+	for _, projectFile := range projectFiles {
+		if projectFile.ComponentID == nil {
 			c.result.addNotMatchedWarning(models.CheckArchWarningMatch{
 				Reference:        speca.NewEmptyReference(),
-				FileRelativePath: strings.TrimPrefix(file.Path, c.rootDirectory),
-				FileAbsolutePath: file.Path,
+				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, c.rootDirectory),
+				FileAbsolutePath: projectFile.File.Path,
 			})
 
 			continue
 		}
 
-		c.checkFile(component, file)
+		componentID := *projectFile.ComponentID
+		if component, ok := components[componentID]; ok {
+			c.checkFile(component, projectFile.File)
+
+			continue
+		}
+
+		return models.CheckResult{}, fmt.Errorf("not found component '%s' in map", componentID)
 	}
 
 	return c.result.assembleSortedResults(), nil
 }
 
-func (c *Checker) resolveComponent(filePath string) *speca.Component {
-	matched := make(map[string]*speca.Component)
-	directory := filepath.Dir(filePath)
+func (c *Checker) assembleComponentsMap(spec speca.Spec) map[string]speca.Component {
+	results := make(map[string]speca.Component)
 
-	for _, component := range c.spec.Components {
-		component := component
-
-		for _, componentDirectoryRef := range component.ResolvedPaths {
-			componentDirectory := componentDirectoryRef.Value()
-
-			if strings.HasPrefix(directory, componentDirectory.AbsPath) {
-				suffixPath := strings.TrimPrefix(directory, componentDirectory.AbsPath)
-
-				if strings.Contains(suffixPath, "/") {
-					continue
-				}
-
-				matched[componentDirectory.ImportPath] = &component
-				continue
-			}
-		}
+	for _, component := range spec.Components {
+		results[component.Name.Value()] = component
 	}
 
-	return longestPathComponent(matched)
+	return results
 }
 
-func (c *Checker) checkFile(component *speca.Component, file models.ResolvedFile) {
+func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) {
 	for _, resolvedImport := range file.Imports {
 		if checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value()) {
 			continue
@@ -104,32 +93,8 @@ func (c *Checker) checkFile(component *speca.Component, file models.ResolvedFile
 	}
 }
 
-func longestPathComponent(matched map[string]*speca.Component) *speca.Component {
-	// work only with keys
-	sortedPaths := make([]string, len(matched))
-	for path := range matched {
-		sortedPaths = append(sortedPaths, path)
-	}
-
-	sort.Strings(sortedPaths)
-
-	// find longest
-	longest := ""
-	for _, path := range sortedPaths {
-		if len(path) > len(longest) {
-			longest = path
-		}
-	}
-
-	if longest == "" {
-		return nil
-	}
-
-	return matched[longest]
-}
-
 func checkImport(
-	component *speca.Component,
+	component speca.Component,
 	resolvedImport models.ResolvedImport,
 	allowDependOnAnyVendor bool,
 ) bool {
@@ -149,7 +114,7 @@ func checkImport(
 	}
 }
 
-func checkVendorImport(component *speca.Component, resolvedImport models.ResolvedImport) bool {
+func checkVendorImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllVendorDeps.Value() {
 		return true
 	}
@@ -157,7 +122,7 @@ func checkVendorImport(component *speca.Component, resolvedImport models.Resolve
 	return checkImportPath(component, resolvedImport)
 }
 
-func checkProjectImport(component *speca.Component, resolvedImport models.ResolvedImport) bool {
+func checkProjectImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllProjectDeps.Value() {
 		return true
 	}
@@ -165,7 +130,7 @@ func checkProjectImport(component *speca.Component, resolvedImport models.Resolv
 	return checkImportPath(component, resolvedImport)
 }
 
-func checkImportPath(component *speca.Component, resolvedImport models.ResolvedImport) bool {
+func checkImportPath(component speca.Component, resolvedImport models.ResolvedImport) bool {
 	for _, allowedImportRef := range component.AllowedImports {
 		allowedImport := allowedImportRef.Value()
 

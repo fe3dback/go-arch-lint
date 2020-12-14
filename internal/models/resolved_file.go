@@ -14,8 +14,13 @@ type (
 		ImportType ImportType
 	}
 
-	ResolvedFile struct {
+	ProjectFile struct {
 		Path    string
 		Imports []ResolvedImport
+	}
+
+	FileHold struct {
+		File        ProjectFile
+		ComponentID *string
 	}
 )

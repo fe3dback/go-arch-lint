@@ -20,7 +20,7 @@ Run binary with flag "check --project-path" and absolutely path
 to your project, for example:
 
 ```bash
-go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy
+go-arch-lint check --project-path /home/user/go/src/github.com/fe3dback/galaxy
 ```
 
 ### alternative - Run with docker
@@ -43,7 +43,7 @@ Flags:
       --arch-file string      arch file path (default ".go-arch-lint.yml")
   -h, --help                  help for check
       --max-warnings int      max number of warnings to output (default 512)
-      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located)
+      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located) (default "./")
 
 Global Flags:
       --json                   (alias for --output-type=json)
