@@ -13,9 +13,12 @@ func (c *Container) ProvideCheckCommand() *cobra.Command {
 }
 
 func (c *Container) provideCheckCommandAssembler() *check.CommandAssembler {
-	return check.NewCheckCommandAssembler(func(input models.FlagsCheck) error {
-		return c.ProvideRenderer().RenderModel(
-			c.provideCheckService(input).Behave(input.MaxWarnings),
-		)
-	})
+	return check.NewCheckCommandAssembler(
+		c.provideProjectInfoAssembler(),
+		func(input models.FlagsCheck) error {
+			return c.ProvideRenderer().RenderModel(
+				c.provideCheckService(input).Behave(input.MaxWarnings),
+			)
+		},
+	)
 }

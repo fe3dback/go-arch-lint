@@ -23,6 +23,7 @@ func (c *Container) provideCommands() []*cobra.Command {
 	return []*cobra.Command{
 		c.ProvideVersionCommand(),
 		c.ProvideCheckCommand(),
+		c.ProvideMappingCommand(),
 	}
 }
 

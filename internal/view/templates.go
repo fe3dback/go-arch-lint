@@ -10,6 +10,7 @@ var Templates = map[string]string{
 	tpl(models.Error{}):   Error,
 	tpl(models.Version{}): Version,
 	tpl(models.Check{}):   Check,
+	tpl(models.Mapping{}): Mapping,
 }
 
 func tpl(model interface{}) string {

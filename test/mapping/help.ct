@@ -1,17 +1,17 @@
-$ go-arch-lint check --help
-compare project *.go files with arch defined in spec file
+$ go-arch-lint ps --help
+display mapping table between project files and arch components
 
 Usage:
-  go-arch-lint check [flags]
+  go-arch-lint mapping [flags]
 
 Aliases:
-  check, c
+  mapping, ps, ls
 
 Flags:
       --arch-file string      arch file path (default ".go-arch-lint.yml")
-  -h, --help                  help for check
-      --max-warnings int      max number of warnings to output (default 512)
+  -h, --help                  help for mapping
       --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located) (default "./")
+  -s, --scheme string         display scheme [list,grouped] (default "list")
 
 Global Flags:
       --json                   (alias for --output-type=json)

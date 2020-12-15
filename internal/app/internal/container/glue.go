@@ -8,6 +8,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/glue/code"
 	"github.com/fe3dback/go-arch-lint/internal/glue/path"
 	"github.com/fe3dback/go-arch-lint/internal/glue/project/holder"
+	"github.com/fe3dback/go-arch-lint/internal/glue/project/info"
 	"github.com/fe3dback/go-arch-lint/internal/glue/project/resolver"
 	"github.com/fe3dback/go-arch-lint/internal/glue/project/scanner"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
@@ -73,11 +74,9 @@ func (c *Container) provideReferenceRender() *code.Render {
 	)
 }
 
-func (c *Container) provideSpecChecker(projectDir, moduleName string) *checker.Checker {
+func (c *Container) provideSpecChecker() *checker.Checker {
 	return checker.NewChecker(
 		c.provideProjectFilesResolver(),
-		projectDir,
-		moduleName,
 	)
 }
 
@@ -94,4 +93,8 @@ func (c *Container) provideProjectFilesScanner() *scanner.Scanner {
 
 func (c *Container) provideProjectFilesHolder() *holder.Holder {
 	return holder.NewHolder()
+}
+
+func (c *Container) provideProjectInfoAssembler() *info.Assembler {
+	return info.NewAssembler()
 }

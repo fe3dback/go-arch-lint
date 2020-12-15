@@ -1,7 +1,8 @@
-package check
+package mapping
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -11,7 +12,7 @@ import (
 func (c *CommandAssembler) assembleFlags(cmd *cobra.Command) {
 	c.withProjectPath(cmd)
 	c.withArchFileName(cmd)
-	c.withMaxWarnings(cmd)
+	c.withScheme(cmd)
 }
 
 func (c *CommandAssembler) withProjectPath(cmd *cobra.Command) {
@@ -32,11 +33,14 @@ func (c *CommandAssembler) withArchFileName(cmd *cobra.Command) {
 	)
 }
 
-func (c *CommandAssembler) withMaxWarnings(cmd *cobra.Command) {
-	cmd.PersistentFlags().IntP(
-		flagMaxWarnings,
-		"",
-		c.localFlags.MaxWarnings,
-		"max number of warnings to output",
+func (c *CommandAssembler) withScheme(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP(
+		flagScheme,
+		"s",
+		c.localFlags.Scheme,
+		fmt.Sprintf(
+			"display scheme [%s]",
+			strings.Join(validSchemes, ","),
+		),
 	)
 }

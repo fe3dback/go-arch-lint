@@ -22,14 +22,10 @@ func NewResolver(
 	}
 }
 
-func (r *Resolver) ProjectFiles(
-	rootDirectory string,
-	moduleName string,
-	spec speca.Spec,
-) ([]models.FileHold, error) {
+func (r *Resolver) ProjectFiles(spec speca.Spec) ([]models.FileHold, error) {
 	projectFiles, err := r.projectFilesResolver.Scan(
-		rootDirectory,
-		moduleName,
+		spec.RootDirectory.Value(),
+		spec.ModuleName.Value(),
 		refPathToList(spec.Exclude),
 		refRegExpToList(spec.ExcludeFilesMatcher),
 	)

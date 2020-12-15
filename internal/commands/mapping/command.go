@@ -1,7 +1,8 @@
-package check
+package mapping
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -9,13 +10,18 @@ import (
 )
 
 const (
-	flagMaxWarnings = "max-warnings"
 	flagProjectPath = "project-path"
 	flagArchFile    = "arch-file"
+	flagScheme      = "scheme"
 )
 
+var validSchemes = []string{
+	models.MappingSchemeList,
+	models.MappingSchemeGrouped,
+}
+
 type (
-	processorFn = func(models.FlagsCheck) error
+	processorFn = func(mapping models.FlagsMapping) error
 
 	CommandAssembler struct {
 		projectInfoAssembler ProjectInfoAssembler
@@ -24,13 +30,13 @@ type (
 	}
 
 	localFlags struct {
-		MaxWarnings int
 		ProjectPath string
 		ArchFile    string
+		Scheme      string
 	}
 )
 
-func NewCheckCommandAssembler(
+func NewMappingCommandAssembler(
 	projectInfoAssembler ProjectInfoAssembler,
 	processorFn processorFn,
 ) *CommandAssembler {
@@ -38,19 +44,19 @@ func NewCheckCommandAssembler(
 		projectInfoAssembler: projectInfoAssembler,
 		processorFn:          processorFn,
 		localFlags: &localFlags{
-			MaxWarnings: 512,
 			ProjectPath: "./",
 			ArchFile:    models.ProjectInfoDefaultArchFileName,
+			Scheme:      models.MappingSchemeList,
 		},
 	}
 }
 
 func (c *CommandAssembler) Assemble() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "check",
-		Aliases: []string{"c"},
-		Short:   "check project architecture by yaml file",
-		Long:    "compare project *.go files with arch defined in spec file",
+		Use:     "mapping",
+		Aliases: []string{"ps", "ls"},
+		Short:   "mapping table between files and components",
+		Long:    "display mapping table between project files and arch components",
 		PreRunE: c.prePersist,
 		RunE:    c.invoke,
 	}
@@ -80,42 +86,46 @@ func (c *CommandAssembler) prePersist(cmd *cobra.Command, _ []string) error {
 		return failedToGetFlag(err, flagArchFile)
 	}
 
-	maxWarnings, err := cmd.Flags().GetInt(flagMaxWarnings)
+	scheme, err := cmd.Flags().GetString(flagScheme)
 	if err != nil {
-		return failedToGetFlag(err, flagMaxWarnings)
+		return failedToGetFlag(err, flagScheme)
 	}
 
-	const warningsRangeMin = 1
-	const warningsRangeMax = 32768
+	schemeIsValid := false
+	for _, s := range validSchemes {
+		if scheme == s {
+			schemeIsValid = true
+			break
+		}
+	}
 
-	if maxWarnings < warningsRangeMin || maxWarnings > warningsRangeMax {
+	if !schemeIsValid {
 		return fmt.Errorf(
-			"flag '%s' should by in range [%d .. %d]",
-			flagMaxWarnings,
-			warningsRangeMin,
-			warningsRangeMax,
+			"invalid scheme '%s', available: [%s]",
+			scheme,
+			strings.Join(validSchemes, ", "),
 		)
 	}
 
 	// assemble localFlags
 	c.localFlags.ProjectPath = rootDirectory
 	c.localFlags.ArchFile = archFile
-	c.localFlags.MaxWarnings = maxWarnings
+	c.localFlags.Scheme = scheme
 
 	return nil
 }
 
-func (c *CommandAssembler) assembleInput() (models.FlagsCheck, error) {
+func (c *CommandAssembler) assembleInput() (models.FlagsMapping, error) {
 	projectInfo, err := c.projectInfoAssembler.ProjectInfo(
 		c.localFlags.ProjectPath,
 		c.localFlags.ArchFile,
 	)
 	if err != nil {
-		return models.FlagsCheck{}, fmt.Errorf("failed to assemble project info: %w", err)
+		return models.FlagsMapping{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	return models.FlagsCheck{
-		Project:     projectInfo,
-		MaxWarnings: c.localFlags.MaxWarnings,
+	return models.FlagsMapping{
+		Project: projectInfo,
+		Scheme:  c.localFlags.Scheme,
 	}, nil
 }

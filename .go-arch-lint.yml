@@ -42,6 +42,8 @@ components:
     in: internal/glue/**
   glueCode:
     in: internal/glue/code
+  glueProject:
+    in: internal/glue/project/**
   gluePrinter:
     in: internal/glue/printer
   glueSpec:
@@ -79,7 +81,6 @@ deps:
 
   commands:
     canUse:
-      - go-modfile
       - 3rd-cobra
 
   glueSpec:
@@ -97,6 +98,10 @@ deps:
     canUse:
       - 3rd-yaml
       - 3rd-yaml-parser
+
+  glueProject:
+    canUse:
+      - go-modfile
 
   gluePrinter:
     canUse:

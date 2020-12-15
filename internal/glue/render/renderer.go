@@ -11,7 +11,13 @@ import (
 )
 
 const (
-	fnColorize = "colorize"
+	fnColorize   = "colorize"
+	fnTrimPrefix = "trimPrefix"
+	fnTrimSuffix = "trimSuffix"
+	fnTrimDef    = "def"
+	fnPadLeft    = "padLeft"
+	fnPadRight   = "padRight"
+	fnDir        = "dir"
 )
 
 type (
@@ -71,7 +77,13 @@ func (r *Renderer) renderAscii(model interface{}) error {
 	tpl, err := template.
 		New(templateName).
 		Funcs(map[string]interface{}{
-			fnColorize: r.asciiColorize,
+			fnColorize:   r.asciiColorize,
+			fnTrimPrefix: r.asciiTrimPrefix,
+			fnTrimSuffix: r.asciiTrimSuffix,
+			fnTrimDef:    r.asciiDefaultValue,
+			fnPadLeft:    r.asciiPadLeft,
+			fnPadRight:   r.asciiPadRight,
+			fnDir:        r.asciiPathDirectory,
 		}).
 		Parse(
 			preprocessRawAsciiTemplate(templateBuffer),
@@ -88,19 +100,6 @@ func (r *Renderer) renderAscii(model interface{}) error {
 
 	fmt.Println(buffer.String())
 	return nil
-}
-
-func (r *Renderer) asciiColorize(color string, value interface{}) (string, error) {
-	colorizer := newColorizer(r.colorPrinter)
-	out, err := colorizer.colorize(
-		color,
-		fmt.Sprintf("%s", value),
-	)
-	if err != nil {
-		return "", fmt.Errorf("failed colorize: %s", err)
-	}
-
-	return out, nil
 }
 
 func (r *Renderer) renderJson(model interface{}) error {

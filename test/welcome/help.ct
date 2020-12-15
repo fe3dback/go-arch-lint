@@ -9,6 +9,7 @@ Usage:
 Available Commands:
   check       check project architecture by yaml file
   help        Help about any command
+  mapping     mapping table between files and components
   version     Print go arch linter version
 
 Flags:

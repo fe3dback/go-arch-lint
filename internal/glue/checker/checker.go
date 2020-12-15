@@ -12,31 +12,21 @@ type Checker struct {
 	spec                 speca.Spec
 	projectFilesResolver ProjectFilesResolver
 	result               results
-	rootDirectory        string
-	moduleName           string
 }
 
 func NewChecker(
 	projectFilesResolver ProjectFilesResolver,
-	rootDirectory string,
-	moduleName string,
 ) *Checker {
 	return &Checker{
 		result:               newResults(),
 		projectFilesResolver: projectFilesResolver,
-		rootDirectory:        rootDirectory,
-		moduleName:           moduleName,
 	}
 }
 
 func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
-	projectFiles, err := c.projectFilesResolver.ProjectFiles(
-		c.rootDirectory,
-		c.moduleName,
-		spec,
-	)
+	projectFiles, err := c.projectFilesResolver.ProjectFiles(spec)
 	if err != nil {
 		return models.CheckResult{}, fmt.Errorf("failed to resolve project files: %w", err)
 	}
@@ -47,7 +37,7 @@ func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 		if projectFile.ComponentID == nil {
 			c.result.addNotMatchedWarning(models.CheckArchWarningMatch{
 				Reference:        speca.NewEmptyReference(),
-				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, c.rootDirectory),
+				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, spec.RootDirectory.Value()),
 				FileAbsolutePath: projectFile.File.Path,
 			})
 
@@ -86,7 +76,7 @@ func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) 
 		c.result.addDependencyWarning(models.CheckArchWarningDependency{
 			Reference:          component.Name.Reference(),
 			ComponentName:      component.Name.Value(),
-			FileRelativePath:   strings.TrimPrefix(file.Path, c.rootDirectory),
+			FileRelativePath:   strings.TrimPrefix(file.Path, c.spec.RootDirectory.Value()),
 			FileAbsolutePath:   file.Path,
 			ResolvedImportName: resolvedImport.Name,
 		})
