@@ -45,3 +45,8 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
+      -
+        name: Clear
+        if: always() && steps.check-tag.outputs.match == 'true'
+        run: |
+          rm -f ${HOME}/.docker/config.json
