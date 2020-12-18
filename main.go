@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/fe3dback/go-arch-lint/cmd"
+	"github.com/fe3dback/go-arch-lint/internal/app"
 )
 
 func main() {
@@ -11,5 +11,5 @@ func main() {
 }
 
 func run() int {
-	return cmd.Execute()
+	return app.Execute()
 }

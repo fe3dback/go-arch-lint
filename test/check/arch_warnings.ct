@@ -5,4 +5,4 @@ module: github.com/fe3dback/go-arch-lint/test/check/project
 [WARN] File '/d/not_covered.go' not attached to any component in archfile
 [WARN] File '/not_covered/nc.go' not attached to any component in archfile
 
-panic: cmd: warnings found: 1
+warnings found: 1

@@ -1,0 +1,14 @@
+$ go-arch-lint version --help
+show version, build time and commit hash of current build
+
+Usage:
+  go-arch-lint version [flags]
+
+Flags:
+  -h, --help   help for version
+
+Global Flags:
+      --json                   (alias for --output-type=json)
+      --output-color           use ANSI colors in terminal output (default true)
+      --output-json-one-line   format JSON as single line payload (without line breaks), only for json output type
+      --output-type string     type of command output, variants: [ascii, json] (default "default")

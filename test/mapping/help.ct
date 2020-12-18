@@ -1,0 +1,20 @@
+$ go-arch-lint ps --help
+display mapping table between project files and arch components
+
+Usage:
+  go-arch-lint mapping [flags]
+
+Aliases:
+  mapping, ps, ls
+
+Flags:
+      --arch-file string      arch file path (default ".go-arch-lint.yml")
+  -h, --help                  help for mapping
+      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located) (default "./")
+  -s, --scheme string         display scheme [list,grouped] (default "list")
+
+Global Flags:
+      --json                   (alias for --output-type=json)
+      --output-color           use ANSI colors in terminal output (default true)
+      --output-json-one-line   format JSON as single line payload (without line breaks), only for json output type
+      --output-type string     type of command output, variants: [ascii, json] (default "default")
