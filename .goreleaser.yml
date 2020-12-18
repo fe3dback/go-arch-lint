@@ -2,7 +2,10 @@ before:
   hooks:
     - go mod download
 builds:
-  - env:
+  -
+    id: "binary"
+    binary: go-arch-lint
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -10,11 +13,12 @@ builds:
       - darwin
     ldflags:
       - -s -w
-      - -X 'github.com/fe3dback/go-arch-lint/internal/version.VERSION={{.Version}}'
-      - -X 'github.com/fe3dback/go-arch-lint/internal/version.COMMIT_HASH={{.Commit}}'
-      - -X 'github.com/fe3dback/go-arch-lint/internal/version.BUILD_TIME={{.Date}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.VERSION={{.Version}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.COMMIT_HASH={{.Commit}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.BUILD_TIME={{.Date}}'
 archives:
-  - replacements:
+  -
+    replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
@@ -23,6 +27,24 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+dockers:
+  -
+    builds:
+      - binary
+    binaries:
+      - go-arch-lint
+    image_templates:
+      - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}release-v{{.RawVersion}}{{else}}dev-v{{.RawVersion}}-{{.Prerelease}}{{end}}
+      - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}release-v{{.Major}}.{{.Minor}}{{else}}dev-v{{.Major}}.{{.Minor}}-{{.Prerelease}}{{end}}
+      - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}release-v{{.Major}}{{else}}dev-v{{.Major}}-{{.Prerelease}}{{end}}
+      - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}latest-stable-release{{else}}dev-{{.Version}}{{end}}
+      - fe3dback/{{.ProjectName}}:latest
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
 checksum:
   name_template: 'checksums.txt'
 snapshot:
