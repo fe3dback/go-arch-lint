@@ -12,3 +12,9 @@ arch:
 
 build-dev:
 	docker build -t fe3dback/go-arch-lint:dev .
+
+release-dry:
+	@echo "check config.."
+	goreleaser check
+	@echo "build dry release.."
+	goreleaser --snapshot --skip-publish --rm-dist

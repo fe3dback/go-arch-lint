@@ -1,0 +1,38 @@
+name: release
+
+on:
+  tags:
+    - '*'
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Check Tag
+        id: check-tag
+        run: | #
+          if [[ ${{ github.event.ref }} =~ ^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+(\-rc[0-9]*)?$ ]]; then
+              echo ::set-output name=match::true
+          fi
+      -
+        name: Checkout
+        if: steps.check-tag.outputs.match == 'true'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      -
+        name: Set up Go
+        if: steps.check-tag.outputs.match == 'true'
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+      -
+        name: Release
+        if: steps.check-tag.outputs.match == 'true'
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}

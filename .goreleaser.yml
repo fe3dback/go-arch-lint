@@ -8,6 +8,11 @@ builds:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -s -w
+      - -X 'github.com/fe3dback/go-arch-lint/internal/version.VERSION={{.Version}}'
+      - -X 'github.com/fe3dback/go-arch-lint/internal/version.COMMIT_HASH={{.Commit}}'
+      - -X 'github.com/fe3dback/go-arch-lint/internal/version.BUILD_TIME={{.Date}}'
 archives:
   - replacements:
       darwin: Darwin
@@ -15,10 +20,13 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+  format_overrides:
+    - goos: windows
+      format: zip
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}"
 changelog:
   sort: asc
   filters:
