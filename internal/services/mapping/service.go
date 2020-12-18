@@ -80,6 +80,19 @@ func assembleMappingByComponent(
 		})
 	}
 
+	emptyComponentID := componentName(nil)
+	if _, hasNotAttached := tmp[emptyComponentID]; hasNotAttached {
+		notAttachedFiles := tmp[emptyComponentID].FileNames
+
+		if len(notAttachedFiles) > 0 {
+			sort.Strings(notAttachedFiles)
+			mapping = append(mapping, models.MappingGrouped{
+				ComponentName: emptyComponentID,
+				FileNames:     notAttachedFiles,
+			})
+		}
+	}
+
 	sort.Slice(mapping, func(i, j int) bool {
 		return mapping[i].ComponentName < mapping[j].ComponentName
 	})
