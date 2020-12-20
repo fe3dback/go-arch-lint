@@ -15,7 +15,6 @@ import (
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/validator"
 )
 
 func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.Assembler {
@@ -23,28 +22,22 @@ func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath st
 		c.provideYamlSpecProvider(projectDir, archFilePath),
 		c.providePathResolver(),
 		c.provideSourceCodeReferenceResolver(archFilePath),
-		c.provideSpecValidator(),
 		projectDir,
 		moduleName,
 	)
 }
 
-func (c *Container) provideSpecValidator() *specvalidator.Validator {
-	return specvalidator.NewValidator()
+func (c *Container) provideSpecValidator(projectDir string) *specvalidator.Validator {
+	return specvalidator.NewValidator(
+		c.providePathResolver(),
+		projectDir,
+	)
 }
 
 func (c *Container) provideYamlSpecProvider(projectDir, archFilePath string) *spec.Provider {
 	return spec.NewProvider(
 		c.provideSourceCode(archFilePath),
-		c.provideYamlValidator(projectDir, archFilePath),
-	)
-}
-
-func (c *Container) provideYamlValidator(projectDir, archFilePath string) *validator.Validator {
-	return validator.NewValidator(
-		c.provideSourceCodeReferenceResolver(archFilePath),
-		c.providePathResolver(),
-		projectDir,
+		c.provideSpecValidator(projectDir),
 	)
 }
 

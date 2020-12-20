@@ -23,7 +23,7 @@ func newAllowedImportsAssembler(
 }
 
 func (aia *allowedImportsAssembler) assemble(
-	spec *spec.Document,
+	spec *spec.ArchV1Document,
 	componentNames []string,
 	vendorNames []string,
 ) ([]models.ResolvedPath, error) {
@@ -31,14 +31,14 @@ func (aia *allowedImportsAssembler) assemble(
 
 	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
-	allowedComponents = append(allowedComponents, spec.CommonComponents...)
+	allowedComponents = append(allowedComponents, spec.V1CommonComponents...)
 
 	allowedVendors := make([]string, 0)
 	allowedVendors = append(allowedVendors, vendorNames...)
-	allowedVendors = append(allowedVendors, spec.CommonVendors...)
+	allowedVendors = append(allowedVendors, spec.V1CommonVendors...)
 
 	for _, name := range allowedComponents {
-		maskPath := spec.Components[name].LocalPath
+		maskPath := spec.V1Components[name].V1LocalPath
 
 		resolved, err := aia.resolver.resolveLocalPath(maskPath)
 		if err != nil {
@@ -51,7 +51,7 @@ func (aia *allowedImportsAssembler) assemble(
 	}
 
 	for _, name := range allowedVendors {
-		importPath := spec.Vendors[name].ImportPath
+		importPath := spec.V1Vendors[name].V1ImportPath
 		localPath := fmt.Sprintf("vendor/%s", importPath)
 		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
 

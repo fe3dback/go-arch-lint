@@ -18,8 +18,8 @@ func newExcludeFilesMatcherAssembler(provideYamlRef provideYamlRef) *excludeFile
 	}
 }
 
-func (efa excludeFilesMatcherAssembler) assemble(spec *speca.Spec, yamlSpec *spec.Document) error {
-	for ind, regString := range yamlSpec.ExcludeFilesRegExp {
+func (efa excludeFilesMatcherAssembler) assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error {
+	for ind, regString := range yamlSpec.V1ExcludeFilesRegExp {
 		ref := efa.provideYamlRef(fmt.Sprintf("$.excludeFiles[%d]", ind))
 
 		matcher, err := regexp.Compile(regString)

@@ -5,25 +5,25 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type (
 	utils struct {
 		pathResolver  PathResolver
-		document      spec.Document
+		document      arch.Document
 		rootDirectory string
 	}
 )
 
 func newUtils(
 	pathResolver PathResolver,
-	spec spec.Document,
+	document arch.Document,
 	rootDirectory string,
 ) *utils {
 	return &utils{
 		pathResolver:  pathResolver,
-		document:      spec,
+		document:      document,
 		rootDirectory: rootDirectory,
 	}
 }
@@ -66,7 +66,7 @@ func (u *utils) assertDirectoriesValid(paths ...string) error {
 }
 
 func (u *utils) assertKnownComponent(name string) error {
-	for knownName := range u.document.Components {
+	for knownName := range u.document.Components().Map() {
 		if name == knownName {
 			return nil
 		}
@@ -76,7 +76,7 @@ func (u *utils) assertKnownComponent(name string) error {
 }
 
 func (u *utils) assertKnownVendor(name string) error {
-	for knownName := range u.document.Vendors {
+	for knownName := range u.document.Vendors().Map() {
 		if name == knownName {
 			return nil
 		}

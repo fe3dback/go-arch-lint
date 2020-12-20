@@ -27,8 +27,8 @@ func newComponentsAssembler(
 	}
 }
 
-func (m componentsAssembler) assemble(spec *speca.Spec, yamlSpec *spec.Document) error {
-	for yamlName, yamlComponent := range yamlSpec.Components {
+func (m componentsAssembler) assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error {
+	for yamlName, yamlComponent := range yamlSpec.V1Components {
 		component, err := m.assembleComponent(yamlName, yamlComponent, yamlSpec)
 		if err != nil {
 			return fmt.Errorf("failed to assemble component: %s", yamlName)
@@ -41,15 +41,15 @@ func (m componentsAssembler) assemble(spec *speca.Spec, yamlSpec *spec.Document)
 }
 
 func (m componentsAssembler) assembleComponent(
-	yamlName spec.ComponentName,
-	yamlComponent spec.Component,
-	yamlSpec *spec.Document,
+	yamlName string,
+	yamlComponent spec.ArchV1Component,
+	yamlSpec *spec.ArchV1Document,
 ) (speca.Component, error) {
-	depMeta := yamlSpec.Dependencies[yamlName]
+	depMeta := yamlSpec.V1Dependencies[yamlName]
 
 	// components
 	mayDependOn := make([]speca.ReferableString, 0)
-	for index, name := range depMeta.MayDependOn {
+	for index, name := range depMeta.V1MayDependOn {
 		mayDependOn = append(mayDependOn, speca.NewReferableString(
 			name,
 			m.provideYamlRef(fmt.Sprintf("$.deps.%s.mayDependOn[%d]", yamlName, index)),
@@ -58,7 +58,7 @@ func (m componentsAssembler) assembleComponent(
 
 	// vendors
 	canUse := make([]speca.ReferableString, 0)
-	for index, name := range depMeta.CanUse {
+	for index, name := range depMeta.V1CanUse {
 		canUse = append(canUse, speca.NewReferableString(
 			name,
 			m.provideYamlRef(fmt.Sprintf("$.deps.%s.canUse[%d]", yamlName, index)),
@@ -66,7 +66,7 @@ func (m componentsAssembler) assembleComponent(
 	}
 
 	// component path in
-	tmpResolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.LocalPath)
+	tmpResolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.V1LocalPath)
 	if err != nil {
 		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %v", err)
 	}
@@ -95,7 +95,7 @@ func (m componentsAssembler) assembleComponent(
 			m.provideYamlRef(fmt.Sprintf("$.components.%s", yamlName)),
 		),
 		LocalPathMask: speca.NewReferableString(
-			yamlComponent.LocalPath,
+			yamlComponent.V1LocalPath,
 			m.provideYamlRef(fmt.Sprintf("$.components.%s.in", yamlName)),
 		),
 		ResolvedPaths:  resolvedPaths,
@@ -104,11 +104,11 @@ func (m componentsAssembler) assembleComponent(
 		AllowedImports: allowedImports,
 		SpecialFlags: speca.SpecialFlags{
 			AllowAllProjectDeps: speca.NewReferableBool(
-				depMeta.AnyProjectDeps,
+				depMeta.V1AnyProjectDeps,
 				m.provideYamlRef(fmt.Sprintf("$.deps.%s.anyProjectDeps", yamlName)),
 			),
 			AllowAllVendorDeps: speca.NewReferableBool(
-				depMeta.AnyVendorDeps,
+				depMeta.V1AnyVendorDeps,
 				m.provideYamlRef(fmt.Sprintf("$.deps.%s.anyVendorDeps", yamlName)),
 			),
 		},

@@ -11,20 +11,18 @@ type (
 	provideYamlRef func(path string) models.Reference
 
 	Assembler struct {
-		provider              YamlSpecProvider
+		provider              ArchProvider
 		pathResolver          PathResolver
 		yamlReferenceResolver YamlSourceCodeReferenceResolver
-		validator             Validator
 		rootDirectory         string
 		moduleName            string
 	}
 )
 
 func NewAssembler(
-	provider YamlSpecProvider,
+	provider ArchProvider,
 	pathResolver PathResolver,
 	yamlReferenceResolver YamlSourceCodeReferenceResolver,
-	validator Validator,
 	rootDirectory string,
 	moduleName string,
 ) *Assembler {
@@ -32,7 +30,6 @@ func NewAssembler(
 		provider:              provider,
 		pathResolver:          pathResolver,
 		yamlReferenceResolver: yamlReferenceResolver,
-		validator:             validator,
 		rootDirectory:         rootDirectory,
 		moduleName:            moduleName,
 	}
@@ -54,8 +51,8 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		return spec, fmt.Errorf("failed to provide yamlSpec: %w", err)
 	}
 
-	yamlSpec := archFile.Document
-	yamlIntegrity := archFile.Integrity
+	yamlSpec := archFile.Document()
+	yamlIntegrity := archFile.Integrity()
 
 	resolver := newResolver(
 		sa.pathResolver,
@@ -88,7 +85,6 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 
 	// add integrity check in this level
 	spec.Integrity.DocumentNotices = yamlIntegrity
-	spec.Integrity.SpecNotices = append(spec.Integrity.SpecNotices, sa.validator.Validate(spec)...)
 
 	return spec, nil
 }

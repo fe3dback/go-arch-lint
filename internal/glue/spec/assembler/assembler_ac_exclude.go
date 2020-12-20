@@ -22,8 +22,8 @@ func newExcludeAssembler(
 	}
 }
 
-func (ea excludeAssembler) assemble(spec *speca.Spec, yamlSpec *spec.Document) error {
-	for _, yamlRelativePath := range yamlSpec.Exclude {
+func (ea excludeAssembler) assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error {
+	for _, yamlRelativePath := range yamlSpec.V1Exclude {
 		tmpResolvedPath, err := ea.resolver.resolveLocalPath(yamlRelativePath)
 		if err != nil {
 			return fmt.Errorf("failed to assemble exclude '%s' path's: %v", yamlRelativePath, err)

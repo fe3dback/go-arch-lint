@@ -9,7 +9,7 @@ import (
 
 type (
 	assembler interface {
-		assemble(spec *speca.Spec, yamlSpec *spec.Document) error
+		assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error
 	}
 
 	specModifier struct {
@@ -23,7 +23,7 @@ func newSpecAssembler(modifiers []assembler) *specModifier {
 	}
 }
 
-func (s specModifier) assemble(spec *speca.Spec, yamlSpec *spec.Document) error {
+func (s specModifier) assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error {
 	for _, modifier := range s.modifiers {
 		err := modifier.assemble(spec, yamlSpec)
 		if err != nil {

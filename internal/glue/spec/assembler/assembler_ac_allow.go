@@ -15,10 +15,10 @@ func newAllowAssembler(provideYamlRef provideYamlRef) *allowAssembler {
 	}
 }
 
-func (efa allowAssembler) assemble(spec *speca.Spec, yamlSpec *spec.Document) error {
+func (efa allowAssembler) assemble(spec *speca.Spec, yamlSpec *spec.ArchV1Document) error {
 	spec.Allow = speca.Allow{
 		DepOnAnyVendor: speca.NewReferableBool(
-			yamlSpec.Allow.DepOnAnyVendor,
+			yamlSpec.V1Allow.V1DepOnAnyVendor,
 			efa.provideYamlRef("$.allow.depOnAnyVendor"),
 		),
 	}
