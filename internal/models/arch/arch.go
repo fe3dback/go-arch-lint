@@ -12,14 +12,6 @@ type (
 	// abstract VendorName useful for mapping real vendor packages to one Vendor
 	VendorName = string
 
-	Arch interface {
-		// Arch Document provide all arch spec for project analyze
-		Document() Document
-
-		// additional Document Notice's and parse warnings
-		Integrity() []speca.Notice
-	}
-
 	Document interface {
 		Reference() models.Reference
 

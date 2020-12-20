@@ -13,11 +13,11 @@ type (
 	}
 )
 
-func (s ReferableInt) UnmarshalYAML(bytes []byte) error {
+func (s *ReferableInt) UnmarshalYAML(bytes []byte) error {
 	return yaml.Unmarshal(bytes, &s.value)
 }
 
-func (s ReferableInt) MarshalYAML() ([]byte, error) {
+func (s *ReferableInt) MarshalYAML() ([]byte, error) {
 	return yaml.Marshal(s.value)
 }
 

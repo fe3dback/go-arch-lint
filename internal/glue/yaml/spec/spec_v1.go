@@ -1,17 +1,14 @@
 package spec
 
 import (
+	"fmt"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
-	ArchV1 struct {
-		V1Document  ArchV1Document
-		V1Integrity []speca.Notice
-	}
-
 	ArchV1Document struct {
 		reference                  models.Reference
 		internalVendors            archV1InternalVendors
@@ -98,22 +95,6 @@ type (
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-func (a ArchV1) Document() arch.Document {
-	return a.V1Document
-}
-
-func (a ArchV1) Integrity() []speca.Notice {
-	return a.V1Integrity
-}
-
-func (a ArchV1) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV1 {
-	a.V1Document = a.V1Document.applyReferences(resolver)
-
-	return a
-}
-
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
 func (doc ArchV1Document) Reference() models.Reference {
 	return doc.reference
 }
@@ -165,45 +146,87 @@ func (doc ArchV1Document) applyReferences(resolver YamlSourceCodeReferenceResolv
 	doc.V1Allow = doc.V1Allow.applyReferences(resolver)
 
 	// Vendors
+	vendors := make(map[string]ArchV1Vendor)
+	for name, vendor := range doc.V1Vendors {
+		vendors[name] = vendor.applyReferences(name, resolver)
+	}
 	doc.internalVendors = archV1InternalVendors{
 		reference: resolver.Resolve("$.vendors"),
-		data:      doc.V1Vendors,
+		data:      vendors,
 	}
 
 	// Exclude
+	excludedDirectories := make([]speca.ReferableString, len(doc.V1Exclude))
+	for ind, item := range doc.V1Exclude {
+		excludedDirectories[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.exclude[%d]", ind)),
+		)
+	}
+
 	doc.internalExclude = archV1InternalExclude{
 		reference: resolver.Resolve("$.exclude"),
-		data:      doc.V1Exclude,
+		data:      excludedDirectories,
 	}
 
 	// ExcludeFilesRegExp
+	excludedFiles := make([]speca.ReferableString, len(doc.V1ExcludeFilesRegExp))
+	for ind, item := range doc.V1ExcludeFilesRegExp {
+		excludedFiles[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.excludeFiles[%d]", ind)),
+		)
+	}
+
 	doc.internalExcludeFilesRegExp = archV1InternalExcludeFilesRegExp{
 		reference: resolver.Resolve("$.excludeFiles"),
-		data:      doc.V1ExcludeFilesRegExp,
+		data:      excludedFiles,
 	}
 
 	// Components
+	components := make(map[string]ArchV1Component)
+	for name, component := range doc.V1Components {
+		components[name] = component.applyReferences(name, resolver)
+	}
 	doc.internalComponents = archV1InternalComponents{
 		reference: resolver.Resolve("$.components"),
-		data:      doc.V1Components,
+		data:      components,
 	}
 
 	// Dependencies
+	dependencies := make(map[string]ArchV1Rules)
+	for name, rules := range doc.V1Dependencies {
+		dependencies[name] = rules.applyReferences(name, resolver)
+	}
 	doc.internalDependencies = archV1InternalDependencies{
 		reference: resolver.Resolve("$.deps"),
-		data:      doc.V1Dependencies,
+		data:      dependencies,
 	}
 
 	// CommonComponents
+	commonComponents := make([]speca.ReferableString, len(doc.V1CommonComponents))
+	for ind, item := range doc.V1CommonComponents {
+		commonComponents[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.commonComponents[%d]", ind)),
+		)
+	}
 	doc.internalCommonComponents = archV1InternalCommonComponents{
 		reference: resolver.Resolve("$.commonComponents"),
-		data:      doc.V1CommonComponents,
+		data:      commonComponents,
 	}
 
-	// CommonVendors
+	// CommonVendors // todo
+	commonVendors := make([]speca.ReferableString, len(doc.V1CommonVendors))
+	for ind, item := range doc.V1CommonVendors {
+		commonVendors[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.commonVendors[%d]", ind)),
+		)
+	}
 	doc.internalCommonVendors = archV1InternalCommonVendors{
 		reference: resolver.Resolve("$.commonVendors"),
-		data:      doc.V1CommonVendors,
+		data:      commonVendors,
 	}
 
 	return doc
@@ -240,6 +263,16 @@ func (v ArchV1Vendor) ImportPath() speca.ReferableString {
 	return v.V1ImportPath
 }
 
+func (v ArchV1Vendor) applyReferences(name arch.VendorName, resolver YamlSourceCodeReferenceResolver) ArchV1Vendor {
+	v.reference = resolver.Resolve(fmt.Sprintf("$.vendors.%s", name))
+	v.V1ImportPath = speca.NewReferableString(
+		v.V1ImportPath.Value(),
+		resolver.Resolve(fmt.Sprintf("$.vendors.%s.in", name)),
+	)
+
+	return v
+}
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 func (c ArchV1Component) Reference() models.Reference {
@@ -248,6 +281,16 @@ func (c ArchV1Component) Reference() models.Reference {
 
 func (c ArchV1Component) LocalPath() speca.ReferableString {
 	return c.V1LocalPath
+}
+
+func (c ArchV1Component) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV1Component {
+	c.reference = resolver.Resolve(fmt.Sprintf("$.components.%s", name))
+	c.V1LocalPath = speca.NewReferableString(
+		c.V1LocalPath.Value(),
+		resolver.Resolve(fmt.Sprintf("$.components.%s.in", name)),
+	)
+
+	return c
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -270,6 +313,45 @@ func (rule ArchV1Rules) AnyProjectDeps() speca.ReferableBool {
 
 func (rule ArchV1Rules) AnyVendorDeps() speca.ReferableBool {
 	return rule.V1AnyVendorDeps
+}
+
+func (rule ArchV1Rules) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV1Rules {
+	rule.reference = resolver.Resolve(fmt.Sprintf("$.deps.%s", name))
+
+	// --
+	rule.V1AnyVendorDeps = speca.NewReferableBool(
+		rule.V1AnyVendorDeps.Value(),
+		resolver.Resolve(fmt.Sprintf("$.deps.%s.anyVendorDeps", name)),
+	)
+
+	// --
+	rule.V1AnyProjectDeps = speca.NewReferableBool(
+		rule.V1AnyProjectDeps.Value(),
+		resolver.Resolve(fmt.Sprintf("$.deps.%s.anyProjectDeps", name)),
+	)
+
+	// --
+	canUse := make([]speca.ReferableString, len(rule.V1CanUse))
+	for ind, item := range rule.V1CanUse {
+		canUse[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.deps.%s.canUse[%d]", name, ind)),
+		)
+	}
+	rule.V1CanUse = canUse
+
+	// --
+	mayDependOn := make([]speca.ReferableString, len(rule.V1MayDependOn))
+	for ind, item := range rule.V1MayDependOn {
+		mayDependOn[ind] = speca.NewReferableString(
+			item.Value(),
+			resolver.Resolve(fmt.Sprintf("$.deps.%s.mayDependOn[%d]", name, ind)),
+		)
+	}
+	rule.V1MayDependOn = mayDependOn
+
+	// --
+	return rule
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

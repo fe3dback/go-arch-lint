@@ -3,8 +3,8 @@ package assembler
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type allowedImportsAssembler struct {
@@ -23,7 +23,7 @@ func newAllowedImportsAssembler(
 }
 
 func (aia *allowedImportsAssembler) assemble(
-	spec *spec.ArchV1Document,
+	yamlDocument arch.Document,
 	componentNames []string,
 	vendorNames []string,
 ) ([]models.ResolvedPath, error) {
@@ -31,27 +31,34 @@ func (aia *allowedImportsAssembler) assemble(
 
 	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
-	allowedComponents = append(allowedComponents, spec.V1CommonComponents...)
+	for _, componentName := range yamlDocument.CommonComponents().List() {
+		allowedComponents = append(allowedComponents, componentName.Value())
+	}
 
 	allowedVendors := make([]string, 0)
 	allowedVendors = append(allowedVendors, vendorNames...)
-	allowedVendors = append(allowedVendors, spec.V1CommonVendors...)
+	for _, vendorName := range yamlDocument.CommonVendors().List() {
+		allowedVendors = append(allowedVendors, vendorName.Value())
+	}
 
 	for _, name := range allowedComponents {
-		maskPath := spec.V1Components[name].V1LocalPath
+		yamlComponent, ok := yamlDocument.Components().Map()[name]
+		if !ok {
+			return nil, fmt.Errorf("not found component '%s' from allowed components", name)
+		}
+
+		maskPath := yamlComponent.LocalPath().Value()
 
 		resolved, err := aia.resolver.resolveLocalPath(maskPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to resolve mask '%s'", maskPath)
 		}
 
-		for _, resolvedPath := range resolved {
-			list = append(list, resolvedPath)
-		}
+		list = append(list, resolved...)
 	}
 
 	for _, name := range allowedVendors {
-		importPath := spec.V1Vendors[name].V1ImportPath
+		importPath := yamlDocument.Vendors().Map()[name].ImportPath().Value()
 		localPath := fmt.Sprintf("vendor/%s", importPath)
 		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
 

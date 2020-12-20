@@ -19,9 +19,9 @@ import (
 
 func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.Assembler {
 	return specassembler.NewAssembler(
-		c.provideYamlSpecProvider(projectDir, archFilePath),
+		c.provideYamlSpecProvider(archFilePath),
+		c.provideSpecValidator(projectDir),
 		c.providePathResolver(),
-		c.provideSourceCodeReferenceResolver(archFilePath),
 		projectDir,
 		moduleName,
 	)
@@ -34,10 +34,10 @@ func (c *Container) provideSpecValidator(projectDir string) *specvalidator.Valid
 	)
 }
 
-func (c *Container) provideYamlSpecProvider(projectDir, archFilePath string) *spec.Provider {
+func (c *Container) provideYamlSpecProvider(archFilePath string) *spec.Provider {
 	return spec.NewProvider(
+		c.provideSourceCodeReferenceResolver(archFilePath),
 		c.provideSourceCode(archFilePath),
-		c.provideSpecValidator(projectDir),
 	)
 }
 

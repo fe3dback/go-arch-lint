@@ -36,7 +36,6 @@ type (
 
 	Integrity struct {
 		DocumentNotices []Notice
-		SpecNotices     []Notice
 		Suggestions     []Notice
 	}
 

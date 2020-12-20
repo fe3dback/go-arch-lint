@@ -105,7 +105,6 @@ func (s *Service) resultsHasWarnings(result models.CheckResult) bool {
 func (s *Service) assembleNotice(integrity speca.Integrity) []models.CheckNotice {
 	notices := make([]speca.Notice, 0)
 	notices = append(notices, integrity.DocumentNotices...)
-	notices = append(notices, integrity.SpecNotices...)
 
 	results := make([]models.CheckNotice, 0)
 	for _, notice := range notices {

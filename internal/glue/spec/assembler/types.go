@@ -1,17 +1,17 @@
 package assembler
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	ArchProvider interface {
-		Provide() (arch.Arch, error)
+		Provide() (arch.Document, error)
 	}
 
-	YamlSourceCodeReferenceResolver interface {
-		Resolve(yamlPath string) models.Reference
+	ArchValidator interface {
+		Validate(doc arch.Document) []speca.Notice
 	}
 
 	PathResolver interface {

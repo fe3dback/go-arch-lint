@@ -12,22 +12,19 @@ import (
 type Provider struct {
 	yamlReferenceResolver YamlSourceCodeReferenceResolver
 	sourceCode            []byte
-	validator             Validator
 }
 
 func NewProvider(
 	yamlReferenceResolver YamlSourceCodeReferenceResolver,
 	sourceCode []byte,
-	validator Validator,
 ) *Provider {
 	return &Provider{
 		yamlReferenceResolver: yamlReferenceResolver,
 		sourceCode:            sourceCode,
-		validator:             validator,
 	}
 }
 
-func (sp *Provider) Provide() (arch.Arch, error) {
+func (sp *Provider) Provide() (arch.Document, error) {
 	reader := bytes.NewBuffer(sp.sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
@@ -39,7 +36,7 @@ func (sp *Provider) Provide() (arch.Arch, error) {
 	document := ArchV1Document{}
 	err := decoder.Decode(&document)
 	if err != nil {
-		return ArchV1{}, fmt.Errorf("can`t parse yaml: %w", err)
+		return document, fmt.Errorf("can`t parse yaml: %w", err)
 	}
 
 	document = document.applyReferences(sp.yamlReferenceResolver)
@@ -55,8 +52,5 @@ func (sp *Provider) Provide() (arch.Arch, error) {
 	//
 	//_ = result
 
-	return ArchV1{
-		V1Document:  document,
-		V1Integrity: sp.validator.Validate(document),
-	}, nil
+	return document, nil
 }

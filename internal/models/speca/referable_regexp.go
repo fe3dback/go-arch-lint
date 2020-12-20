@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/goccy/go-yaml"
 )
 
 type (
@@ -12,6 +13,14 @@ type (
 		ref   models.Reference
 	}
 )
+
+func (s *ReferableRegExp) UnmarshalYAML(bytes []byte) error {
+	return yaml.Unmarshal(bytes, &s.value)
+}
+
+func (s *ReferableRegExp) MarshalYAML() ([]byte, error) {
+	return yaml.Marshal(s.value)
+}
 
 func NewReferableRegExp(value *regexp.Regexp, ref models.Reference) ReferableRegExp {
 	return ReferableRegExp{value: value, ref: ref}
