@@ -8,7 +8,9 @@ tests-functional-update-ct:
 	go test --update
 
 arch:
-	go run main.go check --project-path ${PWD}
+	docker run --rm \
+		-v ${PWD}:/app \
+		fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 
 build-dev:
 	docker build -t fe3dback/go-arch-lint:dev .

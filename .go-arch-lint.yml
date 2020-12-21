@@ -1,6 +1,6 @@
 version: 1
 allow:
-  depOnAnyVendor: 1
+  depOnAnyVendor: false
 
 exclude:
   - docs
