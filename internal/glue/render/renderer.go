@@ -18,6 +18,8 @@ const (
 	fnPadLeft    = "padLeft"
 	fnPadRight   = "padRight"
 	fnDir        = "dir"
+	fnPlus       = "plus"
+	fnMinus      = "minus"
 )
 
 type (
@@ -84,6 +86,8 @@ func (r *Renderer) renderAscii(model interface{}) error {
 			fnPadLeft:    r.asciiPadLeft,
 			fnPadRight:   r.asciiPadRight,
 			fnDir:        r.asciiPathDirectory,
+			fnPlus:       r.asciiPlus,
+			fnMinus:      r.asciiMinus,
 		}).
 		Parse(
 			preprocessRawAsciiTemplate(templateBuffer),

@@ -55,6 +55,8 @@ components:
 
   models:
     in: internal/models/**
+  scheme:
+    in: internal/scheme
   services:
     in: internal/services/*
   version:

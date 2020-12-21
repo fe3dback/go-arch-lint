@@ -44,7 +44,7 @@ func (aia *allowedImportsAssembler) assemble(
 	for _, name := range allowedComponents {
 		yamlComponent, ok := yamlDocument.Components().Map()[name]
 		if !ok {
-			return nil, fmt.Errorf("not found component '%s' from allowed components", name)
+			continue
 		}
 
 		maskPath := yamlComponent.LocalPath().Value()
@@ -58,7 +58,12 @@ func (aia *allowedImportsAssembler) assemble(
 	}
 
 	for _, name := range allowedVendors {
-		importPath := yamlDocument.Vendors().Map()[name].ImportPath().Value()
+		vendor, ok := yamlDocument.Vendors().Map()[name]
+		if !ok {
+			continue
+		}
+
+		importPath := vendor.ImportPath().Value()
 		localPath := fmt.Sprintf("vendor/%s", importPath)
 		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
 

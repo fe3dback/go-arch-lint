@@ -11,6 +11,7 @@ const Check = `
 		{{ end -}}
 	{{ else -}}
 		{{ if .ArchHasWarnings -}}
+			{{ $warnCount := (plus (len .ArchWarningsDependency) (len .ArchWarningsMatch)) -}}
 			{{ range .ArchWarningsDependency -}}
 				[WARN] Component '{{.ComponentName | colorize "green"}}': file '
 				{{- .FileRelativePath | colorize "cyan"}}' shouldn't depend on '
@@ -26,7 +27,7 @@ const Check = `
 				{{ end -}}
 			{{ end }}
 
-			warnings found: {{len .ArchWarningsDependency | printf "%d" | colorize "yellow"}}
+			warnings found: {{ $warnCount | printf "%d" | colorize "yellow" }}
 		{{ else -}}
 			{{"OK - No warnings found" | colorize "green" -}}
 		{{ end -}}
