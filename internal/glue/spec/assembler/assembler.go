@@ -42,12 +42,19 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		},
 	}
 
-	yamlSpec, err := sa.provider.Provide()
+	yamlSpec, schemeNotices, err := sa.provider.Provide()
 	if err != nil {
 		return spec, fmt.Errorf("failed to provide yamlSpec: %w", err)
 	}
 
-	spec.Integrity.DocumentNotices = sa.validator.Validate(yamlSpec)
+	if len(schemeNotices) > 0 {
+		// only simple scheme validation errors
+		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, schemeNotices...)
+	} else {
+		// if scheme is ok, need check arch errors
+		advancedErrors := sa.validator.Validate(yamlSpec)
+		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, advancedErrors...)
+	}
 
 	resolver := newResolver(
 		sa.pathResolver,

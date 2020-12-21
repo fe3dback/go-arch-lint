@@ -7,7 +7,7 @@ import (
 
 type (
 	ArchProvider interface {
-		Provide() (arch.Document, error)
+		Provide() (arch.Document, []speca.Notice, error)
 	}
 
 	ArchValidator interface {

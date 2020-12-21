@@ -13,12 +13,12 @@ type (
 		reference                  models.Reference
 		internalVersion            speca.ReferableInt
 		internalVendors            archV1InternalVendors
-		internalComponents         archV1InternalComponents
 		internalExclude            archV1InternalExclude
 		internalExcludeFilesRegExp archV1InternalExcludeFilesRegExp
-		internalCommonVendors      archV1InternalCommonVendors
-		internalCommonComponents   archV1InternalCommonComponents
+		internalComponents         archV1InternalComponents
 		internalDependencies       archV1InternalDependencies
+		internalCommonComponents   archV1InternalCommonComponents
+		internalCommonVendors      archV1InternalCommonVendors
 
 		V1Version            int                                    `yaml:"version" json:"version"`
 		V1Allow              ArchV1Allow                            `yaml:"allow" json:"allow"`
@@ -146,6 +146,8 @@ func (doc ArchV1Document) Dependencies() arch.Dependencies {
 }
 
 func (doc ArchV1Document) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV1Document {
+	doc.reference = resolver.Resolve("$.version")
+
 	// Version
 	doc.internalVersion = speca.NewReferableInt(
 		doc.V1Version,

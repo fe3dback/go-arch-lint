@@ -48,13 +48,8 @@ func (m componentsAssembler) assembleComponent(
 	canUse := make([]speca.ReferableString, 0)
 
 	if hasDeps {
-		for _, componentName := range depMeta.MayDependOn() {
-			mayDependOn = append(mayDependOn, componentName)
-		}
-
-		for _, vendorName := range depMeta.CanUse() {
-			canUse = append(canUse, vendorName)
-		}
+		mayDependOn = append(mayDependOn, depMeta.MayDependOn()...)
+		canUse = append(canUse, depMeta.CanUse()...)
 	}
 
 	// component path in

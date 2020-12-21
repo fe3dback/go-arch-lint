@@ -10,9 +10,22 @@ const V1 = `{
 	"required": ["version"],
 	"properties": {
 		"version": {
+			"title": "Scheme Version",
+			"description": "Defines arch file syntax and file validation rules",
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 1
+		},
+		"allow": {
+			"title": "Global Scheme options",
+			"type": "object",
+			"properties": {
+				"depOnAnyVendor": {
+					"title": "Any project file can import any vendor lib",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		}
 	},
 	"additionalProperties": false
