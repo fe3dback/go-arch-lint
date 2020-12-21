@@ -1,0 +1,25 @@
+$ go-arch-lint mapping --scheme grouped --project-path ${PWD}/test/check/project --arch-file arch_warnings.yml --output-color=false
+module: github.com/fe3dback/go-arch-lint/test/check/project
+Project Packages:
+   [not attached]:
+     /c/not_covered
+     /d
+     /not_covered
+   a:
+     /a
+   allowb:
+     /a/allowb
+   b:
+     /b
+   c:
+     /c
+   common:
+     /common
+     /common/sub/foo/bar
+   e:
+     /e
+   main:
+   models:
+     /d/models/a/model
+     /d/models/b/model
+
