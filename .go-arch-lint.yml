@@ -6,8 +6,9 @@ exclude:
   - docs
   - test
   - vendor
+
 excludeFiles:
-  - "^.*_test\\.go$"
+  -  "^.*_test\\.go$"
 
 vendors:
   go-modfile:
@@ -26,6 +27,8 @@ vendors:
     in: github.com/alecthomas/chroma/lexers
   3rd-chroma-styles:
     in: github.com/alecthomas/chroma/styles
+  3rd-json-scheme:
+    in: github.com/xeipuuv/gojsonschema
 
 components:
   main:
@@ -100,6 +103,9 @@ deps:
     canUse:
       - 3rd-yaml
       - 3rd-yaml-parser
+      - 3rd-json-scheme
+    mayDependOn:
+      - scheme
 
   glueProject:
     canUse:

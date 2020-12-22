@@ -2,13 +2,10 @@ package spec
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-	"github.com/xeipuuv/gojsonschema"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
@@ -35,11 +32,11 @@ func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
 	documentVersion, err := sp.readVersion()
 	if err != nil {
 		// invalid yaml document
-		return document, nil, fmt.Errorf("can`t parse yaml: %w", err)
+		return document, nil, fmt.Errorf("failed to read 'version' from arch file: %w", err)
 	}
 
 	// validate yaml scheme by version
-	schemeNotices := sp.validateJsonScheme(documentVersion)
+	schemeNotices := sp.jsonSchemeValidate(documentVersion)
 
 	// prepare full document scanner
 	reader := bytes.NewBuffer(sp.sourceCode)
@@ -59,7 +56,7 @@ func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
 		}
 
 		// invalid yaml document, or scheme validation failed
-		return document, nil, fmt.Errorf("can`t parse yaml: %w", err)
+		return document, nil, fmt.Errorf("failed to parse arch file (yaml): %w", err)
 	}
 
 	document = document.applyReferences(sp.yamlReferenceResolver)
@@ -81,28 +78,8 @@ func (sp *Provider) readVersion() (int, error) {
 	return document.Version, nil
 }
 
-func (sp *Provider) validateJsonScheme(version int) []speca.Notice {
-	var body interface{}
-	err := yaml.Unmarshal(sp.sourceCode, &body)
-	if err != nil {
-		// invalid yaml document
-		return nil
-	}
-
-	jsonScheme := provideScheme(version)
-	if jsonScheme == nil {
-		// unknown spec version, skip scheme check
-		return nil
-	}
-
-	jsonBody, err := json.Marshal(&body)
-	if err != nil {
-		// invalid json struct in mem
-		return nil
-	}
-
-	jsonDocument := gojsonschema.NewBytesLoader(jsonBody)
-	result, err := gojsonschema.Validate(*jsonScheme, jsonDocument)
+func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
+	jsonNotices, err := jsonSchemeValidate(sp.sourceCode, schemeVersion)
 	if err != nil {
 		return []speca.Notice{{
 			Notice: fmt.Errorf("failed to validate arch file with json scheme: %v", err),
@@ -110,39 +87,18 @@ func (sp *Provider) validateJsonScheme(version int) []speca.Notice {
 		}}
 	}
 
-	notices := make([]speca.Notice, 0)
-	for _, err := range result.Errors() {
-		notices = append(notices, sp.jsonSchemeErrorToNotice(err))
-	}
-
-	return notices
-}
-
-func (sp *Provider) jsonSchemeErrorToNotice(err gojsonschema.ResultError) speca.Notice {
-	return speca.Notice{
-		Notice: fmt.Errorf(err.String()),
-		Ref:    sp.referenceByJsonSchemeError(err),
-	}
-}
-
-func (sp *Provider) referenceByJsonSchemeError(err gojsonschema.ResultError) models.Reference {
-	// todo: check map and slice path's
-
-	// root
-	path := "$"
-
-	// context
-	if err.Field() == "(root)" {
-		propertyName, ok := err.Details()["property"]
-		if !ok {
-			return speca.NewEmptyReference()
+	schemeNotices := make([]speca.Notice, 0)
+	for _, jsonNotice := range jsonNotices {
+		schemeRef := speca.NewEmptyReference()
+		if jsonNotice.yamlPath != nil {
+			schemeRef = sp.yamlReferenceResolver.Resolve(*jsonNotice.yamlPath)
 		}
 
-		path = fmt.Sprintf("%s.%s", path, propertyName)
-	} else {
-		path = fmt.Sprintf("%s.%s", path, err.Field())
+		schemeNotices = append(schemeNotices, speca.Notice{
+			Notice: fmt.Errorf(jsonNotice.notice),
+			Ref:    schemeRef,
+		})
 	}
 
-	// resolve path
-	return sp.yamlReferenceResolver.Resolve(path)
+	return schemeNotices
 }
