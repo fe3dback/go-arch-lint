@@ -8,7 +8,19 @@ const V1 = `{
 	"type": "object",
 	"description": "Arch file scheme version 1",
 	"required": ["version", "components", "deps"],
+	"additionalProperties": false,
 	"properties": {
+		"version": {"$ref": "#/definitions/version"},
+		"allow": {"$ref": "#/definitions/settings"},
+		"exclude": {"$ref": "#/definitions/exclude"},
+		"excludeFiles": {"$ref": "#/definitions/excludeFiles"},
+		"vendors": {"$ref": "#/definitions/vendors"},
+		"commonVendors": {"$ref": "#/definitions/commonVendors"},
+		"components": {"$ref": "#/definitions/components"},
+		"commonComponents": {"$ref": "#/definitions/commonComponents"},
+		"deps": {"$ref": "#/definitions/dependencies"}
+	},
+	"definitions": {
 		"version": {
 			"title": "Scheme Version",
 			"description": "Defines arch file syntax and file validation rules",
@@ -16,16 +28,16 @@ const V1 = `{
 			"minimum": 1,
 			"maximum": 1
 		},
-		"allow": {
+		"settings": {
 			"title": "Global Scheme options",
 			"type": "object",
+			"additionalProperties": false,
 			"properties": {
 				"depOnAnyVendor": {
 					"title": "Any project file can import any vendor lib",
 					"type": "boolean"
 				}
-			},
-			"additionalProperties": false
+			}
 		},
 		"exclude": {
 			"title": "Excluded folders from analyse",
@@ -46,46 +58,21 @@ const V1 = `{
 			}
 		},
 		"vendors": {
-			"title": "List of vendors libs",
+			"title": "List of vendor libs",
 			"type": "object",
-			"additionalProperties": {
-				"type": "object",
-				"required": ["in"],
-				"properties": {
-					"in": {
-						"title": "full import path to vendor",
-						"type": "string",
-						"examples": ["golang.org/x/mod/modfile"]
-					}
-				},
-				"additionalProperties": false
-			}
+			"additionalProperties": {"$ref": "#/definitions/vendor"}
 		},
-		"components": {
-			"title": "List of components",
+		"vendor": {
 			"type": "object",
-			"additionalProperties": {
-				"type": "object",
-				"required": ["in"],
-				"properties": {
-					"in": {
-						"title": "relative path to project package",
-						"description": "can contain glob for search",
-						"type": "string",
-						"examples": ["src/services", "src/services/*/repo", "src/*/services/**"]
-					}
-				},
-				"additionalProperties": false
-			}
-		},
-		"commonComponents": {
-			"title": "List of components names",
-			"description": "All project packages can import this components, useful for utils packages like 'models'",
-			"type": "array",
-			"items": {
-				"type": "string",
-				"title": "component name"
-			}
+			"required": ["in"],
+			"properties": {
+				"in": {
+					"title": "full import path to vendor",
+					"type": "string",
+					"examples": ["golang.org/x/mod/modfile"]
+				}
+			},
+			"additionalProperties": false
 		},
 		"commonVendors": {
 			"title": "List of vendor names",
@@ -96,40 +83,67 @@ const V1 = `{
 				"title": "vendor name"
 			}
 		},
-		"deps": {
-			"title": "",
+		"components": {
+			"title": "List of components",
 			"type": "object",
-			"additionalProperties": {
-				"type": "object",
-				"properties": {
-					"anyProjectDeps": {
-						"title": "Allow import any project package?",
-						"type": "boolean"
-					},
-					"anyVendorDeps": {
-						"title": "Allow import any vendor package?",
-						"type": "boolean"
-					},
-					"mayDependOn": {
-						"title": "List of allowed components to import",
-						"type": "array",
-						"items": {
-							"type": "string",
-							"title": "component name"
-						}
-					},
-					"canUse": {
-						"title": "List of allowed vendors to import",
-						"type": "array",
-						"items": {
-							"type": "string",
-							"title": "vendor name"
-						}
+			"additionalProperties": {"$ref": "#/definitions/component"}
+		},
+		"component": {
+			"type": "object",
+			"required": ["in"],
+			"properties": {
+				"in": {
+					"title": "relative path to project package",
+					"description": "can contain glob for search",
+					"type": "string",
+					"examples": ["src/services", "src/services/*/repo", "src/*/services/**"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"commonComponents": {
+			"title": "List of components names",
+			"description": "All project packages can import this components, useful for utils packages like 'models'",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"title": "component name"
+			}
+		},
+		"dependencies": {
+			"title": "Dependency rules between spec and package imports",
+			"type": "object",
+			"additionalProperties": {"$ref": "#/definitions/dependencyRule"}
+		},
+		"dependencyRule": {
+			"type": "object",
+			"properties": {
+				"anyProjectDeps": {
+					"title": "Allow import any project package?",
+					"type": "boolean"
+				},
+				"anyVendorDeps": {
+					"title": "Allow import any vendor package?",
+					"type": "boolean"
+				},
+				"mayDependOn": {
+					"title": "List of allowed components to import",
+					"type": "array",
+					"items": {
+						"type": "string",
+						"title": "component name"
 					}
 				},
-				"additionalProperties": false
-			}
+				"canUse": {
+					"title": "List of allowed vendors to import",
+					"type": "array",
+					"items": {
+						"type": "string",
+						"title": "vendor name"
+					}
+				}
+			},
+			"additionalProperties": false
 		}
-	},
-	"additionalProperties": false
+	}
 }`
