@@ -113,6 +113,13 @@ func (doc ArchV1Document) Version() speca.ReferableInt {
 	return doc.internalVersion
 }
 
+func (doc ArchV1Document) WorkingDirectory() speca.ReferableString {
+	return speca.NewReferableString(
+		"./",
+		speca.NewEmptyReference(),
+	)
+}
+
 func (doc ArchV1Document) Options() arch.Options {
 	return doc.V1Allow
 }

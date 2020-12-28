@@ -62,6 +62,8 @@ func jsonSchemeByVersion(version int) (*gojsonschema.JSONLoader, error) {
 	switch version {
 	case 1:
 		jsonScheme = scheme.V1
+	case 2:
+		jsonScheme = scheme.V2
 	default:
 		return nil, fmt.Errorf("unknown version: %d", version)
 	}

@@ -26,19 +26,32 @@ func NewProvider(
 }
 
 func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
-	document := ArchV1Document{}
-
 	// read only doc Version
 	documentVersion, err := sp.readVersion()
 	if err != nil {
 		// invalid yaml document
-		return document, nil, fmt.Errorf("failed to read 'version' from arch file: %w", err)
+		return nil, nil, fmt.Errorf("failed to read 'version' from arch file: %w", err)
 	}
 
 	// validate yaml scheme by version
 	schemeNotices := sp.jsonSchemeValidate(documentVersion)
 
-	// prepare full document scanner
+	// try to read all document
+	document, err := sp.decodeDocument(documentVersion)
+	if err != nil {
+		if len(schemeNotices) > 0 {
+			// document invalid, but yaml
+			return document, schemeNotices, nil
+		}
+
+		// invalid yaml document, or scheme validation failed
+		return nil, nil, fmt.Errorf("failed to parse arch file (yaml): %w", err)
+	}
+
+	return document, schemeNotices, nil
+}
+
+func (sp *Provider) decodeDocument(version int) (arch.Document, error) {
 	reader := bytes.NewBuffer(sp.sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
@@ -47,20 +60,25 @@ func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
 		yaml.Strict(),
 	)
 
-	// try to read all document
-	err = decoder.Decode(&document)
-	if err != nil {
-		if len(schemeNotices) > 0 {
-			// document invalid, but yaml
-			return document, schemeNotices, nil
+	// todo: refactor this somehow (dry)
+	switch version {
+	case 2:
+		document := ArchV2Document{}
+		err := decoder.Decode(&document)
+		if err != nil {
+			return nil, err
 		}
 
-		// invalid yaml document, or scheme validation failed
-		return document, nil, fmt.Errorf("failed to parse arch file (yaml): %w", err)
-	}
+		return document.applyReferences(sp.yamlReferenceResolver), nil
+	default:
+		document := ArchV1Document{}
+		err := decoder.Decode(&document)
+		if err != nil {
+			return nil, err
+		}
 
-	document = document.applyReferences(sp.yamlReferenceResolver)
-	return document, schemeNotices, nil
+		return document.applyReferences(sp.yamlReferenceResolver), nil
+	}
 }
 
 func (sp *Provider) readVersion() (int, error) {

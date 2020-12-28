@@ -18,6 +18,9 @@ type (
 		// Spec Version
 		Version() speca.ReferableInt
 
+		// Spec relative WorkingDirectory to root, prepend this to all path's from spec
+		WorkingDirectory() speca.ReferableString
+
 		// Global spec Options
 		Options() Options
 

@@ -1,4 +1,7 @@
-version: 1
+version: 2
+
+workdir: internal
+
 allow:
   depOnAnyVendor: false
 

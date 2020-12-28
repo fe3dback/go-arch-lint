@@ -3,12 +3,10 @@ package validator
 import (
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
-
-// todo: some version management
-const supportedVersion = 1
 
 type validatorVersion struct{}
 
@@ -19,14 +17,14 @@ func newValidatorVersion() *validatorVersion {
 func (v *validatorVersion) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
-	if doc.Version().Value() <= supportedVersion && doc.Version().Value() > 0 {
+	if doc.Version().Value() <= models.SupportedVersion && doc.Version().Value() > 0 {
 		return notices
 	}
 
 	notices = append(notices, speca.Notice{
-		Notice: fmt.Errorf("version '%d' is not supported, supported: [%d]",
+		Notice: fmt.Errorf("version '%d' is not supported, supported: [1-%d]",
 			doc.Version().Value(),
-			supportedVersion,
+			models.SupportedVersion,
 		),
 		Ref: doc.Version().Reference(),
 	})

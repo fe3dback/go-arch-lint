@@ -34,6 +34,7 @@ func (v *Validator) Validate(doc arch.Document) []speca.Notice {
 		newValidatorExcludeFiles(),
 		newValidatorVendors(utils),
 		newValidatorVersion(),
+		newValidatorWorkDir(utils),
 	}
 
 	for _, specValidator := range validators {

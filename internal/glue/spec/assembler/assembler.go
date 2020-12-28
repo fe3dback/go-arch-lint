@@ -56,6 +56,10 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, advancedErrors...)
 	}
 
+	if yamlSpec == nil {
+		return spec, nil
+	}
+
 	resolver := newResolver(
 		sa.pathResolver,
 		sa.rootDirectory,
