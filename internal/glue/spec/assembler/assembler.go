@@ -77,6 +77,7 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		newExcludeAssembler(resolver),
 		newExcludeFilesMatcherAssembler(),
 		newAllowAssembler(),
+		newWorkdirAssembler(),
 	})
 
 	err = assembler.assemble(&spec, yamlSpec)

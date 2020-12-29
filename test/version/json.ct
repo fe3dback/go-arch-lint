@@ -1,2 +1,2 @@
 $ go-arch-lint version --json --output-json-one-line
-{"Type":"models.Version","Payload":{"LinterVersion":"dev","GoArchFileSupported":"1","BuildTime":"unknown","CommitHash":"unknown"}}
+{"Type":"models.Version","Payload":{"LinterVersion":"dev","GoArchFileSupported":"1, 2","BuildTime":"unknown","CommitHash":"unknown"}}

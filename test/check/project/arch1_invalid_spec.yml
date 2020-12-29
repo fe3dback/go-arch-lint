@@ -1,0 +1,40 @@
+version: 1
+allow:
+  depOnAnyVendor: false
+
+excludeFiles:
+  - "(A-Z" # not valid regexp (V)
+
+vendors:
+  go-modfile:
+    in: golang.org/x/mod/modfile # not installed vendors (V)
+
+
+components:
+  main:
+    in: internal/.
+  not_exist:
+    in: internal/not_exist # not exist path (V)
+
+  a:
+    in: internal/a
+
+commonComponents:
+  - models # not exist component (V)
+
+deps:
+  main:
+    mayDependOn:
+      - not_exist_too_rnd_order # not exist dep (V)
+      - cmd # not exist dep (V)
+    canUse:
+      - 3rd-cobra-not-defined-too # not defined vendor (V)
+      - 3rd-cobra # not defined vendor (V)
+
+  cmd: # not exist component
+    canUse:
+      - go-modfile
+
+  a:
+    anyVendorDeps: false
+    # empty dep (V)

@@ -12,9 +12,6 @@ arch:
 		-v ${PWD}:/app \
 		fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 
-build-dev:
-	docker build -t fe3dback/go-arch-lint:dev .
-
 release-dry:
 	@echo "check config.."
 	goreleaser check

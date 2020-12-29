@@ -1,0 +1,31 @@
+$ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --> FAIL
+{
+  "Type": "models.Check",
+  "Payload": {
+    "ExecutionWarnings": [],
+    "ArchHasWarnings": true,
+    "ArchWarningsDeps": [
+      {
+        "ComponentName": "c",
+        "FileRelativePath": "/internal/c/c1.go",
+        "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/c/c1.go",
+        "ResolvedImportName": "github.com/fe3dback/go-arch-lint/test/check/project/internal/a"
+      }
+    ],
+    "ArchWarningsNotMatched": [
+      {
+        "FileRelativePath": "/internal/c/not_covered/c1nc.go",
+        "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/c/not_covered/c1nc.go"
+      },
+      {
+        "FileRelativePath": "/internal/d/not_covered.go",
+        "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/d/not_covered.go"
+      },
+      {
+        "FileRelativePath": "/internal/not_covered/nc.go",
+        "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/not_covered/nc.go"
+      }
+    ],
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project"
+  }
+}

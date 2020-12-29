@@ -1,0 +1,116 @@
+$ go-arch-lint mapping --project-path ${PWD}/test/check/project --arch-file arch1_ok.yml --json
+{
+  "Type": "models.Mapping",
+  "Payload": {
+    "ProjectDirectory": "${ROOTDIR}/test/check/project",
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project",
+    "MappingGrouped": [
+      {
+        "ComponentName": "a",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/a/a1.go"
+        ]
+      },
+      {
+        "ComponentName": "allowb",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/a/allowb/aa1.go"
+        ]
+      },
+      {
+        "ComponentName": "b",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/b/b1.go"
+        ]
+      },
+      {
+        "ComponentName": "c",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/c/c1.go",
+          "${ROOTDIR}/test/check/project/internal/c/not_covered/c1nc.go"
+        ]
+      },
+      {
+        "ComponentName": "common",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/common/c1.go",
+          "${ROOTDIR}/test/check/project/internal/common/sub/foo/bar/bar.go"
+        ]
+      },
+      {
+        "ComponentName": "d",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/d/models/a/model/a.go",
+          "${ROOTDIR}/test/check/project/internal/d/models/b/model/b.go",
+          "${ROOTDIR}/test/check/project/internal/d/not_covered.go"
+        ]
+      },
+      {
+        "ComponentName": "e",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/e/e1.go"
+        ]
+      },
+      {
+        "ComponentName": "main",
+        "FileNames": []
+      },
+      {
+        "ComponentName": "nc",
+        "FileNames": [
+          "${ROOTDIR}/test/check/project/internal/not_covered/nc.go"
+        ]
+      }
+    ],
+    "MappingList": [
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/a/a1.go",
+        "ComponentName": "a"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/a/allowb/aa1.go",
+        "ComponentName": "allowb"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/b/b1.go",
+        "ComponentName": "b"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/c/c1.go",
+        "ComponentName": "c"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/c/not_covered/c1nc.go",
+        "ComponentName": "c"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/common/c1.go",
+        "ComponentName": "common"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/common/sub/foo/bar/bar.go",
+        "ComponentName": "common"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/d/models/a/model/a.go",
+        "ComponentName": "d"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/d/models/b/model/b.go",
+        "ComponentName": "d"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/d/not_covered.go",
+        "ComponentName": "d"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/e/e1.go",
+        "ComponentName": "e"
+      },
+      {
+        "FileName": "${ROOTDIR}/test/check/project/internal/not_covered/nc.go",
+        "ComponentName": "nc"
+      }
+    ]
+  }
+}

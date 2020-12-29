@@ -7,6 +7,7 @@ import (
 type (
 	Spec struct {
 		RootDirectory       ReferableString
+		WorkingDirectory    ReferableString
 		ModuleName          ReferableString
 		Allow               Allow
 		Components          []Component

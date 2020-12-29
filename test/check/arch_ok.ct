@@ -1,3 +1,0 @@
-$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch_ok.yml --output-color=false
-module: github.com/fe3dback/go-arch-lint/test/check/project
-OK - No warnings found

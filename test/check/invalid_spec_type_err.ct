@@ -1,5 +1,0 @@
-$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file invalid_spec_type_err.yml --output-color=false --> FAIL
-failed to assemble spec: failed to provide yamlSpec: can`t parse yaml: [5:3] unknown field "depOnAnyVendore"
-       3 | allow:  depOnAnyVendore: false
-             ^
-

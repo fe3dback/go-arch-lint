@@ -2,6 +2,7 @@ package spec
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
@@ -161,8 +162,13 @@ func (doc ArchV2Document) applyReferences(resolver YamlSourceCodeReferenceResolv
 	)
 
 	// Working Directory
+	actualWorkDirectory := "./" // fallback from version 1
+	if doc.V2WorkDir != "" {
+		actualWorkDirectory = doc.V2WorkDir
+	}
+
 	doc.internalWorkingDir = speca.NewReferableString(
-		doc.V2WorkDir,
+		actualWorkDirectory,
 		resolver.Resolve("$.workdir"),
 	)
 
@@ -210,7 +216,7 @@ func (doc ArchV2Document) applyReferences(resolver YamlSourceCodeReferenceResolv
 	// Components
 	components := make(map[string]ArchV2Component)
 	for name, component := range doc.V2Components {
-		components[name] = component.applyReferences(name, resolver)
+		components[name] = component.applyReferences(name, doc.internalWorkingDir.Value(), resolver)
 	}
 	doc.internalComponents = archV2InternalComponents{
 		reference: resolver.Resolve("$.components"),
@@ -307,10 +313,17 @@ func (c ArchV2Component) LocalPath() speca.ReferableString {
 	return c.internalLocalPath
 }
 
-func (c ArchV2Component) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV2Component {
+func (c ArchV2Component) applyReferences(
+	name arch.ComponentName,
+	workDirectory string,
+	resolver YamlSourceCodeReferenceResolver,
+) ArchV2Component {
 	c.reference = resolver.Resolve(fmt.Sprintf("$.components.%s", name))
 	c.internalLocalPath = speca.NewReferableString(
-		c.V2LocalPath,
+		path.Clean(fmt.Sprintf("%s/%s",
+			workDirectory,
+			c.V2LocalPath,
+		)),
 		resolver.Resolve(fmt.Sprintf("$.components.%s.in", name)),
 	)
 

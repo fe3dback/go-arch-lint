@@ -1,0 +1,15 @@
+$ go-arch-lint mapping --project-path ${PWD}/test/check/project --arch-file arch2_ok_workdir.yml --output-color=false
+module: github.com/fe3dback/go-arch-lint/test/check/project
+Project Packages:
+   a                   /internal/a
+   allowb              /internal/a/allowb
+   b                   /internal/b
+   c                   /internal/c
+   c                   /internal/c/not_covered
+   common              /internal/common
+   common              /internal/common/sub/foo/bar
+   d                   /internal/d/models/a/model
+   d                   /internal/d/models/b/model
+   d                   /internal/d
+   e                   /internal/e
+   nc                  /internal/not_covered
