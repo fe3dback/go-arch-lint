@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/xeipuuv/gojsonschema"
-
-	"github.com/fe3dback/go-arch-lint/internal/scheme"
 )
 
 type (
@@ -17,23 +15,17 @@ type (
 	}
 )
 
-func jsonSchemeValidate(sourceCode []byte, version int) ([]jsonSchemeNotice, error) {
-	jsonScheme, err := jsonSchemeByVersion(version)
-	if err != nil {
-		return nil, fmt.Errorf("failed provide json scheme loader: %w", err)
-	}
-
+func jsonSchemeValidate(jsonSchema string, sourceCode []byte) ([]jsonSchemeNotice, error) {
 	jsonDocument, err := jsonSchemeDocumentByCode(sourceCode)
 	if err != nil {
 		return nil, fmt.Errorf("failed provide json document loader: %w", err)
 	}
-
-	if jsonScheme == nil || jsonDocument == nil {
-		// unknown spec version, skip scheme check
-		return nil, fmt.Errorf("json document or scheme is invalid")
+	if jsonDocument == nil {
+		return nil, fmt.Errorf("json document is invalid")
 	}
 
-	result, err := gojsonschema.Validate(*jsonScheme, *jsonDocument)
+	jsonScheme := gojsonschema.NewStringLoader(jsonSchema)
+	result, err := gojsonschema.Validate(jsonScheme, *jsonDocument)
 	if err != nil {
 		return nil, fmt.Errorf("json scheme validation error: %w", err)
 	}
@@ -54,22 +46,6 @@ func jsonSchemeValidate(sourceCode []byte, version int) ([]jsonSchemeNotice, err
 	}
 
 	return notices, nil
-}
-
-func jsonSchemeByVersion(version int) (*gojsonschema.JSONLoader, error) {
-	var jsonScheme string
-
-	switch version {
-	case 1:
-		jsonScheme = scheme.V1
-	case 2:
-		jsonScheme = scheme.V2
-	default:
-		return nil, fmt.Errorf("unknown version: %d", version)
-	}
-
-	loader := gojsonschema.NewStringLoader(jsonScheme)
-	return &loader, nil
 }
 
 func jsonSchemeDocumentByCode(sourceCode []byte) (*gojsonschema.JSONLoader, error) {

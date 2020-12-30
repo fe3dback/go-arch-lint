@@ -4,6 +4,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/services/check"
 	"github.com/fe3dback/go-arch-lint/internal/services/mapping"
+	"github.com/fe3dback/go-arch-lint/internal/services/schema"
 	"github.com/fe3dback/go-arch-lint/internal/services/version"
 )
 
@@ -37,4 +38,8 @@ func (c *Container) provideMappingService(input models.FlagsMapping) *mapping.Se
 		),
 		c.provideProjectFilesResolver(),
 	)
+}
+
+func (c *Container) provideSchemaService() *schema.Service {
+	return schema.NewService()
 }

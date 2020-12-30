@@ -8,4 +8,8 @@ type (
 	YamlSourceCodeReferenceResolver interface {
 		Resolve(yamlPath string) models.Reference
 	}
+
+	JsonSchemaProvider interface {
+		Provide(version int) (string, error)
+	}
 )

@@ -15,6 +15,7 @@ import (
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
 	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
+	"github.com/fe3dback/go-arch-lint/internal/schema"
 )
 
 func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.Assembler {
@@ -37,6 +38,7 @@ func (c *Container) provideSpecValidator(projectDir string) *specvalidator.Valid
 func (c *Container) provideYamlSpecProvider(archFilePath string) *spec.Provider {
 	return spec.NewProvider(
 		c.provideSourceCodeReferenceResolver(archFilePath),
+		c.provideJsonSchemaProvider(),
 		c.provideSourceCode(archFilePath),
 	)
 }
@@ -90,4 +92,8 @@ func (c *Container) provideProjectFilesHolder() *holder.Holder {
 
 func (c *Container) provideProjectInfoAssembler() *info.Assembler {
 	return info.NewAssembler()
+}
+
+func (c *Container) provideJsonSchemaProvider() *schema.Provider {
+	return schema.NewProvider()
 }

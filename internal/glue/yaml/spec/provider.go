@@ -12,15 +12,18 @@ import (
 
 type Provider struct {
 	yamlReferenceResolver YamlSourceCodeReferenceResolver
+	jsonSchemaProvider    JsonSchemaProvider
 	sourceCode            []byte
 }
 
 func NewProvider(
 	yamlReferenceResolver YamlSourceCodeReferenceResolver,
+	jsonSchemaProvider JsonSchemaProvider,
 	sourceCode []byte,
 ) *Provider {
 	return &Provider{
 		yamlReferenceResolver: yamlReferenceResolver,
+		jsonSchemaProvider:    jsonSchemaProvider,
 		sourceCode:            sourceCode,
 	}
 }
@@ -97,7 +100,15 @@ func (sp *Provider) readVersion() (int, error) {
 }
 
 func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
-	jsonNotices, err := jsonSchemeValidate(sp.sourceCode, schemeVersion)
+	jsonSchema, err := sp.jsonSchemaProvider.Provide(schemeVersion)
+	if err != nil {
+		return []speca.Notice{{
+			Notice: fmt.Errorf("failed to provide json scheme for validation: %v", err),
+			Ref:    speca.NewEmptyReference(),
+		}}
+	}
+
+	jsonNotices, err := jsonSchemeValidate(jsonSchema, sp.sourceCode)
 	if err != nil {
 		return []speca.Notice{{
 			Notice: fmt.Errorf("failed to validate arch file with json scheme: %v", err),

@@ -59,8 +59,8 @@ components:
 
   models:
     in: internal/models/**
-  scheme:
-    in: internal/scheme
+  schema:
+    in: internal/schema
   services:
     in: internal/services/*
   version:
@@ -105,8 +105,6 @@ deps:
       - 3rd-yaml
       - 3rd-yaml-parser
       - 3rd-json-scheme
-    mayDependOn:
-      - scheme
 
   glueProject:
     canUse:

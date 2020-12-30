@@ -1,4 +1,4 @@
-package scheme
+package schema
 
 // language=JSON
 const V1 = `{
