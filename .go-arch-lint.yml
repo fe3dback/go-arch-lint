@@ -1,7 +1,5 @@
 version: 2
-
 workdir: internal
-
 allow:
   depOnAnyVendor: false
 
@@ -19,7 +17,7 @@ vendors:
       - github.com/goccy/go-yaml/parser
   3rd-color-fmt:
     in: github.com/logrusorgru/aurora/v3
-  3rd-chroma:
+  3rd-code-highlight:
     in:
       - github.com/alecthomas/chroma/formatters
       - github.com/alecthomas/chroma/lexers
@@ -104,4 +102,4 @@ deps:
 
   glueCode:
     canUse:
-      - 3rd-chroma
+      - 3rd-code-highlight

@@ -58,7 +58,8 @@ Make archfile called '.go-arch-lint.yml' in root directory
 of your project, and put some arch rules to it
 
 ```yaml
-version: 1
+version: 2
+workdir: ./
 allow:
   depOnAnyVendor: false
 
@@ -77,10 +78,12 @@ excludeFiles:
 # Vendor libs
 # ----------------------------------
 vendors:
-  loaderYaml:
-    in: gopkg.in/yaml.v2
   vectors:
     in: github.com/fe3dback/go-vec
+  loaders:
+    in:
+      - gopkg.in/yaml.v2
+      - github.com/mailru/easyjson
 
 # ----------------------------------
 # Project components
@@ -122,7 +125,7 @@ commonVendors:
 deps:
   engine:
     canUse:
-      - loaderYaml  
+      - loaders 
 
   engineVendorEvents:
     mayDependOn:
@@ -145,26 +148,26 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 
 | Path              | Req?  | Type  | Description         |
 | -------------     | ----- | ----- | ------------------- |
-| version           | +     | int   | schema version  |
+| version           | +     | int   | schema version (__latest: 2__)  |
+| workdir           | -     | str   | relative directory for analyse  |
 | allow             | -     | map   | global rules |
 | . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
-| exclude           | -     | list  | list of directories (relative path) for exclude from analyse |
-| excludeFiles      | -     | list  | regExp rules for file names, for exclude from analyse |
+| exclude           | -     | []str  | list of directories (relative path) for exclude from analyse |
+| excludeFiles      | -     | []str  | regExp rules for file names, for exclude from analyse |
 | components        | +     | map   | project components used for split real modules and packages to abstract thing |
 | . %name%          | +     | str   | name of component |
 | . . in            | +     | str   | relative directory name, support glob masking (src/\*/engine/\*\*) |
 | vendors           | -     | map   | vendor libs |
 | . %name%          | +     | str   | name of vendor component |
-| . . in            | +     | str   | full import path |
-| commonComponents  | -     | list  | list of components, allow import them into any code |
-| commonVendors     | -     | list  | list of vendors, allow import them into any code |
+| . . in            | +     | str, []str   | one or more full import path of vendor libs |
+| commonComponents  | -     | []str  | list of components, allow import them into any code |
+| commonVendors     | -     | []str  | list of vendors, allow import them into any code |
 | deps              | +     | map   | dependency rules |
 | . %name%          | +     | str   | name of component, exactly as defined in "components" section |
 | . . anyVendorDeps | -     | bool  | all component code can import any vendor code |
 | . . anyProjectDeps| -     | bool  | all component code can import any other project code, useful for DI/main component |
-| . . mayDependOn   | -     | list  | list of components that can by imported in %name% |
-| . . canUse        | -     | list  | list of vendors that can by imported in %name% |
-
+| . . mayDependOn   | -     | []str  | list of components that can by imported in %name% |
+| . . canUse        | -     | []str  | list of vendors that can by imported in %name% |
 
 ## Example of usage
 
