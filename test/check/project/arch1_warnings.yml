@@ -5,6 +5,7 @@ allow:
 
 exclude:
   - internal/excluded
+  - vendor
 
 excludeFiles:
   - "^.*_test\\.go$"
@@ -42,6 +43,7 @@ deps:
   e:
     mayDependOn:
       - models
+    anyVendorDeps: true
 
   allowb:
     mayDependOn:

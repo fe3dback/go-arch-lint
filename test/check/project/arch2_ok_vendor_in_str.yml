@@ -11,6 +11,12 @@ exclude:
 excludeFiles:
   - "^.*_test\\.go$"
 
+vendors:
+  3rd-a:
+    in: github.com/example/a
+  3rd-b:
+    in: github.com/example/b
+
 components:
   main:
     in: .
@@ -52,4 +58,6 @@ deps:
       - b
 
   e:
-    anyVendorDeps: true
+    canUse:
+      - 3rd-a
+      - 3rd-b

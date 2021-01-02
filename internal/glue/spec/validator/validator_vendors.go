@@ -21,14 +21,20 @@ func (v *validatorVendors) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
 	for _, vendor := range doc.Vendors().Map() {
-		err := v.utils.assertVendorImportPathValid(vendor.ImportPath().Value())
-		if err != nil {
-			notices = append(notices, speca.Notice{
-				Notice: err,
-				Ref:    vendor.ImportPath().Reference(),
-			})
+		for _, vendorIn := range vendor.ImportPaths() {
+			v.validateImportPath(&notices, vendorIn)
 		}
 	}
 
 	return notices
+}
+
+func (v *validatorVendors) validateImportPath(notices *[]speca.Notice, vendorIn speca.ReferableString) {
+	err := v.utils.assertVendorImportPathValid(vendorIn.Value())
+	if err != nil {
+		*notices = append(*notices, speca.Notice{
+			Notice: err,
+			Ref:    vendorIn.Reference(),
+		})
+	}
 }

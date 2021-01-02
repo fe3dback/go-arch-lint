@@ -63,15 +63,17 @@ func (aia *allowedImportsAssembler) assemble(
 			continue
 		}
 
-		importPath := vendor.ImportPath().Value()
-		localPath := fmt.Sprintf("vendor/%s", importPath)
-		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
+		for _, vendorIn := range vendor.ImportPaths() {
+			importPath := vendorIn.Value()
+			localPath := fmt.Sprintf("vendor/%s", importPath)
+			absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
 
-		list = append(list, models.ResolvedPath{
-			ImportPath: importPath,
-			LocalPath:  localPath,
-			AbsPath:    absPath,
-		})
+			list = append(list, models.ResolvedPath{
+				ImportPath: importPath,
+				LocalPath:  localPath,
+				AbsPath:    absPath,
+			})
+		}
 	}
 
 	return list, nil

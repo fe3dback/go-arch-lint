@@ -73,12 +73,18 @@ const V2 = `{
 			"required": ["in"],
 			"properties": {
 				"in": {
-					"title": "full import path to vendor",
-					"type": "string",
-					"examples": ["golang.org/x/mod/modfile"]
+					"anyOf": [
+						{"$ref": "#/definitions/vendorIn"},
+						{"type": "array", "items": {"$ref": "#/definitions/vendorIn"}}
+					]
 				}
 			},
 			"additionalProperties": false
+		},
+		"vendorIn": {
+			"title": "full import path to vendor",
+			"type": "string",
+			"examples": ["golang.org/x/mod/modfile"]
 		},
 		"commonVendors": {
 			"title": "List of vendor names",

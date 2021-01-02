@@ -87,7 +87,7 @@ type (
 		// Full import vendor qualified path
 		// example:
 		// 	- golang.org/x/mod/modfile
-		ImportPath() speca.ReferableString
+		ImportPaths() []speca.ReferableString
 	}
 
 	CommonVendors interface {

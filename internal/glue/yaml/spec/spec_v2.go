@@ -42,10 +42,10 @@ type (
 	}
 
 	ArchV2Vendor struct {
-		reference          models.Reference
-		internalImportPath speca.ReferableString
+		reference           models.Reference
+		internalImportPaths []speca.ReferableString
 
-		V2ImportPath string `yaml:"in" json:"in"`
+		V2ImportPaths stringsList `yaml:"in" json:"in"`
 	}
 
 	ArchV2Component struct {
@@ -289,16 +289,24 @@ func (v ArchV2Vendor) Reference() models.Reference {
 	return v.reference
 }
 
-func (v ArchV2Vendor) ImportPath() speca.ReferableString {
-	return v.internalImportPath
+func (v ArchV2Vendor) ImportPaths() []speca.ReferableString {
+	return v.internalImportPaths
 }
 
 func (v ArchV2Vendor) applyReferences(name arch.VendorName, resolver YAMLSourceCodeReferenceResolver) ArchV2Vendor {
 	v.reference = resolver.Resolve(fmt.Sprintf("$.vendors.%s", name))
-	v.internalImportPath = speca.NewReferableString(
-		v.V2ImportPath,
-		resolver.Resolve(fmt.Sprintf("$.vendors.%s.in", name)),
-	)
+
+	for ind, importPath := range v.V2ImportPaths.list {
+		yamlPath := fmt.Sprintf("$.vendors.%s.in", name)
+		if v.V2ImportPaths.definedAsList {
+			yamlPath = fmt.Sprintf("%s[%d]", yamlPath, ind)
+		}
+
+		v.internalImportPaths = append(v.internalImportPaths, speca.NewReferableString(
+			importPath,
+			resolver.Resolve(yamlPath),
+		))
+	}
 
 	return v
 }

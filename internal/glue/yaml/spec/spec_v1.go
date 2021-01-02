@@ -278,8 +278,10 @@ func (v ArchV1Vendor) Reference() models.Reference {
 	return v.reference
 }
 
-func (v ArchV1Vendor) ImportPath() speca.ReferableString {
-	return v.internalImportPath
+func (v ArchV1Vendor) ImportPaths() []speca.ReferableString {
+	return []speca.ReferableString{
+		v.internalImportPath,
+	}
 }
 
 func (v ArchV1Vendor) applyReferences(name arch.VendorName, resolver YAMLSourceCodeReferenceResolver) ArchV1Vendor {
