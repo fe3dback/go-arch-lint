@@ -55,7 +55,7 @@ func (m componentsAssembler) assembleComponent(
 	// component path in
 	tmpResolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.LocalPath().Value())
 	if err != nil {
-		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %v", err)
+		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %w", err)
 	}
 	resolvedPaths := wrapPaths(
 		yamlComponent.LocalPath().Reference(),
@@ -69,7 +69,7 @@ func (m componentsAssembler) assembleComponent(
 		unwrapStrings(canUse),
 	)
 	if err != nil {
-		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %v", err)
+		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %w", err)
 	}
 	allowedImports := wrapPaths(
 		yamlComponent.Reference(),

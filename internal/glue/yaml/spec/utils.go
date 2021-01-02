@@ -7,7 +7,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-func yamlToJson(sourceCode []byte) ([]byte, error) {
+func yamlToJSON(sourceCode []byte) ([]byte, error) {
 	var body interface{}
 	err := yaml.Unmarshal(sourceCode, &body)
 	if err != nil {

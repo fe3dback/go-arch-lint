@@ -12,9 +12,9 @@ import (
 
 func Execute() int {
 	di := container.NewContainer(
-		version.VERSION,
-		version.BUILD_TIME,
-		version.COMMIT_HASH,
+		version.Version,
+		version.BuildTime,
+		version.CommitHash,
 	)
 	rootCmd := di.ProvideRootCommand()
 
@@ -26,7 +26,7 @@ func Execute() int {
 		}
 
 		// system error, not possible to output this in json, so just dump to stdout
-		_, _ = fmt.Fprintln(os.Stderr, fmt.Errorf("%s\n", err))
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return 1
 	}
 

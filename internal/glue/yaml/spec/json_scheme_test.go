@@ -72,7 +72,7 @@ func Test_jsonSchemeTransformJsonPathToYamlPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := jsonSchemeTransformJsonPathToYamlPath(tt.args.path); got != tt.want {
+			if got := jsonSchemeTransformJSONPathToYamlPath(tt.args.path); got != tt.want {
 				t.Errorf("jsonSchemeTransformJsonPathToYamlPath() = %v, want %v", got, tt.want)
 			}
 		})

@@ -26,7 +26,7 @@ type (
 	Renderer struct {
 		colorPrinter      ColorPrinter
 		outputType        models.OutputType
-		outputJsonOneLine bool
+		outputJSONOneLine bool
 		asciiTemplates    map[string]string
 	}
 )
@@ -34,13 +34,13 @@ type (
 func NewRenderer(
 	colorPrinter ColorPrinter,
 	outputType models.OutputType,
-	outputJsonOneLine bool,
+	outputJSONOneLine bool,
 	asciiTemplates map[string]string,
 ) *Renderer {
 	return &Renderer{
 		colorPrinter:      colorPrinter,
 		outputType:        outputType,
-		outputJsonOneLine: outputJsonOneLine,
+		outputJSONOneLine: outputJSONOneLine,
 		asciiTemplates:    asciiTemplates,
 	}
 }
@@ -54,9 +54,9 @@ func (r *Renderer) RenderModel(model interface{}, err error) error {
 
 	switch r.outputType {
 	case models.OutputTypeJSON:
-		renderErr = r.renderJson(model)
+		renderErr = r.renderJSON(model)
 	case models.OutputTypeASCII:
-		renderErr = r.renderAscii(model)
+		renderErr = r.renderASCII(model)
 	default:
 		panic(fmt.Sprintf("failed to render: unknown output type: %s", r.outputType))
 	}
@@ -68,7 +68,7 @@ func (r *Renderer) RenderModel(model interface{}, err error) error {
 	return err
 }
 
-func (r *Renderer) renderAscii(model interface{}) error {
+func (r *Renderer) renderASCII(model interface{}) error {
 	templateName := fmt.Sprintf("%T", model)
 	templateBuffer, exist := r.asciiTemplates[templateName]
 
@@ -90,23 +90,23 @@ func (r *Renderer) renderAscii(model interface{}) error {
 			fnMinus:      r.asciiMinus,
 		}).
 		Parse(
-			preprocessRawAsciiTemplate(templateBuffer),
+			preprocessRawASCIITemplate(templateBuffer),
 		)
 	if err != nil {
-		return fmt.Errorf("failed to render ascii view '%s': %s", templateName, err)
+		return fmt.Errorf("failed to render ascii view '%s': %w", templateName, err)
 	}
 
 	var buffer bytes.Buffer
 	err = tpl.Execute(&buffer, model)
 	if err != nil {
-		return fmt.Errorf("failed to execute template '%s': %s", templateName, err)
+		return fmt.Errorf("failed to execute template '%s': %w", templateName, err)
 	}
 
 	fmt.Println(buffer.String())
 	return nil
 }
 
-func (r *Renderer) renderJson(model interface{}) error {
+func (r *Renderer) renderJSON(model interface{}) error {
 	var jsonBuffer []byte
 	var marshalErr error
 
@@ -118,7 +118,7 @@ func (r *Renderer) renderJson(model interface{}) error {
 		Payload: model,
 	}
 
-	if r.outputJsonOneLine {
+	if r.outputJSONOneLine {
 		jsonBuffer, marshalErr = json.Marshal(wrapperModel)
 	} else {
 		jsonBuffer, marshalErr = json.MarshalIndent(wrapperModel, "", "  ")

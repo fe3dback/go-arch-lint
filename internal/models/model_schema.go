@@ -2,5 +2,5 @@ package models
 
 type Schema struct {
 	Version    int    `json:"Version"`
-	JsonSchema string `json:"JsonSchema"`
+	JSONSchema string `json:"JsonSchema"`
 }

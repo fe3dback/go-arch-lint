@@ -6,10 +6,10 @@ import (
 )
 
 type (
-	// abstract ComponentName useful for mapping real packages to one Component
+	// abstract ComponentName useful for mapping real packages to one Component.
 	ComponentName = string
 
-	// abstract VendorName useful for mapping real vendor packages to one Vendor
+	// abstract VendorName useful for mapping real vendor packages to one Vendor.
 	VendorName = string
 
 	Document interface {

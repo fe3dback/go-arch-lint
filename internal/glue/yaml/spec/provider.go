@@ -4,21 +4,21 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/goccy/go-yaml"
-
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+
+	"github.com/goccy/go-yaml"
 )
 
 type Provider struct {
-	yamlReferenceResolver YamlSourceCodeReferenceResolver
-	jsonSchemaProvider    JsonSchemaProvider
+	yamlReferenceResolver YAMLSourceCodeReferenceResolver
+	jsonSchemaProvider    JSONSchemaProvider
 	sourceCode            []byte
 }
 
 func NewProvider(
-	yamlReferenceResolver YamlSourceCodeReferenceResolver,
-	jsonSchemaProvider JsonSchemaProvider,
+	yamlReferenceResolver YAMLSourceCodeReferenceResolver,
+	jsonSchemaProvider JSONSchemaProvider,
 	sourceCode []byte,
 ) *Provider {
 	return &Provider{
@@ -103,7 +103,7 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
 	jsonSchema, err := sp.jsonSchemaProvider.Provide(schemeVersion)
 	if err != nil {
 		return []speca.Notice{{
-			Notice: fmt.Errorf("failed to provide json scheme for validation: %v", err),
+			Notice: fmt.Errorf("failed to provide json scheme for validation: %w", err),
 			Ref:    speca.NewEmptyReference(),
 		}}
 	}
@@ -111,7 +111,7 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
 	jsonNotices, err := jsonSchemeValidate(jsonSchema, sp.sourceCode)
 	if err != nil {
 		return []speca.Notice{{
-			Notice: fmt.Errorf("failed to validate arch file with json scheme: %v", err),
+			Notice: fmt.Errorf("failed to validate arch file with json scheme: %w", err),
 			Ref:    speca.NewEmptyReference(),
 		}}
 	}

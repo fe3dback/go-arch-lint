@@ -152,7 +152,7 @@ func (doc ArchV2Document) Dependencies() arch.Dependencies {
 	return doc.internalDependencies
 }
 
-func (doc ArchV2Document) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV2Document {
+func (doc ArchV2Document) applyReferences(resolver YAMLSourceCodeReferenceResolver) ArchV2Document {
 	doc.reference = resolver.Resolve("$.version")
 
 	// Version
@@ -272,7 +272,7 @@ func (opt ArchV2Allow) IsDependOnAnyVendor() speca.ReferableBool {
 	return opt.internalDepOnAnyVendor
 }
 
-func (opt ArchV2Allow) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV2Allow {
+func (opt ArchV2Allow) applyReferences(resolver YAMLSourceCodeReferenceResolver) ArchV2Allow {
 	opt.reference = resolver.Resolve("$.allow")
 
 	opt.internalDepOnAnyVendor = speca.NewReferableBool(
@@ -293,7 +293,7 @@ func (v ArchV2Vendor) ImportPath() speca.ReferableString {
 	return v.internalImportPath
 }
 
-func (v ArchV2Vendor) applyReferences(name arch.VendorName, resolver YamlSourceCodeReferenceResolver) ArchV2Vendor {
+func (v ArchV2Vendor) applyReferences(name arch.VendorName, resolver YAMLSourceCodeReferenceResolver) ArchV2Vendor {
 	v.reference = resolver.Resolve(fmt.Sprintf("$.vendors.%s", name))
 	v.internalImportPath = speca.NewReferableString(
 		v.V2ImportPath,
@@ -316,7 +316,7 @@ func (c ArchV2Component) LocalPath() speca.ReferableString {
 func (c ArchV2Component) applyReferences(
 	name arch.ComponentName,
 	workDirectory string,
-	resolver YamlSourceCodeReferenceResolver,
+	resolver YAMLSourceCodeReferenceResolver,
 ) ArchV2Component {
 	c.reference = resolver.Resolve(fmt.Sprintf("$.components.%s", name))
 	c.internalLocalPath = speca.NewReferableString(
@@ -352,7 +352,7 @@ func (rule ArchV2Rules) AnyVendorDeps() speca.ReferableBool {
 	return rule.internalAnyVendorDeps
 }
 
-func (rule ArchV2Rules) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV2Rules {
+func (rule ArchV2Rules) applyReferences(name arch.ComponentName, resolver YAMLSourceCodeReferenceResolver) ArchV2Rules {
 	rule.reference = resolver.Resolve(fmt.Sprintf("$.deps.%s", name))
 
 	// --

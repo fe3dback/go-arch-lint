@@ -14,7 +14,7 @@ func (r *Renderer) asciiColorize(color string, value interface{}) (string, error
 		fmt.Sprintf("%s", value),
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed colorize: %s", err)
+		return "", fmt.Errorf("failed colorize: %w", err)
 	}
 
 	return out, nil

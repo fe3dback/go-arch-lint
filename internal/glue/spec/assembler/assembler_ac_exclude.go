@@ -29,7 +29,7 @@ func (ea excludeAssembler) assemble(spec *speca.Spec, document arch.Document) er
 			)),
 		)
 		if err != nil {
-			return fmt.Errorf("failed to assemble exclude '%s' path's: %v", yamlRelativePath.Value(), err)
+			return fmt.Errorf("failed to assemble exclude '%s' path's: %w", yamlRelativePath.Value(), err)
 		}
 
 		resolvedPath := wrapPaths(yamlRelativePath.Reference(), tmpResolvedPath)

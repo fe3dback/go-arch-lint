@@ -152,7 +152,7 @@ func (doc ArchV1Document) Dependencies() arch.Dependencies {
 	return doc.internalDependencies
 }
 
-func (doc ArchV1Document) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV1Document {
+func (doc ArchV1Document) applyReferences(resolver YAMLSourceCodeReferenceResolver) ArchV1Document {
 	doc.reference = resolver.Resolve("$.version")
 
 	// Version
@@ -261,7 +261,7 @@ func (opt ArchV1Allow) IsDependOnAnyVendor() speca.ReferableBool {
 	return opt.internalDepOnAnyVendor
 }
 
-func (opt ArchV1Allow) applyReferences(resolver YamlSourceCodeReferenceResolver) ArchV1Allow {
+func (opt ArchV1Allow) applyReferences(resolver YAMLSourceCodeReferenceResolver) ArchV1Allow {
 	opt.reference = resolver.Resolve("$.allow")
 
 	opt.internalDepOnAnyVendor = speca.NewReferableBool(
@@ -282,7 +282,7 @@ func (v ArchV1Vendor) ImportPath() speca.ReferableString {
 	return v.internalImportPath
 }
 
-func (v ArchV1Vendor) applyReferences(name arch.VendorName, resolver YamlSourceCodeReferenceResolver) ArchV1Vendor {
+func (v ArchV1Vendor) applyReferences(name arch.VendorName, resolver YAMLSourceCodeReferenceResolver) ArchV1Vendor {
 	v.reference = resolver.Resolve(fmt.Sprintf("$.vendors.%s", name))
 	v.internalImportPath = speca.NewReferableString(
 		v.V1ImportPath,
@@ -302,7 +302,7 @@ func (c ArchV1Component) LocalPath() speca.ReferableString {
 	return c.internalLocalPath
 }
 
-func (c ArchV1Component) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV1Component {
+func (c ArchV1Component) applyReferences(name arch.ComponentName, resolver YAMLSourceCodeReferenceResolver) ArchV1Component {
 	c.reference = resolver.Resolve(fmt.Sprintf("$.components.%s", name))
 	c.internalLocalPath = speca.NewReferableString(
 		c.V1LocalPath,
@@ -334,7 +334,7 @@ func (rule ArchV1Rules) AnyVendorDeps() speca.ReferableBool {
 	return rule.internalAnyVendorDeps
 }
 
-func (rule ArchV1Rules) applyReferences(name arch.ComponentName, resolver YamlSourceCodeReferenceResolver) ArchV1Rules {
+func (rule ArchV1Rules) applyReferences(name arch.ComponentName, resolver YAMLSourceCodeReferenceResolver) ArchV1Rules {
 	rule.reference = resolver.Resolve(fmt.Sprintf("$.deps.%s", name))
 
 	// --

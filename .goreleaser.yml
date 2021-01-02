@@ -13,9 +13,9 @@ builds:
       - darwin
     ldflags:
       - -s -w
-      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.VERSION={{.Version}}'
-      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.COMMIT_HASH={{.Commit}}'
-      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.BUILD_TIME={{.Date}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.Version={{.Version}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.CommitHash={{.Commit}}'
+      - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.BuildTime={{.Date}}'
 archives:
   -
     replacements:

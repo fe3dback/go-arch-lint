@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"golang.org/x/mod/modfile"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"golang.org/x/mod/modfile"
 )
 
 type Assembler struct {
@@ -35,13 +35,16 @@ func (a *Assembler) ProjectInfo(rootDirectory string, archFilePath string) (mode
 	goModFilePath := filepath.Clean(fmt.Sprintf("%s/%s", projectPath, models.ProjectInfoDefaultGoModFileName))
 	_, err = os.Stat(goModFilePath)
 	if os.IsNotExist(err) {
-		return models.ProjectInfo{}, fmt.Errorf("not found project '%s' in '%s'", models.ProjectInfoDefaultGoModFileName, goModFilePath)
+		return models.ProjectInfo{}, fmt.Errorf("not found project '%s' in '%s'",
+			models.ProjectInfoDefaultGoModFileName,
+			goModFilePath,
+		)
 	}
 
 	// parse go.mod
 	moduleName, err := checkCmdExtractModuleName(goModFilePath)
 	if err != nil {
-		return models.ProjectInfo{}, fmt.Errorf("failed get module name: %s", err)
+		return models.ProjectInfo{}, fmt.Errorf("failed get module name: %w", err)
 	}
 
 	return models.ProjectInfo{
@@ -55,7 +58,7 @@ func (a *Assembler) ProjectInfo(rootDirectory string, archFilePath string) (mode
 func checkCmdExtractModuleName(goModPath string) (string, error) {
 	goModFile, err := checkCmdParseGoModFile(goModPath)
 	if err != nil {
-		return "", fmt.Errorf("can`t parse gomod: %v", err)
+		return "", fmt.Errorf("can`t parse gomod: %w", err)
 	}
 
 	moduleName := goModFile.Module.Mod.Path
@@ -69,12 +72,12 @@ func checkCmdExtractModuleName(goModPath string) (string, error) {
 func checkCmdParseGoModFile(path string) (*modfile.File, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read '%s': %v", path, err)
+		return nil, fmt.Errorf("failed to read '%s': %w", path, err)
 	}
 
 	mod, err := modfile.ParseLax(path, file, nil)
 	if err != nil {
-		return nil, fmt.Errorf("modfile parseLax failed '%s': %v", path, err)
+		return nil, fmt.Errorf("modfile parseLax failed '%s': %w", path, err)
 	}
 
 	return mod, nil

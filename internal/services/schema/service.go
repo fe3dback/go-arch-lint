@@ -17,7 +17,7 @@ func NewService() *Service {
 func (s *Service) Behave(schema models.FlagsSchema) (models.Schema, error) {
 	// reformat json to system one line string
 	var data interface{}
-	err := json.Unmarshal([]byte(schema.JsonSchema), &data)
+	err := json.Unmarshal([]byte(schema.JSONSchema), &data)
 	if err != nil {
 		return models.Schema{}, fmt.Errorf("failed to unmarshal json: %w", err)
 	}
@@ -29,6 +29,6 @@ func (s *Service) Behave(schema models.FlagsSchema) (models.Schema, error) {
 
 	return models.Schema{
 		Version:    schema.Version,
-		JsonSchema: string(formatted),
+		JSONSchema: string(formatted),
 	}, nil
 }

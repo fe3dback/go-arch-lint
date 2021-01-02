@@ -3,9 +3,9 @@ package schema
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -16,7 +16,7 @@ type (
 	processorFn = func(schema models.FlagsSchema) error
 
 	CommandAssembler struct {
-		jsonSchemaProvider JsonSchemaProvider
+		jsonSchemaProvider JSONSchemaProvider
 		processorFn        processorFn
 		localFlags         *localFlags
 	}
@@ -27,7 +27,7 @@ type (
 )
 
 func NewSchemaCommandAssembler(
-	jsonSchemaProvider JsonSchemaProvider,
+	jsonSchemaProvider JSONSchemaProvider,
 	processorFn processorFn,
 ) *CommandAssembler {
 	return &CommandAssembler{
@@ -81,6 +81,6 @@ func (c *CommandAssembler) assembleInput() (models.FlagsSchema, error) {
 
 	return models.FlagsSchema{
 		Version:    c.localFlags.Version,
-		JsonSchema: jsonSchema,
+		JSONSchema: jsonSchema,
 	}, nil
 }

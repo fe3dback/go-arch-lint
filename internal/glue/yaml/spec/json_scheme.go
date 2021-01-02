@@ -49,7 +49,7 @@ func jsonSchemeValidate(jsonSchema string, sourceCode []byte) ([]jsonSchemeNotic
 }
 
 func jsonSchemeDocumentByCode(sourceCode []byte) (*gojsonschema.JSONLoader, error) {
-	jsonBody, err := yamlToJson(sourceCode)
+	jsonBody, err := yamlToJSON(sourceCode)
 	if err != nil {
 		return nil, fmt.Errorf("failed transform yaml to json: %w", err)
 	}
@@ -78,7 +78,7 @@ func jsonSchemeExtractYamlPathFromError(err gojsonschema.ResultError) *string {
 		path = fmt.Sprintf("%s.%s", path, err.Field())
 	}
 
-	path = jsonSchemeTransformJsonPathToYamlPath(path)
+	path = jsonSchemeTransformJSONPathToYamlPath(path)
 
 	// resolve path
 	return &path
@@ -88,7 +88,7 @@ func jsonSchemeExtractYamlPathFromError(err gojsonschema.ResultError) *string {
 //   "(root).exclude.1" 		-> "$.exclude[1]"
 //   "(root).some.field.22" 	-> "$.some.field[22]"
 //   "(root).some.field.22a.b" 	-> "$.some.field.22a.b"
-func jsonSchemeTransformJsonPathToYamlPath(path string) string {
+func jsonSchemeTransformJSONPathToYamlPath(path string) string {
 	// root -> $
 	path = strings.Replace(path, "(root)", "$", 1)
 

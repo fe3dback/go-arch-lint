@@ -1,16 +1,16 @@
 package root
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"github.com/spf13/cobra"
 )
 
 const (
 	flagUseColors         = "output-color"
 	flagOutputType        = "output-type"
-	flagOutputJsonOneLine = "output-json-one-line"
-	flagAliasJson         = "json"
+	flagOutputJSONOneLine = "output-json-one-line"
+	flagAliasJSON         = "json"
 )
 
 type (
@@ -79,9 +79,9 @@ func (c *CommandAssembler) prePersist(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	outputJsonOneLine, err := cmd.Flags().GetBool(flagOutputJsonOneLine)
+	outputJsonOneLine, err := cmd.Flags().GetBool(flagOutputJSONOneLine)
 	if err != nil {
-		return failedToGetFlag(err, flagOutputJsonOneLine)
+		return failedToGetFlag(err, flagOutputJSONOneLine)
 	}
 
 	// all root cmd flags is global, and we should set it to global container context

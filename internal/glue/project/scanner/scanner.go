@@ -93,7 +93,7 @@ func inScope(ctx *resolveContext, path string) bool {
 func parse(ctx *resolveContext, path string) error {
 	fileAst, err := parser.ParseFile(ctx.tokenSet, path, nil, parser.ImportsOnly)
 	if err != nil {
-		return fmt.Errorf("failed to parse go source code at '%s': %v", path, err)
+		return fmt.Errorf("failed to parse go source code at '%s': %w", path, err)
 	}
 
 	ctx.results = append(ctx.results, models.ProjectFile{

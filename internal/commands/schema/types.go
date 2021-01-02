@@ -1,7 +1,7 @@
 package schema
 
 type (
-	JsonSchemaProvider interface {
+	JSONSchemaProvider interface {
 		Provide(version int) (string, error)
 	}
 )

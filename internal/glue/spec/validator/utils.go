@@ -32,7 +32,7 @@ func (u *utils) assertVendorImportPathValid(importPath string) error {
 	localPath := fmt.Sprintf("vendor/%s", importPath)
 	err := u.assertPathValid(localPath)
 	if err != nil {
-		return fmt.Errorf("vendor dep '%s' not installed, run 'go mod vendor' first: %v",
+		return fmt.Errorf("vendor dep '%s' not installed, run 'go mod vendor' first: %w",
 			importPath,
 			err,
 		)
@@ -45,7 +45,7 @@ func (u *utils) assertPathValid(localPath string) error {
 	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
-		return fmt.Errorf("failed to resolv path: %v", err)
+		return fmt.Errorf("failed to resolv path: %w", err)
 	}
 
 	if len(resolved) == 0 {

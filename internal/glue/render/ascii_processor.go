@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func preprocessRawAsciiTemplate(tpl string) string {
+func preprocessRawASCIITemplate(tpl string) string {
 	lines := strings.Split(tpl, "\n")
 	buffer := make([]string, 0, len(lines))
 
