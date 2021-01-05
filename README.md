@@ -159,7 +159,7 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 | excludeFiles      | -     | []str  | regular expression rules for file names, will exclude this files and it's packages from analyse |
 | components        | +     | map   | project components used for split real modules and packages to abstract thing |
 | . %name%          | +     | str   | name of component |
-| . . in            | +     | str   | relative directory name, support glob masking (src/\*/engine/\*\*) |
+| . . in            | +     | str, []str   | one or more relative directory name, support glob masking (src/\*/engine/\*\*) |
 | vendors           | -     | map   | vendor libs |
 | . %name%          | +     | str   | name of vendor component |
 | . . in            | +     | str, []str   | one or more import path of vendor libs, support glob masking (src/\*/engine/\*\*) |
