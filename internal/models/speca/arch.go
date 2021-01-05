@@ -22,7 +22,6 @@ type (
 
 	Component struct {
 		Name           ReferableString
-		LocalPathMask  ReferableString
 		ResolvedPaths  []ReferableResolvedPath
 		AllowedImports []ReferableResolvedPath
 		MayDependOn    []ReferableString

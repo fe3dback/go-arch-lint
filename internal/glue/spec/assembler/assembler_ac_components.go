@@ -53,14 +53,23 @@ func (m componentsAssembler) assembleComponent(
 	}
 
 	// component path in
-	tmpResolvedPath, err := m.resolver.resolveLocalPath(yamlComponent.LocalPath().Value())
-	if err != nil {
-		return speca.Component{}, fmt.Errorf("failed to assemble component path's: %w", err)
+	resolvedPaths := make([]speca.ReferableResolvedPath, 0)
+	for _, componentIn := range yamlComponent.RelativePaths() {
+		tmpResolvedPath, err := m.resolver.resolveLocalPath(componentIn.Value())
+		if err != nil {
+			return speca.Component{}, fmt.Errorf("failed to assemble component '%s' path '%s': %w",
+				yamlName,
+				componentIn.Value(),
+				err,
+			)
+		}
+
+		wrappedPaths := wrapPaths(
+			componentIn.Reference(),
+			tmpResolvedPath,
+		)
+		resolvedPaths = append(resolvedPaths, wrappedPaths...)
 	}
-	resolvedPaths := wrapPaths(
-		yamlComponent.LocalPath().Reference(),
-		tmpResolvedPath,
-	)
 
 	// deps import
 	tmpAllowedImports, err := m.allowedImportsAssembler.assemble(
@@ -94,7 +103,6 @@ func (m componentsAssembler) assembleComponent(
 			yamlName,
 			yamlComponent.Reference(),
 		),
-		LocalPathMask:  yamlComponent.LocalPath(),
 		ResolvedPaths:  resolvedPaths,
 		MayDependOn:    mayDependOn,
 		CanUse:         canUse,

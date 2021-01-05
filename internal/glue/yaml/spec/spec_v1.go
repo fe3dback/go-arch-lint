@@ -300,8 +300,10 @@ func (c ArchV1Component) Reference() models.Reference {
 	return c.reference
 }
 
-func (c ArchV1Component) LocalPath() speca.ReferableString {
-	return c.internalLocalPath
+func (c ArchV1Component) RelativePaths() []speca.ReferableString {
+	return []speca.ReferableString{
+		c.internalLocalPath,
+	}
 }
 
 func (c ArchV1Component) applyReferences(name arch.ComponentName, resolver YAMLSourceCodeReferenceResolver) ArchV1Component {

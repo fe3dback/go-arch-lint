@@ -30,12 +30,13 @@ func (v *validatorComponents) Validate(doc arch.Document) []speca.Notice {
 	}
 
 	for _, component := range doc.Components().Map() {
-		localPath := component.LocalPath()
-		if err := v.utils.assertPathValid(localPath.Value()); err != nil {
-			notices = append(notices, speca.Notice{
-				Notice: err,
-				Ref:    localPath.Reference(),
-			})
+		for _, componentIn := range component.RelativePaths() {
+			if err := v.utils.assertPathValid(componentIn.Value()); err != nil {
+				notices = append(notices, speca.Notice{
+					Notice: err,
+					Ref:    componentIn.Reference(),
+				})
+			}
 		}
 	}
 

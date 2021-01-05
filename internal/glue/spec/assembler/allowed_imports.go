@@ -47,14 +47,16 @@ func (aia *allowedImportsAssembler) assemble(
 			continue
 		}
 
-		maskPath := yamlComponent.LocalPath().Value()
+		for _, componentIn := range yamlComponent.RelativePaths() {
+			relativeGlobPath := componentIn.Value()
 
-		resolved, err := aia.resolver.resolveLocalPath(maskPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve mask '%s'", maskPath)
+			resolved, err := aia.resolver.resolveLocalPath(relativeGlobPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve component path '%s'", relativeGlobPath)
+			}
+
+			list = append(list, resolved...)
 		}
-
-		list = append(list, resolved...)
 	}
 
 	for _, name := range allowedVendors {
@@ -67,12 +69,12 @@ func (aia *allowedImportsAssembler) assemble(
 			relativeGlobPath := vendorIn.Value()
 			localPath := fmt.Sprintf("vendor/%s", relativeGlobPath)
 
-			resolvedPathList, err := aia.resolver.resolveVendorPath(localPath)
+			resolved, err := aia.resolver.resolveVendorPath(localPath)
 			if err != nil {
 				return nil, fmt.Errorf("failed to resolve vendor path '%s'", relativeGlobPath)
 			}
 
-			list = append(list, resolvedPathList...)
+			list = append(list, resolved...)
 		}
 	}
 

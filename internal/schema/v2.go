@@ -105,7 +105,12 @@ const V2 = `{
 			"type": "object",
 			"required": ["in"],
 			"properties": {
-				"in": {"$ref": "#/definitions/componentIn"}
+				"in": {
+					"anyOf": [
+						{"$ref": "#/definitions/componentIn"},
+						{"type": "array", "items": {"$ref": "#/definitions/componentIn"}}
+					]
+				}
 			},
 			"additionalProperties": false
 		},

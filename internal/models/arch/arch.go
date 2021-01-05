@@ -87,6 +87,7 @@ type (
 		// Full import vendor qualified path
 		// example:
 		// 	- golang.org/x/mod/modfile
+		// 	- example.com/*/libs/**
 		ImportPaths() []speca.ReferableString
 	}
 
@@ -112,7 +113,7 @@ type (
 		// 	- internal/service/*/models/**
 		// 	- /
 		// 	- tests/**
-		LocalPath() speca.ReferableString
+		RelativePaths() []speca.ReferableString
 	}
 
 	CommonComponents interface {

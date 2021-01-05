@@ -49,10 +49,10 @@ type (
 	}
 
 	ArchV2Component struct {
-		reference         models.Reference
-		internalLocalPath speca.ReferableString
+		reference          models.Reference
+		internalLocalPaths []speca.ReferableString
 
-		V2LocalPath string `yaml:"in" json:"in"`
+		V2LocalPaths stringsList `yaml:"in" json:"in"`
 	}
 
 	ArchV2Rules struct {
@@ -317,8 +317,8 @@ func (c ArchV2Component) Reference() models.Reference {
 	return c.reference
 }
 
-func (c ArchV2Component) LocalPath() speca.ReferableString {
-	return c.internalLocalPath
+func (c ArchV2Component) RelativePaths() []speca.ReferableString {
+	return c.internalLocalPaths
 }
 
 func (c ArchV2Component) applyReferences(
@@ -327,13 +327,21 @@ func (c ArchV2Component) applyReferences(
 	resolver YAMLSourceCodeReferenceResolver,
 ) ArchV2Component {
 	c.reference = resolver.Resolve(fmt.Sprintf("$.components.%s", name))
-	c.internalLocalPath = speca.NewReferableString(
-		path.Clean(fmt.Sprintf("%s/%s",
-			workDirectory,
-			c.V2LocalPath,
-		)),
-		resolver.Resolve(fmt.Sprintf("$.components.%s.in", name)),
-	)
+
+	for ind, importPath := range c.V2LocalPaths.list {
+		yamlPath := fmt.Sprintf("$.components.%s.in", name)
+		if c.V2LocalPaths.definedAsList {
+			yamlPath = fmt.Sprintf("%s[%d]", yamlPath, ind)
+		}
+
+		c.internalLocalPaths = append(c.internalLocalPaths, speca.NewReferableString(
+			path.Clean(fmt.Sprintf("%s/%s",
+				workDirectory,
+				importPath,
+			)),
+			resolver.Resolve(yamlPath),
+		))
+	}
 
 	return c
 }
