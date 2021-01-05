@@ -18,10 +18,7 @@ vendors:
   3rd-color-fmt:
     in: github.com/logrusorgru/aurora/v3
   3rd-code-highlight:
-    in:
-      - github.com/alecthomas/chroma/formatters
-      - github.com/alecthomas/chroma/lexers
-      - github.com/alecthomas/chroma/styles
+    in: github.com/alecthomas/chroma/*
   3rd-json-scheme:
     in: github.com/xeipuuv/gojsonschema
 

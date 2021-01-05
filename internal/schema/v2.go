@@ -31,7 +31,7 @@ const V2 = `{
 		},
 		"workdir": {
 			"title": "Working directory",
-			"description": "Linter will prepend all path's in project with this relative path prefix",
+			"description": "Linter will prepend all path's in project with this relative path prefix (relative directory for analyse)",
 			"type": "string"
 		},
 		"settings": {
@@ -40,7 +40,7 @@ const V2 = `{
 			"additionalProperties": false,
 			"properties": {
 				"depOnAnyVendor": {
-					"title": "Any project file can import any vendor lib",
+					"title": "allow import any vendor code to any project file",
 					"type": "boolean"
 				}
 			}
@@ -50,7 +50,7 @@ const V2 = `{
 			"type": "array",
 			"items": {
 				"type": "string",
-				"title": "relative path to project root"
+				"title": "list of directories (relative path) for exclude from analyse"
 			}
 		},
 		"excludeFiles": {
@@ -59,7 +59,7 @@ const V2 = `{
 			"type": "array",
 			"items": {
 				"type": "string",
-				"title": "regular expression for absolute file path matching",
+				"title": "regular expression rules for file names, will exclude this files and it's packages from analyse",
 				"x-intellij-language-injection": "regexp"
 			}
 		},
@@ -83,8 +83,9 @@ const V2 = `{
 		},
 		"vendorIn": {
 			"title": "full import path to vendor",
+			"description": "one or more import path of vendor libs, support glob masking (src/\\*/engine/\\*\\*)",
 			"type": "string",
-			"examples": ["golang.org/x/mod/modfile"]
+			"examples": ["golang.org/x/mod/modfile", "example.com/*/libs/**", ["gopkg.in/yaml.v2", "github.com/mailru/easyjson"]]
 		},
 		"commonVendors": {
 			"title": "List of vendor names",
@@ -104,14 +105,15 @@ const V2 = `{
 			"type": "object",
 			"required": ["in"],
 			"properties": {
-				"in": {
-					"title": "relative path to project package",
-					"description": "can contain glob for search",
-					"type": "string",
-					"examples": ["src/services", "src/services/*/repo", "src/*/services/**"]
-				}
+				"in": {"$ref": "#/definitions/componentIn"}
 			},
 			"additionalProperties": false
+		},
+		"componentIn": {
+			"title": "relative path to project package",
+			"description": "relative directory name, support glob masking (src/\\*/engine/\\*\\*)",
+			"type": "string",
+			"examples": ["src/services", "src/services/*/repo", "src/*/services/**"]
 		},
 		"commonComponents": {
 			"title": "List of components names",
@@ -132,10 +134,12 @@ const V2 = `{
 			"properties": {
 				"anyProjectDeps": {
 					"title": "Allow import any project package?",
+					"description": "all component code can import any other project code, useful for DI/main component",
 					"type": "boolean"
 				},
 				"anyVendorDeps": {
 					"title": "Allow import any vendor package?",
+					"description": "all component code can import any vendor code",
 					"type": "boolean"
 				},
 				"mayDependOn": {

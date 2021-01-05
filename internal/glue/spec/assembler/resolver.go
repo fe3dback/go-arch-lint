@@ -49,3 +49,25 @@ func (r *resolver) resolveLocalPath(localPathMask string) ([]models.ResolvedPath
 
 	return list, nil
 }
+
+func (r *resolver) resolveVendorPath(localPathMask string) ([]models.ResolvedPath, error) {
+	list, err := r.resolveLocalPath(localPathMask)
+	if err != nil {
+		return nil, err
+	}
+
+	transformedList := make([]models.ResolvedPath, len(list))
+	for ind, globalFormat := range list {
+		transformedList[ind] = r.transformPathGlobalToVendor(globalFormat)
+	}
+
+	return transformedList, nil
+}
+
+func (r *resolver) transformPathGlobalToVendor(global models.ResolvedPath) models.ResolvedPath {
+	return models.ResolvedPath{
+		ImportPath: strings.TrimPrefix(global.LocalPath, "vendor/"),
+		LocalPath:  global.LocalPath,
+		AbsPath:    global.AbsPath,
+	}
+}

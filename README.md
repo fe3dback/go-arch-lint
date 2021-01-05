@@ -80,6 +80,8 @@ excludeFiles:
 vendors:
   vectors:
     in: github.com/fe3dback/go-vec
+  company-libs:
+    in: example.com/*/libs/**
   loaders:
     in:
       - gopkg.in/yaml.v2
@@ -118,6 +120,7 @@ commonComponents:
 # ----------------------------------
 commonVendors:
   - vectors
+  - company-libs
 
 # ----------------------------------
 # Dependency rules
@@ -153,13 +156,13 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 | allow             | -     | map   | global rules |
 | . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
 | exclude           | -     | []str  | list of directories (relative path) for exclude from analyse |
-| excludeFiles      | -     | []str  | regExp rules for file names, for exclude from analyse |
+| excludeFiles      | -     | []str  | regular expression rules for file names, will exclude this files and it's packages from analyse |
 | components        | +     | map   | project components used for split real modules and packages to abstract thing |
 | . %name%          | +     | str   | name of component |
 | . . in            | +     | str   | relative directory name, support glob masking (src/\*/engine/\*\*) |
 | vendors           | -     | map   | vendor libs |
 | . %name%          | +     | str   | name of vendor component |
-| . . in            | +     | str, []str   | one or more full import path of vendor libs |
+| . . in            | +     | str, []str   | one or more import path of vendor libs, support glob masking (src/\*/engine/\*\*) |
 | commonComponents  | -     | []str  | list of components, allow import them into any code |
 | commonVendors     | -     | []str  | list of vendors, allow import them into any code |
 | deps              | +     | map   | dependency rules |

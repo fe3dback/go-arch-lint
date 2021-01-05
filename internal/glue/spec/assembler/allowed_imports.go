@@ -64,15 +64,15 @@ func (aia *allowedImportsAssembler) assemble(
 		}
 
 		for _, vendorIn := range vendor.ImportPaths() {
-			importPath := vendorIn.Value()
-			localPath := fmt.Sprintf("vendor/%s", importPath)
-			absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
+			relativeGlobPath := vendorIn.Value()
+			localPath := fmt.Sprintf("vendor/%s", relativeGlobPath)
 
-			list = append(list, models.ResolvedPath{
-				ImportPath: importPath,
-				LocalPath:  localPath,
-				AbsPath:    absPath,
-			})
+			resolvedPathList, err := aia.resolver.resolveVendorPath(localPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve vendor path '%s'", relativeGlobPath)
+			}
+
+			list = append(list, resolvedPathList...)
 		}
 	}
 

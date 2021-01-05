@@ -32,7 +32,7 @@ func (u *utils) assertVendorImportPathValid(importPath string) error {
 	localPath := fmt.Sprintf("vendor/%s", importPath)
 	err := u.assertPathValid(localPath)
 	if err != nil {
-		return fmt.Errorf("vendor dep '%s' not installed, run 'go mod vendor' first: %w",
+		return fmt.Errorf("vendor path '%s' not valid, or no packages found by glob (project use gomod? try 'go mod vendor'), err: %w",
 			importPath,
 			err,
 		)
