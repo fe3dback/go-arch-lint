@@ -1,8 +1,6 @@
 package printer
 
 import (
-	"fmt"
-
 	"github.com/logrusorgru/aurora/v3"
 )
 
@@ -17,33 +15,33 @@ func NewColorPrinter(au aurora.Aurora) *ColorPrinter {
 }
 
 func (cp *ColorPrinter) Red(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Red(in))
+	return cp.au.Red(in).String()
 }
 
 func (cp *ColorPrinter) Green(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Green(in))
+	return cp.au.Green(in).String()
 }
 
 func (cp *ColorPrinter) Yellow(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Yellow(in))
+	return cp.au.Yellow(in).String()
 }
 
 func (cp *ColorPrinter) Blue(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Blue(in))
+	return cp.au.Blue(in).String()
 }
 
 func (cp *ColorPrinter) Magenta(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Magenta(in))
+	return cp.au.Magenta(in).String()
 }
 
 func (cp *ColorPrinter) Cyan(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.Cyan(in))
+	return cp.au.Cyan(in).String()
 }
 
 func (cp *ColorPrinter) White(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.White(in))
+	return cp.au.White(in).String()
 }
 
 func (cp *ColorPrinter) Gray(in string) (out string) {
-	return fmt.Sprintf("%s", cp.au.BrightBlack(in))
+	return cp.au.BrightBlack(in).String()
 }

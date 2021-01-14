@@ -9,9 +9,11 @@
 # dev
 docs export-ignore
 vendor export-ignore
-Makefile  export-ignore
-CONTRIBUTING.md export-ignore
 .go-arch-lint.yml export-ignore
+.goreleaser.yml export-ignore
+CONTRIBUTING.md export-ignore
+Dockerfile export-ignore
+Makefile export-ignore
 
 # functional tests
 main_test.go export-ignore

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"github.com/spf13/cobra"
 )
 
 const (

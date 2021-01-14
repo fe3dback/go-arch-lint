@@ -10,13 +10,10 @@ type (
 	}
 )
 
-// output types
-var (
-	OutputTypeVariantsConst = []string{
-		OutputTypeASCII,
-		OutputTypeJSON,
-	}
-)
+var OutputTypeVariantsConst = []string{
+	OutputTypeASCII,
+	OutputTypeJSON,
+}
 
 const (
 	OutputTypeDefault OutputType = "default"

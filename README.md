@@ -13,25 +13,38 @@ Check all project imports and compare to arch rules defined in yml file
 go get -u github.com/fe3dback/go-arch-lint
 ```
 
-go will download and install binary to bin folder, usually
-is ~/go/bin
-
-Run binary with flag "check --project-path" and absolutely path
-to your project, for example:
+go will download and install `go-arch-lint` binary to bin folder, usually
+is `~/go/bin`
 
 ```bash
 go-arch-lint check --project-path /home/user/go/src/github.com/fe3dback/galaxy
+
+// or inside project directory:
+cd project_dir
+go-arch-lint check
 ```
 
-### alternative - Run with docker
+### alternative - run with docker
 
 ```bash
 docker run --rm \
-    -v /home/user/go/src/github.com/fe3dback/galaxy:/app \
+    -v ${PWD}:/app \
     fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 ```
 
-[docker hub](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
+[all docker tags](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
+
+### precompiled binaries and other options
+
+[releases page](https://github.com/fe3dback/go-arch-lint/releases)
+
+### IDE plugin for autocompletion and other help
+
+<img src="https://user-images.githubusercontent.com/2073883/104641610-0f453900-56bb-11eb-8419-6d94fbcb4d2f.png" alt="jetbrains goland logo" align="left" width="100px" height="100px">
+
+https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
+
+currently IDE plugin in alpha
 
 ## Usage
 
@@ -54,11 +67,12 @@ Global Flags:
 
 ## Archfile example
 
-Make archfile called '.go-arch-lint.yml' in root directory
+Make archfile called `.go-arch-lint.yml` in root directory
 of your project, and put some arch rules to it
 
 ```yaml
-version: 1
+version: 2
+workdir: ./
 allow:
   depOnAnyVendor: false
 
@@ -77,16 +91,17 @@ excludeFiles:
 # Vendor libs
 # ----------------------------------
 vendors:
-  loaderYaml:
-    in: gopkg.in/yaml.v2
   vectors:
     in: github.com/fe3dback/go-vec
+  company-libs:
+    in: example.com/*/libs/**
+  loaders:
+    in:
+      - gopkg.in/yaml.v2
+      - github.com/mailru/easyjson
 
 # ----------------------------------
 # Project components
-#
-# Used for split real modules and 
-# packages to abstract namespaces
 # ----------------------------------
 components:
   main:
@@ -94,7 +109,9 @@ components:
   engine:
     in: engine
   engineVendorEvents:
-    in: engine/vendor/*/event
+    in: 
+      - engine/vendor/*/event
+      - engine/company/*/event
   game:
     in: game
   gameComponent:
@@ -104,7 +121,7 @@ components:
 
 # ----------------------------------
 # All components can import any 
-# packages from "common" list
+# other components from "common" list
 # ----------------------------------
 commonComponents:
   - utils
@@ -115,17 +132,18 @@ commonComponents:
 # ----------------------------------
 commonVendors:
   - vectors
+  - company-libs
 
 # ----------------------------------
 # Dependency rules
 # ----------------------------------
 deps:
   engine:
-    canUse:
-      - loaderYaml  
+    canUse: # = can import vendor lib
+      - loaders 
 
   engineVendorEvents:
-    mayDependOn:
+    mayDependOn: # = can import another project package
       - engine
 
   game:
@@ -145,26 +163,26 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 
 | Path              | Req?  | Type  | Description         |
 | -------------     | ----- | ----- | ------------------- |
-| version           | +     | int   | schema version  |
+| version           | `+`   | int   | schema version (__latest: 2__)  |
+| workdir           | -     | str   | relative directory for analyse  |
 | allow             | -     | map   | global rules |
 | . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
-| exclude           | -     | list  | list of directories (relative path) for exclude from analyse |
-| excludeFiles      | -     | list  | regExp rules for file names, for exclude from analyse |
-| components        | +     | map   | project components used for split real modules and packages to abstract thing |
-| . %name%          | +     | str   | name of component |
-| . . in            | +     | str   | relative directory name, support glob masking (src/\*/engine/\*\*) |
+| exclude           | -     | []str  | list of directories (relative path) for exclude from analyse |
+| excludeFiles      | -     | []str  | regular expression rules for file names, will exclude this files and it's packages from analyse |
+| components        | `+`   | map   | project components used for split real modules and packages to abstract thing |
+| . %name%          | `+`   | str   | name of component |
+| . . in            | `+`   | str, []str   | one or more relative directory name, support glob masking (src/\*/engine/\*\*) |
 | vendors           | -     | map   | vendor libs |
-| . %name%          | +     | str   | name of vendor component |
-| . . in            | +     | str   | full import path |
-| commonComponents  | -     | list  | list of components, allow import them into any code |
-| commonVendors     | -     | list  | list of vendors, allow import them into any code |
-| deps              | +     | map   | dependency rules |
-| . %name%          | +     | str   | name of component, exactly as defined in "components" section |
+| . %name%          | `+`   | str   | name of vendor component |
+| . . in            | `+`   | str, []str   | one or more import path of vendor libs, support glob masking (src/\*/engine/\*\*) |
+| commonComponents  | -     | []str  | list of components, allow import them into any code |
+| commonVendors     | -     | []str  | list of vendors, allow import them into any code |
+| deps              | `+`   | map   | dependency rules |
+| . %name%          | `+`   | str   | name of component, exactly as defined in "components" section |
 | . . anyVendorDeps | -     | bool  | all component code can import any vendor code |
 | . . anyProjectDeps| -     | bool  | all component code can import any other project code, useful for DI/main component |
-| . . mayDependOn   | -     | list  | list of components that can by imported in %name% |
-| . . canUse        | -     | list  | list of vendors that can by imported in %name% |
-
+| . . mayDependOn   | -     | []str  | list of components that can by imported in %name% |
+| . . canUse        | -     | []str  | list of vendors that can by imported in %name% |
 
 ## Example of usage
 
@@ -184,6 +202,8 @@ Module: github.com/fe3dback/galaxy
 
 warnings found: 3
 ```
+
+## Advanced examples
 
 ### json
 
@@ -224,4 +244,50 @@ $ go-arch-lint check --project-path ~/go/src/github.com/fe3dback/galaxy --json
 }
 ```
 
-Read more in [docs](docs):
+More json examples in [docs](docs):
+
+### json schema for archfile
+
+linter can export self schema wia `schema --version X` command
+
+```bash
+go-arch-lint schema --version 2
+{"$schema":"http://json-schema.org/draft-07/schema#","additionalProperties":false,"definitions":{"commonComponents":{"description":"All project packages ... }
+```
+
+this will be useful for auto-complete and validation in another editors
+
+### mapping
+
+you can see archfile mapping to source files wia `mapping` command
+
+two modes available:
+- list (default)
+- grouped by component
+
+```bash
+go-arch-lint mapping
+
+module: github.com/fe3dback/go-arch-lint
+Project Packages:
+   app                 /internal/app
+   container           /internal/app/internal/container
+   commands            /internal/commands/check
+   commands            /internal/commands/mapping
+   ...
+```
+
+```bash
+go-arch-lint mapping --scheme grouped
+
+module: github.com/fe3dback/go-arch-lint
+Project Packages:
+   app:
+     /internal/app
+   commands:
+     /internal/commands/check
+     /internal/commands/mapping
+   ...
+```
+
+same data available in json format, with `--json` option

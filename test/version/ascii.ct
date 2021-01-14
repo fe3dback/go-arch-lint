@@ -1,5 +1,5 @@
 $ go-arch-lint version --output-color=false
-Linter version: 2.0.0-rc1
-Supported go arch file versions: 1
+Linter version: dev
+Supported go arch file versions: 1, 2
 Build time: unknown
 Commit hash: unknown

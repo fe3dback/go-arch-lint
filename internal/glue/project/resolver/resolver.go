@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
@@ -23,8 +24,13 @@ func NewResolver(
 }
 
 func (r *Resolver) ProjectFiles(spec speca.Spec) ([]models.FileHold, error) {
-	projectFiles, err := r.projectFilesResolver.Scan(
+	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
 		spec.RootDirectory.Value(),
+		spec.WorkingDirectory.Value(),
+	))
+
+	projectFiles, err := r.projectFilesResolver.Scan(
+		scanDirectory,
 		spec.ModuleName.Value(),
 		refPathToList(spec.Exclude),
 		refRegExpToList(spec.ExcludeFilesMatcher),

@@ -1,26 +1,44 @@
 package validator
 
 import (
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type Validator struct {
-	validators []validator
+	pathResolver  PathResolver
+	rootDirectory string
 }
 
-func NewValidator() *Validator {
+func NewValidator(
+	pathResolver PathResolver,
+	rootDirectory string,
+) *Validator {
 	return &Validator{
-		validators: []validator{
-			// todo: add validators
-		},
+		pathResolver:  pathResolver,
+		rootDirectory: rootDirectory,
 	}
 }
 
-func (v *Validator) Validate(spec speca.Spec) []speca.Notice {
+func (v *Validator) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
-	for _, specValidator := range v.validators {
-		notices = append(notices, specValidator.Validate(spec)...)
+	utils := newUtils(v.pathResolver, doc, v.rootDirectory)
+	validators := []validator{
+		newValidatorCommonComponents(utils),
+		newValidatorCommonVendors(utils),
+		newValidatorComponents(utils),
+		newValidatorDeps(utils),
+		newValidatorDepsComponents(utils),
+		newValidatorDepsVendors(utils),
+		newValidatorExcludeFiles(),
+		newValidatorVendors(utils),
+		newValidatorVersion(),
+		newValidatorWorkDir(utils),
+	}
+
+	for _, specValidator := range validators {
+		notices = append(notices, specValidator.Validate(doc)...)
 	}
 
 	return notices

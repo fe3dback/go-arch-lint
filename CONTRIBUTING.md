@@ -1,8 +1,8 @@
 ## Development
 
 1. Use DI containers for all struct constructors (see cmd/container)
-2. All other struct/processors should by injected only wia constructor as interface
-3. All injected interfaces should by described in file called "types.go" 
+2. All other struct/processors should be injected only wia constructor as interface
+3. All injected interfaces should be described in file called "types.go" 
 
 ## Quality control
 
@@ -37,7 +37,7 @@ Tags must expect the semantic version.
 
 ### Currently, version maintained by hand
 
-Before release update version in code places
+Before release, update version in code places
 
 1. go - internal/version/version.go (const `VERSION`)
 2. git - tag commit with same version from const

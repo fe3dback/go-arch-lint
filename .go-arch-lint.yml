@@ -1,13 +1,10 @@
-version: 1
+version: 2
+workdir: internal
 allow:
   depOnAnyVendor: false
 
-exclude:
-  - docs
-  - test
-  - vendor
 excludeFiles:
-  - "^.*_test\\.go$"
+  -  "^.*_test\\.go$"
 
 vendors:
   go-modfile:
@@ -15,61 +12,55 @@ vendors:
   3rd-cobra:
     in: github.com/spf13/cobra
   3rd-yaml:
-    in: github.com/goccy/go-yaml
-  3rd-yaml-parser:
-    in: github.com/goccy/go-yaml/parser
+    in:
+      - github.com/goccy/go-yaml
+      - github.com/goccy/go-yaml/parser
   3rd-color-fmt:
     in: github.com/logrusorgru/aurora/v3
-  3rd-chroma-formatters:
-    in: github.com/alecthomas/chroma/formatters
-  3rd-chroma-lexers:
-    in: github.com/alecthomas/chroma/lexers
-  3rd-chroma-styles:
-    in: github.com/alecthomas/chroma/styles
+  3rd-code-highlight:
+    in: github.com/alecthomas/chroma/*
+  3rd-json-scheme:
+    in: github.com/xeipuuv/gojsonschema
 
 components:
-  main:
-    in: /
   container:
-    in: internal/app/internal/container/**
+    in: app/internal/container/**
   app:
-    in: internal/app
+    in: app
 
   commands:
-    in: internal/commands/*
+    in: commands/*
 
   glue:
-    in: internal/glue/**
+    in: glue/**
   glueCode:
-    in: internal/glue/code
+    in: glue/code
   glueProject:
-    in: internal/glue/project/**
+    in: glue/project/**
   gluePrinter:
-    in: internal/glue/printer
+    in: glue/printer
   glueSpec:
-    in: internal/glue/spec/**
+    in: glue/spec/**
   glueYamlSpec:
-    in: internal/glue/yaml/spec
+    in: glue/yaml/spec
   glueYaml:
-    in: internal/glue/yaml/*
+    in: glue/yaml/*
 
   models:
-    in: internal/models/**
+    in: models/**
+  schema:
+    in: schema
   services:
-    in: internal/services/*
+    in: services/*
   version:
-    in: internal/version
+    in: version
   view:
-    in: internal/view
+    in: view
 
 commonComponents:
   - models
 
 deps:
-  main:
-    mayDependOn:
-      - app
-
   container:
     anyProjectDeps: true
     anyVendorDeps: true
@@ -92,12 +83,11 @@ deps:
       - glueYamlSpec
     canUse:
       - 3rd-yaml
-      - 3rd-yaml-parser
 
   glueYamlSpec:
     canUse:
       - 3rd-yaml
-      - 3rd-yaml-parser
+      - 3rd-json-scheme
 
   glueProject:
     canUse:
@@ -109,6 +99,4 @@ deps:
 
   glueCode:
     canUse:
-      - 3rd-chroma-formatters
-      - 3rd-chroma-lexers
-      - 3rd-chroma-styles
+      - 3rd-code-highlight

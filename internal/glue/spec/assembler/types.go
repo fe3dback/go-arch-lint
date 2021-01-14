@@ -1,25 +1,20 @@
 package assembler
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
-	YamlSpecProvider interface {
-		Provide() (spec.ArchDocument, error)
+	ArchProvider interface {
+		Provide() (arch.Document, []speca.Notice, error)
 	}
 
-	YamlSourceCodeReferenceResolver interface {
-		Resolve(yamlPath string) models.Reference
+	ArchValidator interface {
+		Validate(doc arch.Document) []speca.Notice
 	}
 
 	PathResolver interface {
 		Resolve(absPath string) (resolvePaths []string, err error)
-	}
-
-	Validator interface {
-		Validate(spec speca.Spec) []speca.Notice
 	}
 )

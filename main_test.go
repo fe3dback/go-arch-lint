@@ -29,7 +29,7 @@ func TestCLI(t *testing.T) {
 
 		projectRootDir := filepath.Dir(testFileName)
 		if err := os.Setenv("ROOTDIR", projectRootDir); err != nil {
-			return fmt.Errorf("failed change 'ROOTDIR' to caller working directory: %v", err)
+			return fmt.Errorf("failed change 'ROOTDIR' to caller working directory: %w", err)
 		}
 
 		return nil

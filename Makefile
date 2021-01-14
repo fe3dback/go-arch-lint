@@ -7,11 +7,19 @@ tests-functional:
 tests-functional-update-ct:
 	go test --update
 
-arch:
-	go run main.go check --project-path ${PWD}
+arch-next:
+	@echo "-version:"
+	go run main.go version
+	@echo "-status:"
+	go run main.go check
 
-build-dev:
-	docker build -t fe3dback/go-arch-lint:dev .
+arch-prev:
+	@echo "-version:"
+	docker run --rm fe3dback/go-arch-lint:latest-stable-release version
+	@echo "-status:"
+	docker run --rm \
+		-v ${PWD}:/app \
+		fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 
 release-dry:
 	@echo "check config.."

@@ -1,0 +1,42 @@
+$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec.yml --output-color=false --> FAIL
+module: github.com/fe3dback/go-arch-lint/test/check/project
+[Archfile] invalid regexp '(A-Z' at 0: error parsing regexp: missing closing ): `(A-Z`
+     5 | excludeFiles:
+>    6 |   - "(A-Z" # not valid regexp (V)
+             ^
+[Archfile] vendor path 'golang.org/x/mod/modfile' not valid, or no packages found by glob (project use gomod? try 'go mod vendor'), err: not found directories for 'vendor/golang.org/x/mod/modfile' in '${ROOTDIR}/test/check/project/vendor/golang.org/x/mod/modfile'
+     9 |   go-modfile:
+>   10 |     in: golang.org/x/mod/modfile # not installed vendors (V)
+                 ^
+[Archfile] not found directories for 'internal/not_exist' in '${ROOTDIR}/test/check/project/internal/not_exist'
+    16 |   not_exist:
+>   17 |     in: internal/not_exist # not exist path (V)
+                 ^
+[Archfile] unknown component 'models'
+    22 | commonComponents:
+>   23 |   - models # not exist component (V)
+             ^
+[Archfile] unknown component 'not_exist_too_rnd_order'
+    27 |     mayDependOn:
+>   28 |       - not_exist_too_rnd_order # not exist dep (V)
+                 ^
+[Archfile] unknown component 'cmd'
+    28 |       - not_exist_too_rnd_order # not exist dep (V)
+>   29 |       - cmd # not exist dep (V)
+                 ^
+[Archfile] unknown vendor '3rd-cobra-not-defined-too'
+    30 |     canUse:
+>   31 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
+                 ^
+[Archfile] unknown vendor '3rd-cobra'
+    31 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
+>   32 |       - 3rd-cobra # not defined vendor (V)
+                 ^
+[Archfile] unknown component 'cmd'
+    34 |   cmd: # not exist component
+>   35 |     canUse:
+                   ^
+[Archfile] should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']
+    38 |   a:
+>   39 |     anyVendorDeps: false
+                          ^

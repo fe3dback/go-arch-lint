@@ -3,9 +3,9 @@ package root
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"github.com/spf13/cobra"
 )
 
 func (c *CommandAssembler) prepareOutputType(cmd *cobra.Command) (models.OutputType, error) {
@@ -14,16 +14,16 @@ func (c *CommandAssembler) prepareOutputType(cmd *cobra.Command) (models.OutputT
 		return "", failedToGetFlag(err, flagOutputType)
 	}
 
-	useJsonAlias, err := cmd.Flags().GetBool(flagAliasJson)
+	useJSONAlias, err := cmd.Flags().GetBool(flagAliasJSON)
 	if err != nil {
-		return "", failedToGetFlag(err, flagAliasJson)
+		return "", failedToGetFlag(err, flagAliasJSON)
 	}
 
 	// alias preprocessor
-	if useJsonAlias {
+	if useJSONAlias {
 		if outputType != models.OutputTypeDefault && outputType != models.OutputTypeJSON {
 			return "", fmt.Errorf("flag --%s not compatible with --%s=%s",
-				flagAliasJson,
+				flagAliasJSON,
 				flagOutputType,
 				outputType,
 			)

@@ -24,6 +24,7 @@ func (c *Container) provideCommands() []*cobra.Command {
 		c.ProvideVersionCommand(),
 		c.ProvideCheckCommand(),
 		c.ProvideMappingCommand(),
+		c.ProvideSchemaCommand(),
 	}
 }
 

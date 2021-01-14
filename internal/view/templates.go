@@ -11,6 +11,7 @@ var Templates = map[string]string{
 	tpl(models.Version{}): Version,
 	tpl(models.Check{}):   Check,
 	tpl(models.Mapping{}): Mapping,
+	tpl(models.Schema{}):  Schema,
 }
 
 func tpl(model interface{}) string {

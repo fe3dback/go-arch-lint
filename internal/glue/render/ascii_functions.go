@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ func (r *Renderer) asciiColorize(color string, value interface{}) (string, error
 		fmt.Sprintf("%s", value),
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed colorize: %s", err)
+		return "", fmt.Errorf("failed colorize: %w", err)
 	}
 
 	return out, nil
@@ -55,4 +56,32 @@ func (r *Renderer) asciiPadRight(overallLen int, padStr string, value interface{
 
 func (r *Renderer) asciiPathDirectory(value interface{}) string {
 	return path.Dir(fmt.Sprintf("%s", value))
+}
+
+func (r *Renderer) asciiPlus(a, b interface{}) (int, error) {
+	iA, err := strconv.Atoi(fmt.Sprintf("%d", a))
+	if err != nil {
+		return 0, fmt.Errorf("A component of 'plus' is not int: %s", a)
+	}
+
+	iB, err := strconv.Atoi(fmt.Sprintf("%d", b))
+	if err != nil {
+		return 0, fmt.Errorf("B component of 'plus' is not int: %s", b)
+	}
+
+	return iA + iB, nil
+}
+
+func (r *Renderer) asciiMinus(a, b interface{}) (int, error) {
+	iA, err := strconv.Atoi(fmt.Sprintf("%d", a))
+	if err != nil {
+		return 0, fmt.Errorf("A component of 'minus' is not int: %s", a)
+	}
+
+	iB, err := strconv.Atoi(fmt.Sprintf("%d", b))
+	if err != nil {
+		return 0, fmt.Errorf("B component of 'minus' is not int: %s", b)
+	}
+
+	return iA + iB, nil
 }

@@ -3,8 +3,8 @@ package assembler
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type allowedImportsAssembler struct {
@@ -23,7 +23,7 @@ func newAllowedImportsAssembler(
 }
 
 func (aia *allowedImportsAssembler) assemble(
-	spec *spec.Document,
+	yamlDocument arch.Document,
 	componentNames []string,
 	vendorNames []string,
 ) ([]models.ResolvedPath, error) {
@@ -31,35 +31,51 @@ func (aia *allowedImportsAssembler) assemble(
 
 	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
-	allowedComponents = append(allowedComponents, spec.CommonComponents...)
+	for _, componentName := range yamlDocument.CommonComponents().List() {
+		allowedComponents = append(allowedComponents, componentName.Value())
+	}
 
 	allowedVendors := make([]string, 0)
 	allowedVendors = append(allowedVendors, vendorNames...)
-	allowedVendors = append(allowedVendors, spec.CommonVendors...)
+	for _, vendorName := range yamlDocument.CommonVendors().List() {
+		allowedVendors = append(allowedVendors, vendorName.Value())
+	}
 
 	for _, name := range allowedComponents {
-		maskPath := spec.Components[name].LocalPath
-
-		resolved, err := aia.resolver.resolveLocalPath(maskPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve mask '%s'", maskPath)
+		yamlComponent, ok := yamlDocument.Components().Map()[name]
+		if !ok {
+			continue
 		}
 
-		for _, resolvedPath := range resolved {
-			list = append(list, resolvedPath)
+		for _, componentIn := range yamlComponent.RelativePaths() {
+			relativeGlobPath := componentIn.Value()
+
+			resolved, err := aia.resolver.resolveLocalPath(relativeGlobPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve component path '%s'", relativeGlobPath)
+			}
+
+			list = append(list, resolved...)
 		}
 	}
 
 	for _, name := range allowedVendors {
-		importPath := spec.Vendors[name].ImportPath
-		localPath := fmt.Sprintf("vendor/%s", importPath)
-		absPath := fmt.Sprintf("%s/%s", aia.rootDirectory, localPath)
+		vendor, ok := yamlDocument.Vendors().Map()[name]
+		if !ok {
+			continue
+		}
 
-		list = append(list, models.ResolvedPath{
-			ImportPath: importPath,
-			LocalPath:  localPath,
-			AbsPath:    absPath,
-		})
+		for _, vendorIn := range vendor.ImportPaths() {
+			relativeGlobPath := vendorIn.Value()
+			localPath := fmt.Sprintf("vendor/%s", relativeGlobPath)
+
+			resolved, err := aia.resolver.resolveVendorPath(localPath)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve vendor path '%s'", relativeGlobPath)
+			}
+
+			list = append(list, resolved...)
+		}
 	}
 
 	return list, nil

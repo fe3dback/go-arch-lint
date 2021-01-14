@@ -1,11 +1,11 @@
 package reference
 
 import (
-	"github.com/goccy/go-yaml"
-	"github.com/goccy/go-yaml/parser"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+
+	"github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/parser"
 )
 
 type Resolver struct {

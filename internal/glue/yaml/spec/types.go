@@ -1,11 +1,15 @@
 package spec
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 type (
-	Validator interface {
-		Validate(doc Document) []speca.Notice
+	YAMLSourceCodeReferenceResolver interface {
+		Resolve(yamlPath string) models.Reference
+	}
+
+	JSONSchemaProvider interface {
+		Provide(version int) (string, error)
 	}
 )

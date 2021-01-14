@@ -1,12 +1,7 @@
 package version
 
 var (
-	// nolint
-	VERSION = "dev"
-
-	// nolint
-	BUILD_TIME = "unknown"
-
-	// nolint
-	COMMIT_HASH = "unknown"
+	Version    = "dev"     // nolint
+	BuildTime  = "unknown" // nolint
+	CommitHash = "unknown" // nolint
 )

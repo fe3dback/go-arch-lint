@@ -7,6 +7,7 @@ import (
 type (
 	Spec struct {
 		RootDirectory       ReferableString
+		WorkingDirectory    ReferableString
 		ModuleName          ReferableString
 		Allow               Allow
 		Components          []Component
@@ -21,7 +22,6 @@ type (
 
 	Component struct {
 		Name           ReferableString
-		LocalPathMask  ReferableString
 		ResolvedPaths  []ReferableResolvedPath
 		AllowedImports []ReferableResolvedPath
 		MayDependOn    []ReferableString
@@ -36,7 +36,6 @@ type (
 
 	Integrity struct {
 		DocumentNotices []Notice
-		SpecNotices     []Notice
 		Suggestions     []Notice
 	}
 

@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+
+	"github.com/spf13/cobra"
 )
 
 func (c *CommandAssembler) assembleFlags(cmd *cobra.Command) {
 	c.withColors(cmd)
 	c.withOutputType(cmd)
-	c.withOutputJsonOneLine(cmd)
-	c.withJsonAlias(cmd)
+	c.withOutputJSONOneLine(cmd)
+	c.withJSONAlias(cmd)
 }
 
 func (c *CommandAssembler) withColors(cmd *cobra.Command) {
@@ -32,18 +32,18 @@ func (c *CommandAssembler) withOutputType(cmd *cobra.Command) {
 	)
 }
 
-func (c *CommandAssembler) withOutputJsonOneLine(cmd *cobra.Command) {
+func (c *CommandAssembler) withOutputJSONOneLine(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolP(
-		flagOutputJsonOneLine,
+		flagOutputJSONOneLine,
 		"",
 		false,
 		"format JSON as single line payload (without line breaks), only for json output type",
 	)
 }
 
-func (c *CommandAssembler) withJsonAlias(cmd *cobra.Command) {
+func (c *CommandAssembler) withJSONAlias(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolP(
-		flagAliasJson,
+		flagAliasJSON,
 		"",
 		false,
 		fmt.Sprintf("(alias for --%s=%s)",

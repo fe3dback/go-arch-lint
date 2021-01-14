@@ -1,11 +1,9 @@
 package version
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models"
-)
+	"fmt"
 
-const (
-	goArchFileSupported = "1"
+	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 type Service struct {
@@ -29,7 +27,7 @@ func NewService(
 func (s *Service) Behave() (models.Version, error) {
 	return models.Version{
 		LinterVersion:       s.version,
-		GoArchFileSupported: goArchFileSupported,
+		GoArchFileSupported: fmt.Sprintf("1, %d", models.SupportedVersion),
 		BuildTime:           s.buildTime,
 		CommitHash:          s.commitHash,
 	}, nil
