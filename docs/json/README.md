@@ -2,17 +2,6 @@
 
 ## models.Check
 
-*struct:*
-```go
-type Check struct {
-    DocumentNotices        []CheckNotice                `json:"ExecutionWarnings"`
-    ArchHasWarnings        bool                         `json:"ArchHasWarnings"`
-    ArchWarningsDependency []CheckArchWarningDependency `json:"ArchWarningsDeps"`
-    ArchWarningsMatch      []CheckArchWarningMatch      `json:"ArchWarningsNotMatched"`
-    ModuleName             string                       `json:"ModuleName"`
-}
-```
-
 *example (checker warnings):*
 ```json
 {
@@ -46,10 +35,10 @@ type Check struct {
   "Payload": {
     "ExecutionWarnings": [
       {
-        "Text": "version '333' is not supported, supported: [1]",
-        "File": "/home/neo/go/src/github.com/fe3dback/galaxy/.go-arch-lint.yml",
-        "Line": 1,
-        "Offset": 10
+        "Text": "vendor path 'golang.org/x/mod/madfile' not valid, or no packages found by glob (project use gomod? try 'go mod vendor'), err: not found directories for 'vendor/golang.org/x/mod/madfile' in '/home/neo/go/src/github.com/fe3dback/go-arch-lint/vendor/golang.org/x/mod/madfile'",
+        "File": "/home/neo/go/src/github.com/fe3dback/go-arch-lint/.go-arch-lint.yml",
+        "Line": 11,
+        "Offset": 9
       }
     ],
     "ArchHasWarnings": false,
@@ -62,25 +51,55 @@ type Check struct {
 
 ## models.Version
 
-*struct:*
-```go
-type Version struct {
-    LinterVersion       string `json:"LinterVersion"`
-    GoArchFileSupported string `json:"GoArchFileSupported"`
-    BuildTime           string `json:"BuildTime"`
-    CommitHash          string `json:"CommitHash"`
-}
-```
-
 *example:*
 ```json
 {
   "Type": "models.Version",
   "Payload": {
-    "LinterVersion": "1.4.3",
-    "GoArchFileSupported": "1",
-    "BuildTime": "unknown",
-    "CommitHash": "unknown"
+    "LinterVersion": "2.0.0-rc7",
+    "GoArchFileSupported": "1, 2",
+    "BuildTime": "2020-12-30T15:47:12Z",
+    "CommitHash": "f2f5624a070e0babf82598fb756b316423e47ba7"
+  }
+}
+```
+
+## models.Mapping
+
+*example:*
+```json
+{
+  "Type": "models.Mapping",
+  "Payload": {
+    "ProjectDirectory": "/home/neo/go/src/github.com/fe3dback/go-arch-lint",
+    "ModuleName": "github.com/fe3dback/go-arch-lint",
+    "MappingGrouped": [
+      {
+        "ComponentName": "app",
+        "FileNames": [
+          "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/app/cli.go"
+        ]
+      },
+      {
+        "ComponentName": "commands",
+        "FileNames": [
+          "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/commands/check/command.go",
+          "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/commands/check/flags.go",
+          "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/commands/mapping/command.go",
+          "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/commands/mapping/flags.go"
+        ]
+      }
+    ],
+    "MappingList": [
+      {
+        "FileName": "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/app/cli.go",
+        "ComponentName": "app"
+      },
+      {
+        "FileName": "/home/neo/go/src/github.com/fe3dback/go-arch-lint/internal/app/internal/container/cmd_check.go",
+        "ComponentName": "container"
+      }
+    ]
   }
 }
 ```
