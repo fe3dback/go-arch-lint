@@ -40,7 +40,7 @@ docker run --rm \
 
 ### IDE plugin for autocompletion and other help
 
-<img src="https://user-images.githubusercontent.com/2073883/104641610-0f453900-56bb-11eb-8419-6d94fbcb4d2f.png" alt="jetbrains goland logo" align="left" width="100px" height="100px">
+<img src="https://user-images.githubusercontent.com/2073883/104641610-0f453900-56bb-11eb-8419-6d94fbcb4d2f.png" alt="jetbrains goland logo" align="left" width="80px" height="80px">
 
 https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
 
