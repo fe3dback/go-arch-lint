@@ -13,4 +13,5 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/mod v0.3.0
 	golang.org/x/sys v0.0.0-20201204225414-ed752295db88 // indirect
+	golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e
 )
