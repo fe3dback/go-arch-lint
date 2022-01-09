@@ -2,8 +2,7 @@ before:
   hooks:
     - go mod download
 builds:
-  -
-    id: "binary"
+  - id: "binary"
     binary: go-arch-lint
     env:
       - CGO_ENABLED=0
@@ -17,8 +16,7 @@ builds:
       - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.CommitHash={{.Commit}}'
       - -X 'github.com/fe3dback/{{.ProjectName}}/internal/version.BuildTime={{.Date}}'
 archives:
-  -
-    replacements:
+  - replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
@@ -28,11 +26,8 @@ archives:
       - goos: windows
         format: zip
 dockers:
-  -
-    builds:
+  - ids:
       - binary
-    binaries:
-      - go-arch-lint
     image_templates:
       - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}release-v{{.RawVersion}}{{else}}dev-v{{.RawVersion}}-{{.Prerelease}}{{end}}
       - fe3dback/{{.ProjectName}}:{{if eq .Prerelease ""}}release-v{{.Major}}.{{.Minor}}{{else}}dev-v{{.Major}}.{{.Minor}}-{{.Prerelease}}{{end}}
