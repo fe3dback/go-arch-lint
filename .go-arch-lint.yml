@@ -59,8 +59,12 @@ components:
   view:
     in: view
 
+  generated:
+    in: generated/**
+
 commonComponents:
   - models
+  - generated
 
 deps:
   container:
