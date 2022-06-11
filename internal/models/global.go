@@ -1,3 +1,3 @@
 package models
 
-const SupportedVersion = 2
+const SupportedVersion = 3

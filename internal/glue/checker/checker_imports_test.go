@@ -5,6 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
@@ -118,7 +120,7 @@ func Test_checkImportPath(t *testing.T) {
 				AllowedProjectImports: tt.args.componentImports,
 			}
 
-			if got := checkImportPath(cmp, tt.args.resolvedImport); got != tt.want {
+			if got := checkProjectImport(cmp, tt.args.resolvedImport); got != tt.want {
 				t.Errorf("checkImportPath() = %v, want %v", got, tt.want)
 			}
 		})
@@ -311,20 +313,6 @@ func Test_checkVendorImport(t *testing.T) {
 			},
 			want: false,
 		},
-		{
-			name: "flag + list exactly same",
-			args: args{
-				componentImports: []speca.Referable[models.ResolvedPath]{
-					makeTestResolvedPath("needle"),
-				},
-				componentFlags: speca.SpecialFlags{
-					AllowAllProjectDeps: makeBool(false),
-					AllowAllVendorDeps:  makeBool(true),
-				},
-				resolvedImport: makeTestResolvedProjectImport("needle"),
-			},
-			want: true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -334,9 +322,9 @@ func Test_checkVendorImport(t *testing.T) {
 				AllowedProjectImports: tt.args.componentImports,
 			}
 
-			if got := checkVendorImport(cmp, tt.args.resolvedImport); got != tt.want {
-				t.Errorf("checkVendorImport() = %v, want %v", got, tt.want)
-			}
+			got, err := checkVendorImport(cmp, tt.args.resolvedImport)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -412,9 +400,9 @@ func TestChecker_checkImport(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkImport(cmp, tt.args.resolvedImport, tt.args.dependOnAnyVendor); got != tt.want {
-				t.Errorf("checkImport() = %v, want %v", got, tt.want)
-			}
+			got, err := checkImport(cmp, tt.args.resolvedImport, tt.args.dependOnAnyVendor)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 
@@ -430,6 +418,6 @@ func TestChecker_checkImport(t *testing.T) {
 			ImportType: 100,
 		}
 
-		_ = checkImport(cmp, resolvedImport, false)
+		_, _ = checkImport(cmp, resolvedImport, false)
 	})
 }

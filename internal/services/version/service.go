@@ -27,7 +27,7 @@ func NewService(
 func (s *Service) Behave() (models.Version, error) {
 	return models.Version{
 		LinterVersion:       s.version,
-		GoArchFileSupported: fmt.Sprintf("1, %d", models.SupportedVersion),
+		GoArchFileSupported: fmt.Sprintf("1 .. %d", models.SupportedVersion),
 		BuildTime:           s.buildTime,
 		CommitHash:          s.commitHash,
 	}, nil

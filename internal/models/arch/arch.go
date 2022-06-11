@@ -52,6 +52,10 @@ type (
 		// allow all project code depend on any third party vendor lib
 		// analyze will not check imports with not local namespace's
 		IsDependOnAnyVendor() speca.Referable[bool]
+
+		// use advanced AST linter
+		// this is default behavior since v3+ configs
+		DeepScan() speca.Referable[bool]
 	}
 
 	ExcludedDirectories interface {
@@ -144,5 +148,8 @@ type (
 
 		// described component can import any other vendor namespace packages
 		AnyVendorDeps() speca.Referable[bool]
+
+		// override deepScan global option
+		DeepScan() speca.Referable[bool]
 	}
 )

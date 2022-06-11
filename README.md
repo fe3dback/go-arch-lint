@@ -9,11 +9,14 @@ Check all project imports and compare to arch rules defined in yml file
 
 ### Install globally and run
 
+#### Compile from sources
+It require go 1.18+
+
 ```bash
-go get -u github.com/fe3dback/go-arch-lint
+go install github.com/fe3dback/go-arch-lint@latest
 ```
 
-go will download and install `go-arch-lint` binary to bin folder, usually
+go will download and install `go-arch-lint` binary to go bin folder, usually
 is `~/go/bin`
 
 ```bash
@@ -24,17 +27,15 @@ cd project_dir
 go-arch-lint check
 ```
 
-### alternative - run with docker
+#### Docker
 
 ```bash
-docker run --rm \
-    -v ${PWD}:/app \
-    fe3dback/go-arch-lint:latest-stable-release check --project-path /app
+docker run --rm -v ${PWD}:/app fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 ```
 
 [all docker tags](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
 
-### precompiled binaries and other options
+#### Precompiled binaries and other options
 
 [releases page](https://github.com/fe3dback/go-arch-lint/releases)
 
@@ -44,7 +45,29 @@ docker run --rm \
 
 https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
 
-currently IDE plugin in alpha
+currently IDE plugin in beta
+
+## What`s new in V3 (1.7.0+)
+
+```yaml
+version: 3
+allow:
+  deepScan: true
+```
+
+Biggest change in V3 config (linter 1.7.0+), is deepScan option.
+
+In v1/v2, linter check only file imports, but not analyse code itself.
+deepScan is new advanced code linter, it will analyse all project AST and provide more strict
+and better arch linting
+
+--
+
+Linter now is not require `go mod vendor` (vendor directory) for checking vendor deps.
+
+--
+
+Better plugin for IDEA goland. 
 
 ## Usage
 
@@ -71,7 +94,7 @@ Make archfile called `.go-arch-lint.yml` in root directory
 of your project, and put some arch rules to it
 
 ```yaml
-version: 2
+version: 3
 workdir: ./
 allow:
   depOnAnyVendor: false
@@ -161,28 +184,30 @@ This project also uses arch lint, see example in [.go-arch-lint.yml](.go-arch-li
 
 ## Archfile Syntax
 
-| Path              | Req?  | Type  | Description         |
-| -------------     | ----- | ----- | ------------------- |
-| version           | `+`   | int   | schema version (__latest: 2__)  |
-| workdir           | -     | str   | relative directory for analyse  |
-| allow             | -     | map   | global rules |
-| . depOnAnyVendor  | -     | bool  | allow import any vendor code to any project file |
-| exclude           | -     | []str  | list of directories (relative path) for exclude from analyse |
-| excludeFiles      | -     | []str  | regular expression rules for file names, will exclude this files and it's packages from analyse |
-| components        | `+`   | map   | project components used for split real modules and packages to abstract thing |
-| . %name%          | `+`   | str   | name of component |
-| . . in            | `+`   | str, []str   | one or more relative directory name, support glob masking (src/\*/engine/\*\*) |
-| vendors           | -     | map   | vendor libs |
-| . %name%          | `+`   | str   | name of vendor component |
-| . . in            | `+`   | str, []str   | one or more import path of vendor libs, support glob masking (src/\*/engine/\*\*) |
-| commonComponents  | -     | []str  | list of components, allow import them into any code |
-| commonVendors     | -     | []str  | list of vendors, allow import them into any code |
-| deps              | `+`   | map   | dependency rules |
-| . %name%          | `+`   | str   | name of component, exactly as defined in "components" section |
-| . . anyVendorDeps | -     | bool  | all component code can import any vendor code |
-| . . anyProjectDeps| -     | bool  | all component code can import any other project code, useful for DI/main component |
-| . . mayDependOn   | -     | []str  | list of components that can by imported in %name% |
-| . . canUse        | -     | []str  | list of vendors that can by imported in %name% |
+| Path               | Req? | Type       | Description                                                                                     |
+|--------------------|------|------------|-------------------------------------------------------------------------------------------------|
+| version            | `+`  | int        | schema version (__latest: 3__)                                                                  |
+| workdir            | -    | str        | relative directory for analyse                                                                  |
+| allow              | -    | map        | global rules                                                                                    |
+| . depOnAnyVendor   | -    | bool       | allow import any vendor code to any project file                                                |
+| . deepScan         | -    | bool       | use advanced AST code analyse (default `true`, since v3+).                                      |
+| exclude            | -    | []str      | list of directories (relative path) for exclude from analyse                                    |
+| excludeFiles       | -    | []str      | regular expression rules for file names, will exclude this files and it's packages from analyse |
+| components         | `+`  | map        | project components used for split real modules and packages to abstract thing                   |
+| . %name%           | `+`  | str        | name of component                                                                               |
+| . . in             | `+`  | str, []str | one or more relative directory name, support glob masking (src/\*/engine/\*\*)                  |
+| vendors            | -    | map        | vendor libs                                                                                     |
+| . %name%           | `+`  | str        | name of vendor component                                                                        |
+| . . in             | `+`  | str, []str | one or more import path of vendor libs, support glob masking (github.com/abc/\*/engine/\*\*)    |
+| commonComponents   | -    | []str      | list of components, allow import them into any code                                             |
+| commonVendors      | -    | []str      | list of vendors, allow import them into any code                                                |
+| deps               | `+`  | map        | dependency rules                                                                                |
+| . %name%           | `+`  | str        | name of component, exactly as defined in "components" section                                   |
+| . . anyVendorDeps  | -    | bool       | all component code can import any vendor code                                                   |
+| . . anyProjectDeps | -    | bool       | all component code can import any other project code, useful for DI/main component              |
+| . . mayDependOn    | -    | []str      | list of components that can by imported in %name%                                               |
+| . . canUse         | -    | []str      | list of vendors that can by imported in %name%                                                  |
+| . . deepScan       | -    | bool       | override of allow.deepScan for this component                                                   |
 
 ## Example of usage
 
@@ -251,7 +276,7 @@ More json examples in [docs](docs):
 linter can export self schema wia `schema --version X` command
 
 ```bash
-go-arch-lint schema --version 2
+go-arch-lint schema --version 3
 {"$schema":"http://json-schema.org/draft-07/schema#","additionalProperties":false,"definitions":{"commonComponents":{"description":"All project packages ... }
 ```
 

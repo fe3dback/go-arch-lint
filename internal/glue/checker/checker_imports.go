@@ -8,22 +8,22 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
-type Checker struct {
+type Imports struct {
 	spec                 speca.Spec
 	projectFilesResolver ProjectFilesResolver
 	result               results
 }
 
-func NewChecker(
+func NewImport(
 	projectFilesResolver ProjectFilesResolver,
-) *Checker {
-	return &Checker{
+) *Imports {
+	return &Imports{
 		result:               newResults(),
 		projectFilesResolver: projectFilesResolver,
 	}
 }
 
-func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
+func (c *Imports) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
 	projectFiles, err := c.projectFilesResolver.ProjectFiles(spec)
@@ -60,7 +60,7 @@ func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 	return c.result.assembleSortedResults(), nil
 }
 
-func (c *Checker) assembleComponentsMap(spec speca.Spec) map[string]speca.Component {
+func (c *Imports) assembleComponentsMap(spec speca.Spec) map[string]speca.Component {
 	results := make(map[string]speca.Component)
 
 	for _, component := range spec.Components {
@@ -70,7 +70,7 @@ func (c *Checker) assembleComponentsMap(spec speca.Spec) map[string]speca.Compon
 	return results
 }
 
-func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) error {
+func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) error {
 	for _, resolvedImport := range file.Imports {
 		allowed, err := checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value())
 		if err != nil {

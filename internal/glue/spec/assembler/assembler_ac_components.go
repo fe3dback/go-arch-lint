@@ -50,16 +50,19 @@ func (m *componentsAssembler) assembleComponent(
 
 	mayDependOn := make([]speca.Referable[string], 0)
 	canUse := make([]speca.Referable[string], 0)
+	deepScan := yamlDocument.Options().DeepScan()
 
 	if hasDeps {
 		mayDependOn = append(mayDependOn, depMeta.MayDependOn()...)
 		canUse = append(canUse, depMeta.CanUse()...)
+		deepScan = depMeta.DeepScan()
 	}
 
 	cmp := speca.Component{
 		Name:        speca.NewReferable(yamlName, yamlComponent.Reference()),
 		MayDependOn: mayDependOn,
 		CanUse:      canUse,
+		DeepScan:    deepScan,
 	}
 
 	type enricher func() error

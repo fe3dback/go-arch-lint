@@ -65,6 +65,14 @@ func (sp *Provider) decodeDocument(version int) (arch.Document, error) {
 
 	// todo: refactor this somehow (dry)
 	switch version {
+	case 1:
+		document := ArchV1Document{}
+		err := decoder.Decode(&document)
+		if err != nil {
+			return nil, err
+		}
+
+		return document.applyReferences(sp.yamlReferenceResolver), nil
 	case 2:
 		document := ArchV2Document{}
 		err := decoder.Decode(&document)
@@ -74,7 +82,7 @@ func (sp *Provider) decodeDocument(version int) (arch.Document, error) {
 
 		return document.applyReferences(sp.yamlReferenceResolver), nil
 	default:
-		document := ArchV1Document{}
+		document := ArchV3Document{}
 		err := decoder.Decode(&document)
 		if err != nil {
 			return nil, err

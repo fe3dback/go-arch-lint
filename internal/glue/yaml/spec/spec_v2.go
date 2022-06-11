@@ -272,6 +272,10 @@ func (opt ArchV2Allow) IsDependOnAnyVendor() speca.Referable[bool] {
 	return opt.internalDepOnAnyVendor
 }
 
+func (opt ArchV2Allow) DeepScan() speca.Referable[bool] {
+	return speca.NewEmptyReferable(false)
+}
+
 func (opt ArchV2Allow) applyReferences(resolver YAMLSourceCodeReferenceResolver) ArchV2Allow {
 	opt.reference = resolver.Resolve("$.allow")
 
@@ -368,6 +372,10 @@ func (rule ArchV2Rules) AnyProjectDeps() speca.Referable[bool] {
 
 func (rule ArchV2Rules) AnyVendorDeps() speca.Referable[bool] {
 	return rule.internalAnyVendorDeps
+}
+
+func (rule ArchV2Rules) DeepScan() speca.Referable[bool] {
+	return speca.NewEmptyReferable(false)
 }
 
 func (rule ArchV2Rules) applyReferences(name arch.ComponentName, resolver YAMLSourceCodeReferenceResolver) ArchV2Rules {

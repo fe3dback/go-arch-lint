@@ -38,3 +38,8 @@ type (
 		MatchWarnings      []CheckArchWarningMatch
 	}
 )
+
+func (cr *CheckResult) Append(another CheckResult) {
+	cr.DependencyWarnings = append(cr.DependencyWarnings, another.DependencyWarnings...)
+	cr.MatchWarnings = append(cr.MatchWarnings, another.MatchWarnings...)
+}

@@ -20,10 +20,12 @@ type (
 
 	Allow struct {
 		DepOnAnyVendor Referable[bool]
+		DeepScan       Referable[bool]
 	}
 
 	Component struct {
 		Name                  Referable[string]
+		DeepScan              Referable[bool]
 		ResolvedPaths         []Referable[models.ResolvedPath]
 		AllowedProjectImports []Referable[models.ResolvedPath]
 		AllowedVendorGlobs    []Referable[models.Glob]

@@ -69,10 +69,21 @@ func (c *Container) provideReferenceRender() *code.Render {
 	)
 }
 
-func (c *Container) provideSpecChecker() *checker.Checker {
-	return checker.NewChecker(
+func (c *Container) provideSpecChecker() *checker.CompositeChecker {
+	return checker.NewCompositeChecker(
+		c.provideSpecImportsChecker(),
+		c.provideSpecDeepScanChecker(),
+	)
+}
+
+func (c *Container) provideSpecImportsChecker() *checker.Imports {
+	return checker.NewImport(
 		c.provideProjectFilesResolver(),
 	)
+}
+
+func (c *Container) provideSpecDeepScanChecker() *checker.DeepScan {
+	return checker.NewDeepScan()
 }
 
 func (c *Container) provideProjectFilesResolver() *resolver.Resolver {

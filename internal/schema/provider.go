@@ -13,6 +13,8 @@ func NewProvider() *Provider {
 
 func (p *Provider) Provide(version int) (string, error) {
 	switch version {
+	case 3:
+		return V3, nil
 	case 2:
 		return V2, nil
 	case 1:
