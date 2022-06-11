@@ -3,12 +3,17 @@ workdir: internal
 allow:
   depOnAnyVendor: false
 
+exclude:
+  - ./glue/deepscan/test
+
 excludeFiles:
   - "^.*_test\\.go$"
 
 vendors:
-  go-modfile:
-    in: golang.org/x/mod/modfile
+  go-ast:
+    in:
+      - golang.org/x/mod/modfile
+      - golang.org/x/tools/go/packages
   3rd-cobra:
     in: github.com/spf13/cobra
   3rd-yaml:
@@ -33,8 +38,12 @@ components:
 
   glue:
     in: glue/**
+  glueChecker:
+    in: glue/checker
   glueCode:
     in: glue/code
+  glueDeepscan:
+    in: glue/deepscan
   glueProject:
     in: glue/project/**
   gluePrinter:
@@ -82,6 +91,14 @@ deps:
     mayDependOn:
       - glueYamlSpec
 
+  glueDeepscan:
+    canUse:
+      - go-ast
+
+  glueChecker:
+    mayDependOn:
+      - glueDeepscan
+
   glueYaml:
     mayDependOn:
       - glueYamlSpec
@@ -95,7 +112,7 @@ deps:
 
   glueProject:
     canUse:
-      - go-modfile
+      - go-ast
 
   gluePrinter:
     canUse:
