@@ -46,7 +46,10 @@ func (c *Checker) Check(spec speca.Spec) (models.CheckResult, error) {
 
 		componentID := *projectFile.ComponentID
 		if component, ok := components[componentID]; ok {
-			c.checkFile(component, projectFile.File)
+			err := c.checkFile(component, projectFile.File)
+			if err != nil {
+				return models.CheckResult{}, fmt.Errorf("failed check file '%s': %w", projectFile.File.Path, err)
+			}
 
 			continue
 		}
@@ -67,9 +70,17 @@ func (c *Checker) assembleComponentsMap(spec speca.Spec) map[string]speca.Compon
 	return results
 }
 
-func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) {
+func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) error {
 	for _, resolvedImport := range file.Imports {
-		if checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value()) {
+		allowed, err := checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value())
+		if err != nil {
+			return fmt.Errorf("failed check import '%s': %w",
+				resolvedImport.Name,
+				err,
+			)
+		}
+
+		if allowed {
 			continue
 		}
 
@@ -81,35 +92,54 @@ func (c *Checker) checkFile(component speca.Component, file models.ProjectFile) 
 			ResolvedImportName: resolvedImport.Name,
 		})
 	}
+
+	return nil
 }
 
 func checkImport(
 	component speca.Component,
 	resolvedImport models.ResolvedImport,
 	allowDependOnAnyVendor bool,
-) bool {
+) (bool, error) {
 	switch resolvedImport.ImportType {
 	case models.ImportTypeStdLib:
-		return true
+		return true, nil
 	case models.ImportTypeVendor:
 		if allowDependOnAnyVendor {
-			return true
+			return true, nil
 		}
 
 		return checkVendorImport(component, resolvedImport)
 	case models.ImportTypeProject:
-		return checkProjectImport(component, resolvedImport)
+		return checkProjectImport(component, resolvedImport), nil
 	default:
 		panic(fmt.Sprintf("unknown import type: %+v", resolvedImport))
 	}
 }
 
-func checkVendorImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
+func checkVendorImport(component speca.Component, resolvedImport models.ResolvedImport) (bool, error) {
 	if component.SpecialFlags.AllowAllVendorDeps.Value() {
-		return true
+		return true, nil
 	}
 
-	return checkImportPath(component, resolvedImport)
+	for _, vendorGlob := range component.AllowedVendorGlobs {
+		matched, err := vendorGlob.Value().Match(resolvedImport.Name)
+		if err != nil {
+			return false, models.NewReferableErr(
+				fmt.Errorf("invalid vendor glob '%s': %w",
+					string(vendorGlob.Value()),
+					err,
+				),
+				vendorGlob.Reference(),
+			)
+		}
+
+		if matched {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func checkProjectImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
@@ -117,11 +147,7 @@ func checkProjectImport(component speca.Component, resolvedImport models.Resolve
 		return true
 	}
 
-	return checkImportPath(component, resolvedImport)
-}
-
-func checkImportPath(component speca.Component, resolvedImport models.ResolvedImport) bool {
-	for _, allowedImportRef := range component.AllowedImports {
+	for _, allowedImportRef := range component.AllowedProjectImports {
 		allowedImport := allowedImportRef.Value()
 
 		if allowedImport.ImportPath == resolvedImport.Name {

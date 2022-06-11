@@ -23,7 +23,7 @@ func newSpecCompositeAssembler(modifiers []assembler) *specCompositeModifier {
 	}
 }
 
-func (s specCompositeModifier) assemble(spec *speca.Spec, doc arch.Document) error {
+func (s *specCompositeModifier) assemble(spec *speca.Spec, doc arch.Document) error {
 	for _, modifier := range s.modifiers {
 		err := modifier.assemble(spec, doc)
 		if err != nil {

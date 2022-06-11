@@ -13,14 +13,14 @@ func newExcludeFilesMatcherAssembler() *excludeFilesMatcherAssembler {
 	return &excludeFilesMatcherAssembler{}
 }
 
-func (efa excludeFilesMatcherAssembler) assemble(spec *speca.Spec, yamlSpec arch.Document) error {
+func (efa *excludeFilesMatcherAssembler) assemble(spec *speca.Spec, yamlSpec arch.Document) error {
 	for _, regString := range yamlSpec.ExcludedFilesRegExp().List() {
 		matcher, err := regexp.Compile(regString.Value())
 		if err != nil {
 			continue
 		}
 
-		spec.ExcludeFilesMatcher = append(spec.ExcludeFilesMatcher, speca.NewReferableRegExp(
+		spec.ExcludeFilesMatcher = append(spec.ExcludeFilesMatcher, speca.NewReferable(
 			matcher,
 			regString.Reference(),
 		))

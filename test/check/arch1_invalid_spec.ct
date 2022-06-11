@@ -4,10 +4,6 @@ module: github.com/fe3dback/go-arch-lint/test/check/project
      5 | excludeFiles:
 >    6 |   - "(A-Z" # not valid regexp (V)
              ^
-[Archfile] vendor path 'golang.org/x/mod/modfile' not valid, or no packages found by glob (project use gomod? try 'go mod vendor'), err: not found directories for 'vendor/golang.org/x/mod/modfile' in '${ROOTDIR}/test/check/project/vendor/golang.org/x/mod/modfile'
-     9 |   go-modfile:
->   10 |     in: golang.org/x/mod/modfile # not installed vendors (V)
-                 ^
 [Archfile] not found directories for 'internal/not_exist' in '${ROOTDIR}/test/check/project/internal/not_exist'
     16 |   not_exist:
 >   17 |     in: internal/not_exist # not exist path (V)

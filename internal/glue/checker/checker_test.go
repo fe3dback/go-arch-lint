@@ -22,12 +22,12 @@ func makeTestAbsPath(localPath string) string {
 	return makeTestProjectRoot() + "/" + localPath
 }
 
-func makeBool(b bool) speca.ReferableBool {
-	return speca.NewReferableBool(b, speca.NewEmptyReference())
+func makeBool(b bool) speca.Referable[bool] {
+	return speca.NewReferable(b, speca.NewEmptyReference())
 }
 
-func makeTestResolvedPath(localPath string) speca.ReferableResolvedPath {
-	return speca.NewReferableResolvedPath(
+func makeTestResolvedPath(localPath string) speca.Referable[models.ResolvedPath] {
+	return speca.NewReferable(
 		models.ResolvedPath{
 			ImportPath: testModulePath + "/" + localPath,
 			AbsPath:    makeTestAbsPath(localPath),
@@ -60,7 +60,7 @@ func makeTestResolvedStdlibImport() models.ResolvedImport {
 
 func Test_checkImportPath(t *testing.T) {
 	type args struct {
-		componentImports []speca.ReferableResolvedPath
+		componentImports []speca.Referable[models.ResolvedPath]
 		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
@@ -71,7 +71,7 @@ func Test_checkImportPath(t *testing.T) {
 		{
 			name: "have needed import",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("needle"),
 					makeTestResolvedPath("checker"),
 					makeTestResolvedPath("path"),
@@ -83,7 +83,7 @@ func Test_checkImportPath(t *testing.T) {
 		{
 			name: "not have needed import",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("checker"),
 					makeTestResolvedPath("path"),
 					makeTestResolvedPath("some"),
@@ -95,7 +95,7 @@ func Test_checkImportPath(t *testing.T) {
 		{
 			name: "empty",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				resolvedImport:   makeTestResolvedProjectImport("needle"),
 			},
 			want: false,
@@ -103,7 +103,7 @@ func Test_checkImportPath(t *testing.T) {
 		{
 			name: "only needed",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("needle"),
 				},
 				resolvedImport: makeTestResolvedProjectImport("needle"),
@@ -114,8 +114,8 @@ func Test_checkImportPath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmp := speca.Component{
-				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
-				AllowedImports: tt.args.componentImports,
+				Name:                  speca.NewReferable("component", speca.NewEmptyReference()),
+				AllowedProjectImports: tt.args.componentImports,
 			}
 
 			if got := checkImportPath(cmp, tt.args.resolvedImport); got != tt.want {
@@ -127,7 +127,7 @@ func Test_checkImportPath(t *testing.T) {
 
 func Test_checkProjectImport(t *testing.T) {
 	type args struct {
-		componentImports []speca.ReferableResolvedPath
+		componentImports []speca.Referable[models.ResolvedPath]
 		componentFlags   speca.SpecialFlags
 		resolvedImport   models.ResolvedImport
 	}
@@ -139,7 +139,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "no flags, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
@@ -151,7 +151,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "project flag, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
@@ -163,7 +163,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "vendor flag, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(true),
@@ -175,7 +175,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "flag + list exactly same",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("needle"),
 				},
 				componentFlags: speca.SpecialFlags{
@@ -189,7 +189,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "flag + list have needle",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("needle"),
 					makeTestResolvedPath("module12"),
@@ -205,7 +205,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "flag + list not have needle",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("module12"),
 				},
@@ -220,7 +220,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "no flag + list have needle",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("needle"),
 					makeTestResolvedPath("module12"),
@@ -236,7 +236,7 @@ func Test_checkProjectImport(t *testing.T) {
 		{
 			name: "no flag + list not have needle",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("module12"),
 				},
@@ -252,9 +252,9 @@ func Test_checkProjectImport(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmp := speca.Component{
-				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
-				SpecialFlags:   tt.args.componentFlags,
-				AllowedImports: tt.args.componentImports,
+				Name:                  speca.NewReferable("component", speca.NewEmptyReference()),
+				SpecialFlags:          tt.args.componentFlags,
+				AllowedProjectImports: tt.args.componentImports,
 			}
 
 			if got := checkProjectImport(cmp, tt.args.resolvedImport); got != tt.want {
@@ -266,7 +266,7 @@ func Test_checkProjectImport(t *testing.T) {
 
 func Test_checkVendorImport(t *testing.T) {
 	type args struct {
-		componentImports []speca.ReferableResolvedPath
+		componentImports []speca.Referable[models.ResolvedPath]
 		componentFlags   speca.SpecialFlags
 		resolvedImport   models.ResolvedImport
 	}
@@ -278,7 +278,7 @@ func Test_checkVendorImport(t *testing.T) {
 		{
 			name: "no flags, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
@@ -290,7 +290,7 @@ func Test_checkVendorImport(t *testing.T) {
 		{
 			name: "vendor flag, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(true),
@@ -302,7 +302,7 @@ func Test_checkVendorImport(t *testing.T) {
 		{
 			name: "project flag, empty list",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{},
+				componentImports: []speca.Referable[models.ResolvedPath]{},
 				componentFlags: speca.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
@@ -314,7 +314,7 @@ func Test_checkVendorImport(t *testing.T) {
 		{
 			name: "flag + list exactly same",
 			args: args{
-				componentImports: []speca.ReferableResolvedPath{
+				componentImports: []speca.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("needle"),
 				},
 				componentFlags: speca.SpecialFlags{
@@ -329,9 +329,9 @@ func Test_checkVendorImport(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmp := speca.Component{
-				Name:           speca.NewReferableString("component", speca.NewEmptyReference()),
-				SpecialFlags:   tt.args.componentFlags,
-				AllowedImports: tt.args.componentImports,
+				Name:                  speca.NewReferable("component", speca.NewEmptyReference()),
+				SpecialFlags:          tt.args.componentFlags,
+				AllowedProjectImports: tt.args.componentImports,
 			}
 
 			if got := checkVendorImport(cmp, tt.args.resolvedImport); got != tt.want {
@@ -402,12 +402,12 @@ func TestChecker_checkImport(t *testing.T) {
 	}
 
 	cmp := speca.Component{
-		Name: speca.NewReferableString("component", speca.NewEmptyReference()),
+		Name: speca.NewReferable("component", speca.NewEmptyReference()),
 		SpecialFlags: speca.SpecialFlags{
 			AllowAllProjectDeps: makeBool(false),
 			AllowAllVendorDeps:  makeBool(false),
 		},
-		AllowedImports: []speca.ReferableResolvedPath{},
+		AllowedProjectImports: []speca.Referable[models.ResolvedPath]{},
 	}
 
 	for _, tt := range tests {

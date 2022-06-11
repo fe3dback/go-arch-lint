@@ -12,7 +12,7 @@ func newWorkdirAssembler() *workdirAssembler {
 	return &workdirAssembler{}
 }
 
-func (efa workdirAssembler) assemble(spec *speca.Spec, document arch.Document) error {
+func (efa *workdirAssembler) assemble(spec *speca.Spec, document arch.Document) error {
 	spec.WorkingDirectory = document.WorkingDirectory()
 
 	return nil

@@ -28,28 +28,15 @@ func newUtils(
 	}
 }
 
-func (u *utils) assertVendorImportPathValid(importPath string) error {
-	localPath := fmt.Sprintf("vendor/%s", importPath)
-	err := u.assertPathValid(localPath)
-	if err != nil {
-		return fmt.Errorf("vendor path '%s' not valid, or no packages found by glob (project use gomod? try 'go mod vendor'), err: %w",
-			importPath,
-			err,
-		)
-	}
-
-	return nil
-}
-
-func (u *utils) assertPathValid(localPath string) error {
-	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localPath))
+func (u *utils) assertGlobPathValid(localGlobPath string) error {
+	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %w", err)
 	}
 
 	if len(resolved) == 0 {
-		return fmt.Errorf("not found directories for '%s' in '%s'", localPath, absPath)
+		return fmt.Errorf("not found directories for '%s' in '%s'", localGlobPath, absPath)
 	}
 
 	return u.assertDirectoriesValid(resolved...)

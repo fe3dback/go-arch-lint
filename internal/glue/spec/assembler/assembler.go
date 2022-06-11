@@ -34,8 +34,8 @@ func NewAssembler(
 
 func (sa *Assembler) Assemble() (speca.Spec, error) {
 	spec := speca.Spec{
-		RootDirectory: speca.NewEmptyReferableString(sa.rootDirectory),
-		ModuleName:    speca.NewEmptyReferableString(sa.moduleName),
+		RootDirectory: speca.NewEmptyReferable(sa.rootDirectory),
+		ModuleName:    speca.NewEmptyReferable(sa.moduleName),
 		Integrity: speca.Integrity{
 			DocumentNotices: []speca.Notice{},
 			Suggestions:     []speca.Notice{},
@@ -69,8 +69,11 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 	assembler := newSpecCompositeAssembler([]assembler{
 		newComponentsAssembler(
 			resolver,
-			newAllowedImportsAssembler(
+			newAllowedProjectImportsAssembler(
 				sa.rootDirectory,
+				resolver,
+			),
+			newAllowedVendorImportsAssembler(
 				resolver,
 			),
 		),

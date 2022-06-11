@@ -25,6 +25,7 @@ const (
 type (
 	Renderer struct {
 		colorPrinter      ColorPrinter
+		referenceRender   ReferenceRender
 		outputType        models.OutputType
 		outputJSONOneLine bool
 		asciiTemplates    map[string]string
@@ -33,12 +34,14 @@ type (
 
 func NewRenderer(
 	colorPrinter ColorPrinter,
+	referenceRender ReferenceRender,
 	outputType models.OutputType,
 	outputJSONOneLine bool,
 	asciiTemplates map[string]string,
 ) *Renderer {
 	return &Renderer{
 		colorPrinter:      colorPrinter,
+		referenceRender:   referenceRender,
 		outputType:        outputType,
 		outputJSONOneLine: outputJSONOneLine,
 		asciiTemplates:    asciiTemplates,
@@ -47,6 +50,14 @@ func NewRenderer(
 
 func (r *Renderer) RenderModel(model interface{}, err error) error {
 	if err != nil && !errors.Is(err, models.UserSpaceError{}) {
+		var referableErr models.ReferableErr
+		if errors.As(err, &referableErr) {
+			codePreview := r.referenceRender.SourceCode(referableErr.Reference(), 3, true)
+			fmt.Printf("ERR: %s\n", err.Error())
+			fmt.Printf("------------\n")
+			fmt.Printf("%s\n", codePreview)
+		}
+
 		return err
 	}
 

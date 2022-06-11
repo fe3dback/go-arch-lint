@@ -20,9 +20,9 @@ func newExcludeAssembler(
 	}
 }
 
-func (ea excludeAssembler) assemble(spec *speca.Spec, document arch.Document) error {
+func (ea *excludeAssembler) assemble(spec *speca.Spec, document arch.Document) error {
 	for _, yamlRelativePath := range document.ExcludedDirectories().List() {
-		tmpResolvedPath, err := ea.resolver.resolveLocalPath(
+		tmpResolvedPath, err := ea.resolver.resolveLocalGlobPath(
 			path.Clean(fmt.Sprintf("%s/%s",
 				document.WorkingDirectory().Value(),
 				yamlRelativePath.Value(),
@@ -32,7 +32,7 @@ func (ea excludeAssembler) assemble(spec *speca.Spec, document arch.Document) er
 			return fmt.Errorf("failed to assemble exclude '%s' path's: %w", yamlRelativePath.Value(), err)
 		}
 
-		resolvedPath := wrapPaths(yamlRelativePath.Reference(), tmpResolvedPath)
+		resolvedPath := wrap(yamlRelativePath.Reference(), tmpResolvedPath)
 		spec.Exclude = append(spec.Exclude, resolvedPath...)
 	}
 

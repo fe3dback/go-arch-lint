@@ -23,6 +23,7 @@ func (c *Container) provideAurora() aurora.Aurora {
 func (c *Container) ProvideRenderer() *render.Renderer {
 	return render.NewRenderer(
 		c.provideColorPrinter(),
+		c.provideReferenceRender(),
 		c.flags.OutputType,
 		c.flags.OutputJsonOneLine,
 		view.Templates,

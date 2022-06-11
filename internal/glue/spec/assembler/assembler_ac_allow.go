@@ -12,7 +12,7 @@ func newAllowAssembler() *allowAssembler {
 	return &allowAssembler{}
 }
 
-func (efa allowAssembler) assemble(spec *speca.Spec, document arch.Document) error {
+func (efa *allowAssembler) assemble(spec *speca.Spec, document arch.Document) error {
 	spec.Allow = speca.Allow{
 		DepOnAnyVendor: document.Options().IsDependOnAnyVendor(),
 	}

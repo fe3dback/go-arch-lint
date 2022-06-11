@@ -26,10 +26,10 @@ func newResolver(
 	}
 }
 
-func (r *resolver) resolveLocalPath(localPathMask string) ([]models.ResolvedPath, error) {
+func (r *resolver) resolveLocalGlobPath(localGlobPath string) ([]models.ResolvedPath, error) {
 	list := make([]models.ResolvedPath, 0)
 
-	absPath := fmt.Sprintf("%s/%s", r.rootDirectory, localPathMask)
+	absPath := fmt.Sprintf("%s/%s", r.rootDirectory, localGlobPath)
 	resolved, err := r.pathResolver.Resolve(absPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve path '%s'", absPath)
@@ -50,8 +50,8 @@ func (r *resolver) resolveLocalPath(localPathMask string) ([]models.ResolvedPath
 	return list, nil
 }
 
-func (r *resolver) resolveVendorPath(localPathMask string) ([]models.ResolvedPath, error) {
-	list, err := r.resolveLocalPath(localPathMask)
+func (r *resolver) resolveVendorLocalPathGlob(localPathMask string) ([]models.ResolvedPath, error) {
+	list, err := r.resolveLocalGlobPath(localPathMask)
 	if err != nil {
 		return nil, err
 	}
