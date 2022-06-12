@@ -1,6 +1,8 @@
 package check
 
 import (
+	"context"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
@@ -15,6 +17,6 @@ type (
 	}
 
 	SpecChecker interface {
-		Check(spec speca.Spec) (models.CheckResult, error)
+		Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error)
 	}
 )

@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"context"
 	"regexp"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -10,6 +11,7 @@ import (
 type (
 	ProjectFilesResolver interface {
 		Scan(
+			ctx context.Context,
 			projectDirectory string,
 			moduleName string,
 			excludePaths []models.ResolvedPath,

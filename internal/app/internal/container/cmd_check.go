@@ -1,6 +1,8 @@
 package container
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 
 	"github.com/fe3dback/go-arch-lint/internal/commands/check"
@@ -15,9 +17,9 @@ func (c *Container) ProvideCheckCommand() *cobra.Command {
 func (c *Container) provideCheckCommandAssembler() *check.CommandAssembler {
 	return check.NewCheckCommandAssembler(
 		c.provideProjectInfoAssembler(),
-		func(input models.FlagsCheck) error {
+		func(ctx context.Context, input models.FlagsCheck) error {
 			return c.ProvideRenderer().RenderModel(
-				c.provideCheckService(input).Behave(input.MaxWarnings),
+				c.provideCheckService(input).Behave(ctx, input.MaxWarnings),
 			)
 		},
 	)

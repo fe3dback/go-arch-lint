@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"context"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	terminal "github.com/fe3dback/span-terminal"
 
 	"github.com/fe3dback/go-arch-lint/internal/generated/stdgo"
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -34,12 +37,16 @@ func NewScanner() *Scanner {
 }
 
 func (r *Scanner) Scan(
+	ctx context.Context,
 	projectDirectory string,
 	moduleName string,
 	excludePaths []models.ResolvedPath,
 	excludeFileMatchers []*regexp.Regexp,
 ) ([]models.ProjectFile, error) {
-	ctx := resolveContext{
+	ctx, span := terminal.StartSpan(ctx, "scan project files")
+	defer span.End()
+
+	rctx := resolveContext{
 		projectDirectory:    projectDirectory,
 		moduleName:          moduleName,
 		excludePaths:        excludePaths,
@@ -49,14 +56,16 @@ func (r *Scanner) Scan(
 		results:  []models.ProjectFile{},
 	}
 
-	err := filepath.Walk(ctx.projectDirectory, func(path string, info os.FileInfo, err error) error {
-		return resolveFile(&ctx, path, info, err)
+	err := filepath.Walk(rctx.projectDirectory, func(path string, info os.FileInfo, err error) error {
+		span.WriteMessage(fmt.Sprintf("resolve '%s'", path))
+
+		return resolveFile(&rctx, path, info, err)
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to walk project tree: %w", err)
 	}
 
-	return ctx.results, nil
+	return rctx.results, nil
 }
 
 func resolveFile(ctx *resolveContext, path string, info os.FileInfo, err error) error {

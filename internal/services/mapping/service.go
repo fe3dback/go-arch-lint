@@ -1,6 +1,7 @@
 package mapping
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
@@ -23,13 +24,13 @@ func NewService(
 	}
 }
 
-func (s *Service) Behave(scheme models.MappingScheme) (models.Mapping, error) {
+func (s *Service) Behave(ctx context.Context, scheme models.MappingScheme) (models.Mapping, error) {
 	spec, err := s.specAssembler.Assemble()
 	if err != nil {
 		return models.Mapping{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	projectFiles, err := s.projectFilesResolver.ProjectFiles(spec)
+	projectFiles, err := s.projectFilesResolver.ProjectFiles(ctx, spec)
 	if err != nil {
 		return models.Mapping{}, fmt.Errorf("failed to resolve project files: %w", err)
 	}

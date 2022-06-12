@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"context"
 	"fmt"
 	"path"
 
@@ -23,13 +24,14 @@ func NewResolver(
 	}
 }
 
-func (r *Resolver) ProjectFiles(spec speca.Spec) ([]models.FileHold, error) {
+func (r *Resolver) ProjectFiles(ctx context.Context, spec speca.Spec) ([]models.FileHold, error) {
 	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
 		spec.RootDirectory.Value(),
 		spec.WorkingDirectory.Value(),
 	))
 
 	projectFiles, err := r.projectFilesResolver.Scan(
+		ctx,
 		scanDirectory,
 		spec.ModuleName.Value(),
 		refPathToList(spec.Exclude),

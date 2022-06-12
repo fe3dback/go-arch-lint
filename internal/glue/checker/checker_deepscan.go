@@ -1,11 +1,15 @@
 package checker
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"regexp"
 	"strings"
 	"sync"
+
+	terminal "github.com/fe3dback/span-terminal"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/fe3dback/go-arch-lint/internal/glue/deepscan"
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -32,7 +36,12 @@ func NewDeepScan(projectFilesResolver projectFilesResolver, sourceCodeRenderer s
 	}
 }
 
-func (c *DeepScan) Check(spec speca.Spec) (models.CheckResult, error) {
+func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+	const maxWorkers = 4
+
+	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("deepscan (%d workers)", maxWorkers))
+	defer span.End()
+
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
@@ -41,7 +50,7 @@ func (c *DeepScan) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.result = models.CheckResult{}
 
 	// -- prepare mapping file -> component
-	mapping, err := c.projectFilesResolver.ProjectFiles(spec)
+	mapping, err := c.projectFilesResolver.ProjectFiles(ctx, spec)
 	if err != nil {
 		return models.CheckResult{}, fmt.Errorf("failed resolve project files: %w", err)
 	}
@@ -56,27 +65,63 @@ func (c *DeepScan) Check(spec speca.Spec) (models.CheckResult, error) {
 	}
 
 	// -- scan project
-	for _, component := range spec.Components {
-		if component.DeepScan.Value() != true {
-			continue
-		}
+	checked := 0
+	total := len(spec.Components)
 
-		err := c.checkComponent(component)
-		if err != nil {
-			return models.CheckResult{}, fmt.Errorf("component '%s' check failed: %w",
-				component.Name.Value(),
-				err,
-			)
-		}
+	pool := make(chan struct{}, maxWorkers)
+	var wg errgroup.Group
+
+	for _, component := range spec.Components {
+		component := component
+
+		pool <- struct{}{}
+		wg.Go(func() error {
+			defer func() {
+				<-pool
+			}()
+
+			span.WriteMessage(fmt.Sprintf("checking component '%s'..", component.Name.Value()))
+			span.UpdateProgress(float64(checked) / float64(total))
+			checked++
+
+			if component.DeepScan.Value() != true {
+				return nil
+			}
+
+			err := c.checkComponent(ctx, component)
+			if err != nil {
+				return fmt.Errorf("component '%s' check failed: %w",
+					component.Name.Value(),
+					err,
+				)
+			}
+
+			return nil
+		})
+	}
+
+	err = wg.Wait()
+	if err != nil {
+		return models.CheckResult{}, err
 	}
 
 	return c.result, nil
 }
 
-func (c *DeepScan) checkComponent(cmp speca.Component) error {
+func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
+	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("- %s", cmp.Name.Value()))
+	defer span.End()
+
+	checked := 0
+	total := len(cmp.ResolvedPaths)
+
 	for _, packagePath := range cmp.ResolvedPaths {
+		span.WriteMessage(fmt.Sprintf("in %s", packagePath.Value().LocalPath))
+		span.UpdateProgress(float64(checked) / float64(total))
+		checked++
+
 		absPath := packagePath.Value().AbsPath
-		err := c.scanPackage(&cmp, absPath)
+		err := c.scanPackage(span, &cmp, absPath)
 		if err != nil {
 			return fmt.Errorf("failed scan '%s': %w", absPath, err)
 		}
@@ -85,7 +130,7 @@ func (c *DeepScan) checkComponent(cmp speca.Component) error {
 	return nil
 }
 
-func (c *DeepScan) scanPackage(cmp *speca.Component, absPackagePath string) error {
+func (c *DeepScan) scanPackage(span *terminal.Span, cmp *speca.Component, absPackagePath string) error {
 	usages, err := c.findUsages(absPackagePath)
 	if err != nil {
 		return fmt.Errorf("find usages failed: %w", err)
@@ -96,7 +141,7 @@ func (c *DeepScan) scanPackage(cmp *speca.Component, absPackagePath string) erro
 	}
 
 	for _, usage := range usages {
-		err := c.checkUsage(cmp, &usage)
+		err := c.checkUsage(span, cmp, &usage)
 		if err != nil {
 			return fmt.Errorf("failed check usage '%s' in '%s': %w",
 				usage.Name,
@@ -109,13 +154,13 @@ func (c *DeepScan) scanPackage(cmp *speca.Component, absPackagePath string) erro
 	return nil
 }
 
-func (c *DeepScan) checkUsage(cmp *speca.Component, usage *deepscan.InjectionMethod) error {
+func (c *DeepScan) checkUsage(span *terminal.Span, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
 	for _, gate := range usage.Gates {
 		if len(gate.Implementations) == 0 {
 			continue
 		}
 
-		err := c.checkGate(cmp, &gate)
+		err := c.checkGate(span, cmp, &gate)
 		if err != nil {
 			return fmt.Errorf("failed check gate '%s': %w",
 				gate.ArgumentDefinition.Place,
@@ -127,8 +172,14 @@ func (c *DeepScan) checkUsage(cmp *speca.Component, usage *deepscan.InjectionMet
 	return nil
 }
 
-func (c *DeepScan) checkGate(cmp *speca.Component, gate *deepscan.Gate) error {
+func (c *DeepScan) checkGate(span *terminal.Span, cmp *speca.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
+
+		span.WriteMessage(fmt.Sprintf(" .. %s.%s",
+			implementation.Target.Definition.Pkg,
+			implementation.Target.StructName,
+		))
+
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
 			return fmt.Errorf("failed check implementation '%s': %w",

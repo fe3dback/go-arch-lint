@@ -1,6 +1,7 @@
 package check
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
@@ -38,13 +39,13 @@ func NewService(
 	}
 }
 
-func (s *Service) Behave(maxWarnings int) (models.Check, error) {
+func (s *Service) Behave(ctx context.Context, maxWarnings int) (models.Check, error) {
 	spec, err := s.specAssembler.Assemble()
 	if err != nil {
 		return models.Check{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	result, err := s.specChecker.Check(spec)
+	result, err := s.specChecker.Check(ctx, spec)
 	if err != nil {
 		return models.Check{}, fmt.Errorf("failed to check project deps: %w", err)
 	}
