@@ -6,11 +6,15 @@ import (
 )
 
 type (
-	ProjectFilesResolver interface {
+	projectFilesResolver interface {
 		ProjectFiles(spec speca.Spec) ([]models.FileHold, error)
 	}
 
 	checker interface {
 		Check(spec speca.Spec) (models.CheckResult, error)
+	}
+
+	sourceCodeRenderer interface {
+		SourceCodeWithoutOffset(ref models.Reference, height int, highlight bool) []byte
 	}
 )

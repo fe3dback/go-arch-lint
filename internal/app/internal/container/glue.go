@@ -83,7 +83,10 @@ func (c *Container) provideSpecImportsChecker() *checker.Imports {
 }
 
 func (c *Container) provideSpecDeepScanChecker() *checker.DeepScan {
-	return checker.NewDeepScan()
+	return checker.NewDeepScan(
+		c.provideProjectFilesResolver(),
+		c.provideReferenceRender(),
+	)
 }
 
 func (c *Container) provideProjectFilesResolver() *resolver.Resolver {

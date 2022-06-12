@@ -14,5 +14,6 @@ type (
 		Blue(in string) (out string)
 		Magenta(in string) (out string)
 		Cyan(in string) (out string)
+		Gray(in string) (out string)
 	}
 )

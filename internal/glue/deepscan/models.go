@@ -20,11 +20,13 @@ type (
 	}
 
 	Gate struct {
-		Name            string           // function param name (func (_a_,b int), name="a")
-		Index           int              // function param index (func (a,b bool, c int), for c index=2)
-		Definition      Source           // where method param type defined (func (a,b,c _int_))
-		Interface       Interface        // used interface for injection
-		Implementations []Implementation // all code links to this param
+		MethodName         string           // function name (func Hello(a,b int), name="Hello")
+		ParamName          string           // function param name (func (_a_,b int), name="a")
+		Index              int              // function param index (func (a,b bool, c int), for c index=2)
+		MethodDefinition   Source           // where method is defined
+		ArgumentDefinition Source           // where method param type defined (func (a,b,c _int_))
+		Interface          Interface        // used interface for injection
+		Implementations    []Implementation // all code links to this param
 	}
 
 	Interface struct {
@@ -39,8 +41,9 @@ type (
 	}
 
 	Injector struct {
-		CodeName   string // code expression (not unique)
-		Definition Source // where inject occurs
+		CodeName         string // code expression (not unique)
+		MethodDefinition Source // where method is called
+		ParamDefinition  Source // where param is passed to method (injection occurs)
 	}
 
 	Target struct {

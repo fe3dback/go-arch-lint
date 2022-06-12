@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/fe3dback/go-arch-lint/internal/glue/deepscan"
@@ -12,16 +13,22 @@ import (
 )
 
 type DeepScan struct {
-	scanner *deepscan.Searcher
-	spec    speca.Spec
-	result  models.CheckResult
+	projectFilesResolver projectFilesResolver
+	sourceCodeRenderer   sourceCodeRenderer
+
+	scanner        *deepscan.Searcher
+	spec           speca.Spec
+	result         models.CheckResult
+	fileComponents map[string]string
 
 	sync.Mutex
 }
 
-func NewDeepScan() *DeepScan {
+func NewDeepScan(projectFilesResolver projectFilesResolver, sourceCodeRenderer sourceCodeRenderer) *DeepScan {
 	return &DeepScan{
-		scanner: deepscan.NewSearcher(),
+		projectFilesResolver: projectFilesResolver,
+		sourceCodeRenderer:   sourceCodeRenderer,
+		scanner:              deepscan.NewSearcher(),
 	}
 }
 
@@ -29,9 +36,26 @@ func (c *DeepScan) Check(spec speca.Spec) (models.CheckResult, error) {
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
 
+	// -- prepare shared objects
 	c.spec = spec
 	c.result = models.CheckResult{}
 
+	// -- prepare mapping file -> component
+	mapping, err := c.projectFilesResolver.ProjectFiles(spec)
+	if err != nil {
+		return models.CheckResult{}, fmt.Errorf("failed resolve project files: %w", err)
+	}
+
+	c.fileComponents = map[string]string{}
+	for _, hold := range mapping {
+		if hold.ComponentID == nil {
+			continue
+		}
+
+		c.fileComponents[hold.File.Path] = *hold.ComponentID
+	}
+
+	// -- scan project
 	for _, component := range spec.Components {
 		if component.DeepScan.Value() != true {
 			continue
@@ -91,10 +115,10 @@ func (c *DeepScan) checkUsage(cmp *speca.Component, usage *deepscan.InjectionMet
 			continue
 		}
 
-		err := c.checkGate(cmp, usage, &gate)
+		err := c.checkGate(cmp, &gate)
 		if err != nil {
 			return fmt.Errorf("failed check gate '%s': %w",
-				gate.Definition.Place,
+				gate.ArgumentDefinition.Place,
 				err,
 			)
 		}
@@ -103,12 +127,12 @@ func (c *DeepScan) checkUsage(cmp *speca.Component, usage *deepscan.InjectionMet
 	return nil
 }
 
-func (c *DeepScan) checkGate(cmp *speca.Component, usage *deepscan.InjectionMethod, gate *deepscan.Gate) error {
+func (c *DeepScan) checkGate(cmp *speca.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
-		err := c.checkImplementation(cmp, usage, gate, &implementation)
+		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
 			return fmt.Errorf("failed check implementation '%s': %w",
-				implementation.Injector.Definition,
+				implementation.Injector.ParamDefinition,
 				err,
 			)
 		}
@@ -119,7 +143,6 @@ func (c *DeepScan) checkGate(cmp *speca.Component, usage *deepscan.InjectionMeth
 
 func (c *DeepScan) checkImplementation(
 	cmp *speca.Component,
-	usage *deepscan.InjectionMethod,
 	gate *deepscan.Gate,
 	imp *deepscan.Implementation,
 ) error {
@@ -131,28 +154,36 @@ func (c *DeepScan) checkImplementation(
 		}
 	}
 
-	warn := models.CheckDeepscanWarning{
-		Gate: models.CheckDeepscanWarningGate{
-			ComponentName:     cmp.Name.Value(),
-			MethodName:        gate.Name, // todo: public func name
-			Definition:        c.definitionToReference(gate.Definition.Place),
-			SourceCodePreview: nil, // todo, custom height = (offsetOfParam - offsetOfDefinition)+1
+	targetName := imp.Target.Definition.Place.Filename
+	targetComponentID, targetDefined := c.fileComponents[targetName]
+
+	if !targetDefined {
+		// target component not described in go-arch-lint config
+		// so skip this warning, because linter show another warning
+		// anyway that this target is not mapped
+		return nil
+	}
+
+	warn := models.CheckArchWarningDeepscan{
+		Gate: models.DeepscanWarningGate{
+			ComponentName: cmp.Name.Value(),
+			MethodName:    gate.MethodName,
+			RelativePath:  c.definitionToRelPath(gate.ArgumentDefinition.Place),
+			Definition:    c.definitionToReference(gate.ArgumentDefinition.Place),
 		},
-		Dependency: models.CheckDeepscanWarningDependency{
-			ComponentName: "todo", // todo
+		Dependency: models.DeepscanWarningDependency{
+			ComponentName: targetComponentID,
 			Name: fmt.Sprintf("%s.%s",
 				imp.Target.Definition.Pkg,
 				imp.Target.StructName,
 			),
-			InjectionAST:      imp.Injector.CodeName,
-			Injection:         c.definitionToReference(imp.Injector.Definition.Place),
-			SourceCodePreview: nil, // todo, custom height = (offsetOfParam - offsetOfDefinition)+1
-		},
-		LineArt: models.CheckDeepscanWarningArt{ // todo
-			ToRight:    false,
-			OutPos:     0,
-			InPos:      0,
-			LineLength: 0,
+			InjectionAST:  imp.Injector.CodeName,
+			Injection:     c.definitionToReference(imp.Injector.ParamDefinition.Place),
+			InjectionPath: c.definitionToRelPath(imp.Injector.ParamDefinition.Place),
+			SourceCodePreview: c.renderCodeBetween(
+				imp.Injector.MethodDefinition.Place,
+				imp.Injector.ParamDefinition.Place,
+			),
 		},
 	}
 
@@ -160,13 +191,60 @@ func (c *DeepScan) checkImplementation(
 	return nil
 }
 
+func (c *DeepScan) renderCodeBetween(from, to deepscan.Position) []byte {
+	const maxCodeBlockHeight = 5
+
+	if from.Filename != to.Filename {
+		// invalid references
+		return nil
+	}
+
+	if from.Line == to.Line {
+		// its same line, render only it
+		return c.renderCodeFrom(from, 1)
+	}
+
+	min, max := c.sortPositions(from, to)
+	height := (max.Line - min.Line) + 1
+
+	if height <= maxCodeBlockHeight {
+		// render all block
+		return c.renderCodeFrom(min, height)
+	}
+
+	// render only last useful line
+	return c.renderCodeFrom(max, 1)
+}
+
+func (c *DeepScan) renderCodeFrom(from deepscan.Position, height int) []byte {
+	const highlight = true
+	return c.sourceCodeRenderer.SourceCodeWithoutOffset(
+		c.definitionToReference(from),
+		height,
+		highlight,
+	)
+}
+
+func (c *DeepScan) sortPositions(a, b deepscan.Position) (min, max deepscan.Position) {
+	if a.Line < b.Line {
+		return a, b
+	}
+
+	return b, a
+}
+
 func (c *DeepScan) definitionToReference(source deepscan.Position) models.Reference {
 	return models.Reference{
 		Valid:  true,
 		File:   source.Filename,
 		Line:   source.Line,
-		Offset: source.Offset,
+		Offset: source.Column,
 	}
+}
+
+func (c *DeepScan) definitionToRelPath(source deepscan.Position) string {
+	relativePath := strings.TrimPrefix(source.Filename, c.spec.RootDirectory.Value())
+	return fmt.Sprintf("%s:%d", relativePath, source.Line)
 }
 
 func (c *DeepScan) findUsages(absPackagePath string) ([]deepscan.InjectionMethod, error) {

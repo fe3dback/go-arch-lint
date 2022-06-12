@@ -20,6 +20,13 @@ type Render struct {
 	printer ColorPrinter
 }
 
+type annotateOpts struct {
+	code              []byte
+	ref               models.Reference
+	region            codeRegion
+	showColumnPointer bool
+}
+
 func NewRender(printer ColorPrinter) *Render {
 	return &Render{
 		printer: printer,
@@ -28,7 +35,22 @@ func NewRender(printer ColorPrinter) *Render {
 
 func (r *Render) SourceCode(ref models.Reference, height int, highlight bool) []byte {
 	code, region := r.readCode(ref, height, highlight)
-	return r.annotate(code, ref, region)
+	return r.annotate(annotateOpts{
+		code:              code,
+		ref:               ref,
+		region:            region,
+		showColumnPointer: true,
+	})
+}
+
+func (r *Render) SourceCodeWithoutOffset(ref models.Reference, height int, highlight bool) []byte {
+	code, region := r.readCode(ref, height, highlight)
+	return r.annotate(annotateOpts{
+		code:              code,
+		ref:               ref,
+		region:            region,
+		showColumnPointer: false,
+	})
 }
 
 func (r *Render) readCode(ref models.Reference, height int, highlight bool) ([]byte, codeRegion) {
@@ -111,14 +133,10 @@ func readLines(r io.Reader, region codeRegion) []byte {
 	return buffer.Bytes()
 }
 
-func (r *Render) annotate(
-	code []byte,
-	ref models.Reference,
-	region codeRegion,
-) []byte {
-	buf := bytes.NewBuffer(code)
+func (r *Render) annotate(opt annotateOpts) []byte {
+	buf := bytes.NewBuffer(opt.code)
 	sc := bufio.NewScanner(buf)
-	currentLine := region.lineFirst
+	currentLine := opt.region.lineFirst
 
 	var resultBuffer bytes.Buffer
 	for sc.Scan() {
@@ -126,7 +144,7 @@ func (r *Render) annotate(
 		prefixEmpty := r.printer.Gray("        ")
 
 		// add line pointer
-		if currentLine == region.lineMain {
+		if currentLine == opt.region.lineMain {
 			prefixLine = fmt.Sprintf("> %s", prefixLine)
 		} else {
 			prefixLine = fmt.Sprintf("  %s", prefixLine)
@@ -136,9 +154,11 @@ func (r *Render) annotate(
 		resultBuffer.WriteString(fmt.Sprintf("%s %s\n", prefixLine, sc.Bytes()))
 
 		// add offset pointer
-		if currentLine == region.lineMain && ref.Valid {
-			spaces := strings.Repeat(" ", int(math.Max(0, float64(ref.Offset-1))))
-			resultBuffer.WriteString(fmt.Sprintf("%s %s^\n", prefixEmpty, spaces))
+		if opt.showColumnPointer {
+			if currentLine == opt.region.lineMain && opt.ref.Valid {
+				spaces := strings.Repeat(" ", int(math.Max(0, float64(opt.ref.Offset-1))))
+				resultBuffer.WriteString(fmt.Sprintf("%s %s^\n", prefixEmpty, spaces))
+			}
 		}
 
 		currentLine++

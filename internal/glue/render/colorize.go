@@ -11,6 +11,7 @@ const (
 	colorBlue    colorName = "blue"
 	colorMagenta colorName = "magenta"
 	colorCyan    colorName = "cyan"
+	colorGray    colorName = "gray"
 )
 
 type (
@@ -41,6 +42,8 @@ func (c *colorizer) colorize(color colorName, input string) (string, error) {
 		return c.printer.Magenta(input), nil
 	case colorCyan:
 		return c.printer.Cyan(input), nil
+	case colorGray:
+		return c.printer.Gray(input), nil
 	default:
 		return "", fmt.Errorf("invalid color '%s'", color)
 	}

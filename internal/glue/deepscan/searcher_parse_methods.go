@@ -39,7 +39,7 @@ func (s *Searcher) extractMethodsFromFile(astPackage *packages.Package, astFile 
 			continue
 		}
 
-		gates := s.extractMethodGates(astPackage, decl.Type.Params.List)
+		gates := s.extractMethodGates(astPackage, decl)
 		if len(gates) == 0 {
 			// this method not have interface params (gates)
 			// so nothing can be injected into
@@ -57,7 +57,8 @@ func (s *Searcher) extractMethodsFromFile(astPackage *packages.Package, astFile 
 	return list, nil
 }
 
-func (s *Searcher) extractMethodGates(astPackage *packages.Package, fields []*ast.Field) []Gate {
+func (s *Searcher) extractMethodGates(astPackage *packages.Package, method *ast.FuncDecl) []Gate {
+	fields := method.Type.Params.List
 	params := make([]Gate, 0, len(fields))
 	typeIndex := -1
 
@@ -84,9 +85,11 @@ func (s *Searcher) extractMethodGates(astPackage *packages.Package, fields []*as
 			}
 
 			params = append(params, Gate{
-				Name:       fieldIdent.Name,
-				Index:      typeIndex,
-				Definition: s.sourceFromToken(field.Pos()),
+				MethodName:         method.Name.Name,
+				ParamName:          fieldIdent.Name,
+				Index:              typeIndex,
+				MethodDefinition:   s.sourceFromToken(method.Pos()),
+				ArgumentDefinition: s.sourceFromToken(field.Pos()),
 				Interface: Interface{
 					Name:       interfaceName,
 					Definition: s.sourceFromToken(pos),

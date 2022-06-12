@@ -11,7 +11,7 @@ const Check = `
 		{{ end -}}
 	{{ else -}}
 		{{ if .ArchHasWarnings -}}
-			{{ $warnCount := (plus (len .ArchWarningsDependency) (len .ArchWarningsMatch)) -}}
+			{{ $warnCount := (plus (plus (len .ArchWarningsDependency) (len .ArchWarningsMatch)) (len .ArchWarningsDeepScan) ) -}}
 			{{ range .ArchWarningsDependency -}}
 				[WARN] Component '{{.ComponentName | colorize "green"}}': file '
 				{{- .FileRelativePath | colorize "cyan"}}' shouldn't depend on '
@@ -26,8 +26,22 @@ const Check = `
 					{{ .SourceCodePreview | printf "%s" -}}
 				{{ end -}}
 			{{ end }}
+			{{ range .ArchWarningsDeepScan }}
+				Dependency {{.Dependency.ComponentName | colorize "green"}} -/-> {{.Gate.ComponentName | colorize "green"}} not allowed
+				  ├─ {{.Dependency.ComponentName | colorize "green"}}: type {{.Dependency.Name | colorize "cyan"}} injected in {{.Dependency.InjectionPath | colorize "gray"}}
+				  └─ {{.Gate.ComponentName | colorize "green"}}: into {{.Gate.MethodName | colorize "cyan"}} in {{.Gate.RelativePath | colorize "gray"}}
+				  
+				{{ if .Dependency.SourceCodePreview -}}
+					{{ .Dependency.SourceCodePreview | printf "%s" -}}
+				{{ end -}}
+				  
+			{{ end }}
 
-			warnings found: {{ $warnCount | printf "%d" | colorize "yellow" }}
+			--
+			total notices: {{ plus $warnCount .OmittedCount | printf "%d" | colorize "yellow" }}
+			{{ if gt .OmittedCount 0 -}}
+				omitted: {{.OmittedCount | printf "%d" | colorize "yellow" }} (too big to display)
+			{{ end }}
 		{{ else -}}
 			{{"OK - No warnings found" | colorize "green" -}}
 		{{ end -}}

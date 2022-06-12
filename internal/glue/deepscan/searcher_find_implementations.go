@@ -123,6 +123,7 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 			s.findFunctionCalls(importAlias, method.Name, astFile, func(callExpr *ast.CallExpr) {
 				for gateIndex := range method.Gates {
 					gate := &method.Gates[gateIndex]
+					callMethod := callExpr.Fun
 					callParam := callExpr.Args[gate.Index]
 
 					paramType := astPackage.TypesInfo.TypeOf(callParam)
@@ -151,8 +152,9 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 
 					gate.Implementations = append(gate.Implementations, Implementation{
 						Injector: Injector{
-							CodeName:   s.extractCodeFromASTNode(callParam),
-							Definition: s.sourceFromToken(callParam.Pos()),
+							CodeName:         s.extractCodeFromASTNode(callParam),
+							ParamDefinition:  s.sourceFromToken(callParam.Pos()),
+							MethodDefinition: s.sourceFromToken(callMethod.Pos()),
 						},
 						Target: Target{
 							StructName: targetName,

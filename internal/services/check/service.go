@@ -10,12 +10,19 @@ import (
 
 const highlightPreviewCodeLinesYAML = 1
 
-type Service struct {
-	specAssembler        SpecAssembler
-	specChecker          SpecChecker
-	referenceRender      ReferenceRender
-	highlightCodePreview bool
-}
+type (
+	Service struct {
+		specAssembler        SpecAssembler
+		specChecker          SpecChecker
+		referenceRender      ReferenceRender
+		highlightCodePreview bool
+	}
+
+	limiterResult struct {
+		results      models.CheckResult
+		omittedCount int
+	}
+)
 
 func NewService(
 	specAssembler SpecAssembler,
@@ -42,14 +49,16 @@ func (s *Service) Behave(maxWarnings int) (models.Check, error) {
 		return models.Check{}, fmt.Errorf("failed to check project deps: %w", err)
 	}
 
-	result = s.limitResults(result, maxWarnings)
+	limitedResult := s.limitResults(result, maxWarnings)
 
 	model := models.Check{
 		ModuleName:             spec.ModuleName.Value(),
 		DocumentNotices:        s.assembleNotice(spec.Integrity),
-		ArchHasWarnings:        s.resultsHasWarnings(result),
-		ArchWarningsDependency: result.DependencyWarnings,
-		ArchWarningsMatch:      result.MatchWarnings,
+		ArchHasWarnings:        s.resultsHasWarnings(limitedResult.results),
+		ArchWarningsDependency: limitedResult.results.DependencyWarnings,
+		ArchWarningsMatch:      limitedResult.results.MatchWarnings,
+		ArchWarningsDeepScan:   limitedResult.results.DeepscanWarnings,
+		OmittedCount:           limitedResult.omittedCount,
 	}
 
 	if model.ArchHasWarnings || len(model.DocumentNotices) > 0 {
@@ -60,34 +69,60 @@ func (s *Service) Behave(maxWarnings int) (models.Check, error) {
 	return model, nil
 }
 
-func (s *Service) limitResults(result models.CheckResult, maxWarnings int) models.CheckResult {
-	totalCount := 0
+func (s *Service) limitResults(result models.CheckResult, maxWarnings int) limiterResult {
+	passCount := 0
 	limitedResults := models.CheckResult{
 		DependencyWarnings: []models.CheckArchWarningDependency{},
 		MatchWarnings:      []models.CheckArchWarningMatch{},
+		DeepscanWarnings:   []models.CheckArchWarningDeepscan{},
 	}
 
 	// append deps
 	for _, notice := range result.DependencyWarnings {
-		if totalCount >= maxWarnings {
+		if passCount >= maxWarnings {
 			break
 		}
 
 		limitedResults.DependencyWarnings = append(limitedResults.DependencyWarnings, notice)
-		totalCount++
+		passCount++
 	}
 
 	// append not matched
 	for _, notice := range result.MatchWarnings {
-		if totalCount >= maxWarnings {
+		if passCount >= maxWarnings {
 			break
 		}
 
 		limitedResults.MatchWarnings = append(limitedResults.MatchWarnings, notice)
-		totalCount++
+		passCount++
 	}
 
-	return limitedResults
+	// append deep scan
+	const maxDeepScan = 10
+	deepScanCount := 0
+
+	for _, notice := range result.DeepscanWarnings {
+		if passCount >= maxWarnings {
+			break
+		}
+		if deepScanCount >= maxDeepScan {
+			break
+		}
+
+		limitedResults.DeepscanWarnings = append(limitedResults.DeepscanWarnings, notice)
+		passCount++
+		deepScanCount++
+	}
+
+	totalCount := 0 +
+		len(result.DeepscanWarnings) +
+		len(result.DependencyWarnings) +
+		len(result.MatchWarnings)
+
+	return limiterResult{
+		results:      limitedResults,
+		omittedCount: totalCount - passCount,
+	}
 }
 
 func (s *Service) resultsHasWarnings(result models.CheckResult) bool {
@@ -96,6 +131,10 @@ func (s *Service) resultsHasWarnings(result models.CheckResult) bool {
 	}
 
 	if len(result.MatchWarnings) > 0 {
+		return true
+	}
+
+	if len(result.DeepscanWarnings) > 0 {
 		return true
 	}
 

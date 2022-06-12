@@ -10,12 +10,12 @@ import (
 
 type Imports struct {
 	spec                 speca.Spec
-	projectFilesResolver ProjectFilesResolver
+	projectFilesResolver projectFilesResolver
 	result               results
 }
 
 func NewImport(
-	projectFilesResolver ProjectFilesResolver,
+	projectFilesResolver projectFilesResolver,
 ) *Imports {
 	return &Imports{
 		result:               newResults(),

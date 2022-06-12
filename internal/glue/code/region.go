@@ -1,9 +1,5 @@
 package code
 
-import (
-	"math"
-)
-
 type (
 	codeRegion struct {
 		lineFirst int
@@ -13,39 +9,21 @@ type (
 )
 
 func calculateCodeRegion(line int, regionHeight int, maxLines int) codeRegion {
-	if line < 1 {
-		line = 1
-	}
-	if line > maxLines {
-		line = maxLines
-	}
+	lineFirst := line
+	lineMain := line
+	lineLast := line + (regionHeight - 1)
 
-	isEven := regionHeight%2 == 0
-	var topHeight int
-
-	if isEven {
-		topHeight = regionHeight / 2 // 10 -> 5
-	} else {
-		topHeight = (regionHeight + 1) / 2 // 9 -> 5
+	if lineFirst < 1 {
+		lineFirst = 1
 	}
 
-	firstLine := line - topHeight
-	if firstLine < 1 {
-		firstLine = 1
-	}
-
-	lastLine := firstLine + regionHeight
-	if lastLine > maxLines {
-		lastLine = maxLines
-	}
-
-	if (lastLine - firstLine) < regionHeight {
-		firstLine = int(math.Max(1, float64(lastLine-regionHeight)))
+	if lineLast > maxLines {
+		lineLast = maxLines
 	}
 
 	return codeRegion{
-		lineFirst: firstLine,
-		lineMain:  line,
-		lineLast:  lastLine,
+		lineFirst: lineFirst,
+		lineMain:  lineMain,
+		lineLast:  lineLast,
 	}
 }
