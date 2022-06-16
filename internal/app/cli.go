@@ -4,11 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-	"os/signal"
-	"time"
 
 	terminal "github.com/fe3dback/span-terminal"
 
@@ -21,27 +17,16 @@ func Execute() int {
 	mainCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	frontendTerminal := terminal.NewTerminal(mainCtx, os.Stdout)
-
-	defaultStdout := os.Stdout
-	logBufferReader, logBufferWriter, _ := os.Pipe()
-
-	// forward all logs and output to buffer
-	os.Stdout = logBufferWriter
-	log.SetOutput(logBufferWriter)
-
-	// register frontend terminal
-	terminal.RegisterTerminal(frontendTerminal)
-
-	// -- handle signals
-
-	go func() {
-		sig := make(chan os.Signal, 1)
-		signal.Notify(sig, os.Kill, os.Interrupt)
-
-		_ = <-sig
-		cancel()
-	}()
+	terminal.SetGlobalTerminal(terminal.NewTerminal(
+		terminal.WithStdoutMaxLines(6),
+		terminal.WithContainerMaxLines(3),
+		terminal.WithRenderOpts(
+			terminal.WithRenderOptSpanMaxRoots(4),
+			terminal.WithRenderOptSpanMaxChild(8),
+			terminal.WithRenderOptSpanMaxDetails(16),
+		),
+	))
+	terminal.CaptureOutput()
 
 	// -- build DI
 	di := container.NewContainer(
@@ -54,16 +39,7 @@ func Execute() int {
 	rootCmd := di.ProvideRootCommand()
 	err := rootCmd.ExecuteContext(mainCtx)
 
-	// -- write all logs
-	terminal.Shutdown()
-	time.Sleep(time.Millisecond * 500)
-
-	// -- write buffered logs
-	_ = logBufferWriter.Close()
-	bufferedOutput, _ := ioutil.ReadAll(logBufferReader)
-	os.Stdout = defaultStdout
-
-	fmt.Printf("%s", bufferedOutput)
+	terminal.ReleaseOutput()
 
 	// -- handle errors
 	if err != nil {

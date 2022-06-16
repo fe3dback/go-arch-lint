@@ -80,7 +80,6 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 				<-pool
 			}()
 
-			span.WriteMessage(fmt.Sprintf("checking component '%s'..", component.Name.Value()))
 			span.UpdateProgress(float64(checked) / float64(total))
 			checked++
 
@@ -109,19 +108,18 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 }
 
 func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
-	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("- %s", cmp.Name.Value()))
+	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf(cmp.Name.Value()))
 	defer span.End()
 
 	checked := 0
 	total := len(cmp.ResolvedPaths)
 
 	for _, packagePath := range cmp.ResolvedPaths {
-		span.WriteMessage(fmt.Sprintf("in %s", packagePath.Value().LocalPath))
 		span.UpdateProgress(float64(checked) / float64(total))
 		checked++
 
 		absPath := packagePath.Value().AbsPath
-		err := c.scanPackage(span, &cmp, absPath)
+		err := c.scanPackage(ctx, &cmp, absPath)
 		if err != nil {
 			return fmt.Errorf("failed scan '%s': %w", absPath, err)
 		}
@@ -130,8 +128,8 @@ func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) erro
 	return nil
 }
 
-func (c *DeepScan) scanPackage(span *terminal.Span, cmp *speca.Component, absPackagePath string) error {
-	usages, err := c.findUsages(absPackagePath)
+func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPackagePath string) error {
+	usages, err := c.findUsages(ctx, absPackagePath)
 	if err != nil {
 		return fmt.Errorf("find usages failed: %w", err)
 	}
@@ -141,7 +139,7 @@ func (c *DeepScan) scanPackage(span *terminal.Span, cmp *speca.Component, absPac
 	}
 
 	for _, usage := range usages {
-		err := c.checkUsage(span, cmp, &usage)
+		err := c.checkUsage(ctx, cmp, &usage)
 		if err != nil {
 			return fmt.Errorf("failed check usage '%s' in '%s': %w",
 				usage.Name,
@@ -154,13 +152,13 @@ func (c *DeepScan) scanPackage(span *terminal.Span, cmp *speca.Component, absPac
 	return nil
 }
 
-func (c *DeepScan) checkUsage(span *terminal.Span, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
+func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
 	for _, gate := range usage.Gates {
 		if len(gate.Implementations) == 0 {
 			continue
 		}
 
-		err := c.checkGate(span, cmp, &gate)
+		err := c.checkGate(ctx, cmp, &gate)
 		if err != nil {
 			return fmt.Errorf("failed check gate '%s': %w",
 				gate.ArgumentDefinition.Place,
@@ -172,14 +170,8 @@ func (c *DeepScan) checkUsage(span *terminal.Span, cmp *speca.Component, usage *
 	return nil
 }
 
-func (c *DeepScan) checkGate(span *terminal.Span, cmp *speca.Component, gate *deepscan.Gate) error {
+func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
-
-		span.WriteMessage(fmt.Sprintf(" .. %s.%s",
-			implementation.Target.Definition.Pkg,
-			implementation.Target.StructName,
-		))
-
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
 			return fmt.Errorf("failed check implementation '%s': %w",
@@ -298,7 +290,7 @@ func (c *DeepScan) definitionToRelPath(source deepscan.Position) string {
 	return fmt.Sprintf("%s:%d", relativePath, source.Line)
 }
 
-func (c *DeepScan) findUsages(absPackagePath string) ([]deepscan.InjectionMethod, error) {
+func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deepscan.InjectionMethod, error) {
 	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
 		c.spec.RootDirectory.Value(),
 		c.spec.WorkingDirectory.Value(),

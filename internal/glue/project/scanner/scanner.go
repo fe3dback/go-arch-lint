@@ -11,8 +11,6 @@ import (
 	"regexp"
 	"strings"
 
-	terminal "github.com/fe3dback/span-terminal"
-
 	"github.com/fe3dback/go-arch-lint/internal/generated/stdgo"
 	"github.com/fe3dback/go-arch-lint/internal/models"
 )
@@ -37,15 +35,12 @@ func NewScanner() *Scanner {
 }
 
 func (r *Scanner) Scan(
-	ctx context.Context,
+	_ context.Context,
 	projectDirectory string,
 	moduleName string,
 	excludePaths []models.ResolvedPath,
 	excludeFileMatchers []*regexp.Regexp,
 ) ([]models.ProjectFile, error) {
-	ctx, span := terminal.StartSpan(ctx, "scan project files")
-	defer span.End()
-
 	rctx := resolveContext{
 		projectDirectory:    projectDirectory,
 		moduleName:          moduleName,
@@ -57,8 +52,6 @@ func (r *Scanner) Scan(
 	}
 
 	err := filepath.Walk(rctx.projectDirectory, func(path string, info os.FileInfo, err error) error {
-		span.WriteMessage(fmt.Sprintf("resolve '%s'", path))
-
 		return resolveFile(&rctx, path, info, err)
 	})
 	if err != nil {
