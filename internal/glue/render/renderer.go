@@ -17,9 +17,11 @@ const (
 	fnTrimDef    = "def"
 	fnPadLeft    = "padLeft"
 	fnPadRight   = "padRight"
+	fnLinePrefix = "linePrefix"
 	fnDir        = "dir"
 	fnPlus       = "plus"
 	fnMinus      = "minus"
+	fnConcat     = "concat"
 )
 
 type (
@@ -96,9 +98,11 @@ func (r *Renderer) renderASCII(model interface{}) error {
 			fnTrimDef:    r.asciiDefaultValue,
 			fnPadLeft:    r.asciiPadLeft,
 			fnPadRight:   r.asciiPadRight,
+			fnLinePrefix: r.asciiLinePrefix,
 			fnDir:        r.asciiPathDirectory,
 			fnPlus:       r.asciiPlus,
 			fnMinus:      r.asciiMinus,
+			fnConcat:     r.asciiConcat,
 		}).
 		Parse(
 			preprocessRawASCIITemplate(templateBuffer),

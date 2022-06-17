@@ -5,7 +5,7 @@ const Check = `
 	module: {{.ModuleName | colorize "green"}}
 	
 	{{ range .DocumentNotices -}}
-		[Archfile] {{.Text}}
+		{{.Text}}
 		{{ if .SourceCodePreview -}}
 			{{ .SourceCodePreview | printf "%s" -}}
 		{{ end -}}
@@ -13,28 +13,27 @@ const Check = `
 		{{ if .ArchHasWarnings -}}
 			{{ $warnCount := (plus (plus (len .ArchWarningsDependency) (len .ArchWarningsMatch)) (len .ArchWarningsDeepScan) ) -}}
 			{{ range .ArchWarningsDependency -}}
-				[WARN] Component '{{.ComponentName | colorize "green"}}': file '
-				{{- .FileRelativePath | colorize "cyan"}}' shouldn't depend on '
-				{{- .ResolvedImportName | colorize "yellow"}}'
+				Component {{.ComponentName | colorize "magenta"}} file {{ .FileRelativePath | colorize "cyan"}} shouldn't depend on {{ .ResolvedImportName | colorize "blue"}}
 				{{ if .SourceCodePreview -}}
 					{{ .SourceCodePreview | printf "%s" -}}
 				{{ end -}}
 			{{ end -}}
 			{{ range .ArchWarningsMatch -}}
-				[WARN] File '{{.FileRelativePath | colorize "cyan"}}' not attached to any component in archfile
+				File {{.FileRelativePath | colorize "cyan"}} not attached to any component in archfile
 				{{ if .SourceCodePreview -}}
 					{{ .SourceCodePreview | printf "%s" -}}
 				{{ end -}}
 			{{ end }}
 			{{ range .ArchWarningsDeepScan }}
-				Dependency {{.Dependency.ComponentName | colorize "green"}} -/-> {{.Gate.ComponentName | colorize "green"}} not allowed
-				  ├─ {{.Dependency.ComponentName | colorize "green"}}: type {{.Dependency.Name | colorize "cyan"}} injected in {{.Dependency.InjectionPath | colorize "gray"}}
-				  └─ {{.Gate.ComponentName | colorize "green"}}: into {{.Gate.MethodName | colorize "cyan"}} in {{.Gate.RelativePath | colorize "gray"}}
-				  
+				Dependency {{.Dependency.ComponentName | colorize "magenta"}} -\-> {{.Gate.ComponentName | colorize "magenta"}} not allowed
+				  ├─ {{.Dependency.ComponentName | colorize "magenta"}} {{.Dependency.Name | colorize "blue"}} in {{ .Target.RelativePath | colorize "gray" }}
+				  └─ {{.Gate.ComponentName | colorize "magenta"}} {{.Gate.MethodName | colorize "blue"}} in {{ .Gate.RelativePath | colorize "gray" }}
+				{{ " " }}
+				{{ concat "     " .Dependency.Injection.File ":" .Dependency.Injection.Line | colorize "gray" }}
 				{{ if .Dependency.SourceCodePreview -}}
-					{{ .Dependency.SourceCodePreview | printf "%s" -}}
+					{{ .Dependency.SourceCodePreview | printf "%s" | linePrefix "     " | colorize "red" -}}
 				{{ end -}}
-				  
+
 			{{ end }}
 
 			--

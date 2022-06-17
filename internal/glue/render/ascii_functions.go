@@ -39,7 +39,7 @@ func (r *Renderer) asciiDefaultValue(def string, value interface{}) string {
 }
 
 func (r *Renderer) asciiPadLeft(overallLen int, padStr string, value interface{}) string {
-	s := fmt.Sprintf("%s", value)
+	s := fmt.Sprintf("%v", value)
 
 	padCountInt := 1 + ((overallLen - len(padStr)) / len(padStr))
 	retStr := strings.Repeat(padStr, padCountInt) + s
@@ -47,15 +47,26 @@ func (r *Renderer) asciiPadLeft(overallLen int, padStr string, value interface{}
 }
 
 func (r *Renderer) asciiPadRight(overallLen int, padStr string, value interface{}) string {
-	s := fmt.Sprintf("%s", value)
+	s := fmt.Sprintf("%v", value)
 
 	padCountInt := 1 + ((overallLen - len(padStr)) / len(padStr))
 	retStr := s + strings.Repeat(padStr, padCountInt)
 	return retStr[:overallLen]
 }
 
+func (r *Renderer) asciiLinePrefix(prefix string, value interface{}) string {
+	lines := fmt.Sprintf("%s", value)
+	result := make([]string, 0)
+
+	for _, line := range strings.Split(lines, "\n") {
+		result = append(result, prefix+line)
+	}
+
+	return strings.Join(result, "\n")
+}
+
 func (r *Renderer) asciiPathDirectory(value interface{}) string {
-	return path.Dir(fmt.Sprintf("%s", value))
+	return path.Dir(fmt.Sprintf("%v", value))
 }
 
 func (r *Renderer) asciiPlus(a, b interface{}) (int, error) {
@@ -84,4 +95,14 @@ func (r *Renderer) asciiMinus(a, b interface{}) (int, error) {
 	}
 
 	return iA + iB, nil
+}
+
+func (r *Renderer) asciiConcat(sources ...interface{}) string {
+	result := ""
+
+	for _, source := range sources {
+		result += fmt.Sprintf("%v", source)
+	}
+
+	return result
 }

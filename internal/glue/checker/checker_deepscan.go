@@ -197,10 +197,13 @@ func (c *DeepScan) checkImplementation(
 		}
 	}
 
-	targetName := imp.Target.Definition.Place.Filename
-	targetComponentID, targetDefined := c.fileComponents[targetName]
+	targetPath := imp.Target.Definition.Place.Filename
+	targetComponentID, targetDefined := c.fileComponents[targetPath]
 
-	if !targetDefined {
+	gatePath := gate.MethodDefinition.Place.Filename
+	gateComponentID, gateDefined := c.fileComponents[gatePath]
+
+	if !targetDefined || !gateDefined {
 		// target component not described in go-arch-lint config
 		// so skip this warning, because linter show another warning
 		// anyway that this target is not mapped
@@ -209,7 +212,7 @@ func (c *DeepScan) checkImplementation(
 
 	warn := models.CheckArchWarningDeepscan{
 		Gate: models.DeepscanWarningGate{
-			ComponentName: cmp.Name.Value(),
+			ComponentName: gateComponentID,
 			MethodName:    gate.MethodName,
 			RelativePath:  c.definitionToRelPath(gate.ArgumentDefinition.Place),
 			Definition:    c.definitionToReference(gate.ArgumentDefinition.Place),
@@ -227,6 +230,9 @@ func (c *DeepScan) checkImplementation(
 				imp.Injector.MethodDefinition.Place,
 				imp.Injector.ParamDefinition.Place,
 			),
+		},
+		Target: models.DeepscanWarningTarget{
+			RelativePath: c.definitionToRelPath(imp.Target.Definition.Place),
 		},
 	}
 
@@ -260,7 +266,7 @@ func (c *DeepScan) renderCodeBetween(from, to deepscan.Position) []byte {
 }
 
 func (c *DeepScan) renderCodeFrom(from deepscan.Position, height int) []byte {
-	const highlight = true
+	const highlight = false
 	return c.sourceCodeRenderer.SourceCodeWithoutOffset(
 		c.definitionToReference(from),
 		height,

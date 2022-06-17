@@ -19,13 +19,18 @@ func NewCompositeChecker(checkers ...checker) *CompositeChecker {
 func (c *CompositeChecker) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
 	overallResults := models.CheckResult{}
 
-	for _, checker := range c.checkers {
+	for ind, checker := range c.checkers {
 		results, err := checker.Check(ctx, spec)
 		if err != nil {
 			return models.CheckResult{}, fmt.Errorf("checker failed '%T': %w", checker, err)
 		}
 
 		overallResults.Append(results)
+
+		if results.HasNotices() && ind < len(c.checkers)-1 {
+			fmt.Printf("skipped other checks, found early lint notices..\n\n")
+			break
+		}
 	}
 
 	return overallResults, nil

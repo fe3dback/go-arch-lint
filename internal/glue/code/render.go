@@ -151,7 +151,10 @@ func (r *Render) annotate(opt annotateOpts) []byte {
 		}
 
 		// draw line
-		resultBuffer.WriteString(fmt.Sprintf("%s %s\n", prefixLine, sc.Bytes()))
+		resultBuffer.WriteString(fmt.Sprintf("%s %s\n",
+			prefixLine,
+			r.replaceTabsToSpaces(sc.Bytes()),
+		))
 
 		// add offset pointer
 		if opt.showColumnPointer {
@@ -165,4 +168,8 @@ func (r *Render) annotate(opt annotateOpts) []byte {
 	}
 
 	return resultBuffer.Bytes()
+}
+
+func (r *Render) replaceTabsToSpaces(src []byte) []byte {
+	return []byte(strings.ReplaceAll(string(src), "\t", "  "))
 }

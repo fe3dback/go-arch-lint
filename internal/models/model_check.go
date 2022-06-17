@@ -38,6 +38,7 @@ type (
 	CheckArchWarningDeepscan struct {
 		Gate       DeepscanWarningGate
 		Dependency DeepscanWarningDependency
+		Target     DeepscanWarningTarget
 	}
 
 	DeepscanWarningGate struct {
@@ -56,6 +57,10 @@ type (
 		SourceCodePreview []byte    `json:"-"`
 	}
 
+	DeepscanWarningTarget struct {
+		RelativePath string `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
+	}
+
 	CheckResult struct {
 		DependencyWarnings []CheckArchWarningDependency
 		MatchWarnings      []CheckArchWarningMatch
@@ -67,4 +72,18 @@ func (cr *CheckResult) Append(another CheckResult) {
 	cr.DependencyWarnings = append(cr.DependencyWarnings, another.DependencyWarnings...)
 	cr.MatchWarnings = append(cr.MatchWarnings, another.MatchWarnings...)
 	cr.DeepscanWarnings = append(cr.DeepscanWarnings, another.DeepscanWarnings...)
+}
+
+func (cr *CheckResult) HasNotices() bool {
+	if len(cr.DependencyWarnings) > 0 {
+		return true
+	}
+	if len(cr.MatchWarnings) > 0 {
+		return true
+	}
+	if len(cr.DeepscanWarnings) > 0 {
+		return true
+	}
+
+	return false
 }
