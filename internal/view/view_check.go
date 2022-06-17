@@ -31,9 +31,8 @@ const Check = `
 				{{ " " }}
 				{{ concat "     " .Dependency.Injection.File ":" .Dependency.Injection.Line | colorize "gray" }}
 				{{ if .Dependency.SourceCodePreview -}}
-					{{ .Dependency.SourceCodePreview | printf "%s" | linePrefix "     " | colorize "red" -}}
-				{{ end -}}
-
+					{{ .Dependency.SourceCodePreview | printf "%s" | linePrefix "     " -}}
+				{{ end }}
 			{{ end }}
 
 			--

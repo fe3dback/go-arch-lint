@@ -26,7 +26,7 @@ func (v *validatorDeps) Validate(doc arch.Document) []speca.Notice {
 		if err := v.utils.assertKnownComponent(name); err != nil {
 			notices = append(notices, speca.Notice{
 				Notice: err,
-				Ref:    rules.Reference(),
+				Ref:    doc.Dependencies().Reference(),
 			})
 		}
 

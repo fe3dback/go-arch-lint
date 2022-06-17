@@ -8,12 +8,18 @@ exclude:
 
 excludeFiles:
   - "^.*_test\\.go$"
+  - "^.*\/test\/.*$"
 
 vendors:
+  go-common:
+    in: golang.org/x/sync/errgroup
   go-ast:
     in:
       - golang.org/x/mod/modfile
       - golang.org/x/tools/go/packages
+  mod-term:
+    in: github.com/fe3dback/span-terminal
+
   3rd-cobra:
     in: github.com/spf13/cobra
   3rd-yaml:
@@ -27,97 +33,79 @@ vendors:
   3rd-json-scheme:
     in: github.com/xeipuuv/gojsonschema
 
+commonVendors:
+  - go-common
+  - mod-term
+
 components:
+  # system layers
+  main:
+    in: app
   container:
     in: app/internal/container/**
-  app:
-    in: app
 
+  # layout
   commands:
     in: commands/*
-
-  glue:
-    in: glue/**
-  glueChecker:
-    in: glue/checker
-  glueCode:
-    in: glue/code
-  glueDeepscan:
-    in: glue/deepscan
-  glueProject:
-    in: glue/project/**
-  gluePrinter:
-    in: glue/printer
-  glueSpec:
-    in: glue/spec/**
-  glueYamlSpec:
-    in: glue/yaml/spec
-  glueYaml:
-    in: glue/yaml/*
-
-  models:
-    in: models/**
-  schema:
-    in: schema
+  operations:
+    in: operations/*
   services:
-    in: services/*
-  version:
-    in: version
+    in: services/**
+  pkg:
+    in: pkg/*
   view:
     in: view
 
-  generated:
-    in: generated/**
+  # utility
+  models:
+    in: models/**
+  version:
+    in: version
+
+  # generated
+  genStdLibrary:
+    in: generated/stdgo
 
 commonComponents:
   - models
-  - generated
 
+# layout:
+# commands <- | operations <- services |
+#             |     \ view             | <- pkg
 deps:
+  main:
+    mayDependOn:
+      - version
+      - container
+
   container:
     anyProjectDeps: true
     anyVendorDeps: true
 
-  app:
-    mayDependOn:
-      - container
-      - version
-
   commands:
+    mayDependOn:
+      - operations
+      - pkg
     canUse:
       - 3rd-cobra
 
-  glueSpec:
+  operations:
     mayDependOn:
-      - glueYamlSpec
+      - services
+      - view
 
-  glueDeepscan:
+  services:
+    mayDependOn:
+      - pkg
+      - genStdLibrary
+      - services
     canUse:
       - go-ast
-
-  glueChecker:
-    mayDependOn:
-      - glueDeepscan
-
-  glueYaml:
-    mayDependOn:
-      - glueYamlSpec
-    canUse:
       - 3rd-yaml
-
-  glueYamlSpec:
-    canUse:
-      - 3rd-yaml
+      - 3rd-color-fmt
+      - 3rd-code-highlight
       - 3rd-json-scheme
 
-  glueProject:
+  pkg:
     canUse:
       - go-ast
-
-  gluePrinter:
-    canUse:
-      - 3rd-color-fmt
-
-  glueCode:
-    canUse:
-      - 3rd-code-highlight

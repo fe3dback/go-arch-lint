@@ -13,7 +13,7 @@ type (
 	}
 
 	ReferenceRender interface {
-		SourceCode(ref models.Reference, height int, highlight bool) []byte
+		SourceCode(ref models.CodeReference, highlight bool) []byte
 	}
 
 	SpecChecker interface {

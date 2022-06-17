@@ -4,7 +4,7 @@ import "github.com/fe3dback/go-arch-lint/internal/models"
 
 type (
 	ReferenceRender interface {
-		SourceCode(ref models.Reference, height int, highlight bool) []byte
+		SourceCode(ref models.CodeReference, highlight bool) []byte
 	}
 
 	ColorPrinter interface {

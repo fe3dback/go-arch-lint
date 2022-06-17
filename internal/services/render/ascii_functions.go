@@ -11,7 +11,7 @@ func (r *Renderer) asciiColorize(color string, value interface{}) (string, error
 	colorizer := newColorizer(r.colorPrinter)
 	out, err := colorizer.colorize(
 		color,
-		fmt.Sprintf("%s", value),
+		fmt.Sprintf("%v", value),
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed colorize: %w", err)

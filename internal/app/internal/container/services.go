@@ -2,10 +2,10 @@ package container
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/services/check"
-	"github.com/fe3dback/go-arch-lint/internal/services/mapping"
-	"github.com/fe3dback/go-arch-lint/internal/services/schema"
-	"github.com/fe3dback/go-arch-lint/internal/services/version"
+	"github.com/fe3dback/go-arch-lint/internal/operations/check"
+	"github.com/fe3dback/go-arch-lint/internal/operations/mapping"
+	"github.com/fe3dback/go-arch-lint/internal/operations/schema"
+	"github.com/fe3dback/go-arch-lint/internal/operations/version"
 )
 
 func (c *Container) provideVersionService() *version.Service {

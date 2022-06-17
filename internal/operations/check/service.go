@@ -9,8 +9,6 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
-const highlightPreviewCodeLinesYAML = 1
-
 type (
 	Service struct {
 		specAssembler        SpecAssembler
@@ -154,8 +152,7 @@ func (s *Service) assembleNotice(integrity speca.Integrity) []models.CheckNotice
 			Line:   notice.Ref.Line,
 			Offset: notice.Ref.Offset,
 			SourceCodePreview: s.referenceRender.SourceCode(
-				notice.Ref,
-				highlightPreviewCodeLinesYAML,
+				models.NewCodeReferenceRelative(notice.Ref, 1, 1),
 				s.highlightCodePreview,
 			),
 		})

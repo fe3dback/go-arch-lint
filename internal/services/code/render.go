@@ -22,7 +22,7 @@ type Render struct {
 
 type annotateOpts struct {
 	code              []byte
-	ref               models.Reference
+	ref               models.CodeReference
 	region            codeRegion
 	showColumnPointer bool
 }
@@ -33,8 +33,8 @@ func NewRender(printer ColorPrinter) *Render {
 	}
 }
 
-func (r *Render) SourceCode(ref models.Reference, height int, highlight bool) []byte {
-	code, region := r.readCode(ref, height, highlight)
+func (r *Render) SourceCode(ref models.CodeReference, highlight bool) []byte {
+	code, region := r.readCode(ref, highlight)
 	return r.annotate(annotateOpts{
 		code:              code,
 		ref:               ref,
@@ -43,8 +43,8 @@ func (r *Render) SourceCode(ref models.Reference, height int, highlight bool) []
 	})
 }
 
-func (r *Render) SourceCodeWithoutOffset(ref models.Reference, height int, highlight bool) []byte {
-	code, region := r.readCode(ref, height, highlight)
+func (r *Render) SourceCodeWithoutOffset(ref models.CodeReference, highlight bool) []byte {
+	code, region := r.readCode(ref, highlight)
 	return r.annotate(annotateOpts{
 		code:              code,
 		ref:               ref,
@@ -53,12 +53,12 @@ func (r *Render) SourceCodeWithoutOffset(ref models.Reference, height int, highl
 	})
 }
 
-func (r *Render) readCode(ref models.Reference, height int, highlight bool) ([]byte, codeRegion) {
-	if !ref.Valid {
+func (r *Render) readCode(ref models.CodeReference, highlight bool) ([]byte, codeRegion) {
+	if !ref.Pointer.Valid {
 		return []byte{}, codeRegion{}
 	}
 
-	rawCode, region := r.readRaw(ref, height)
+	rawCode, region := r.readRaw(ref)
 	if !highlight {
 		return rawCode, region
 	}
@@ -66,12 +66,12 @@ func (r *Render) readCode(ref models.Reference, height int, highlight bool) ([]b
 	return highlightRawCode(ref, rawCode), region
 }
 
-func (r *Render) readRaw(ref models.Reference, height int) ([]byte, codeRegion) {
-	if !ref.Valid {
+func (r *Render) readRaw(ref models.CodeReference) ([]byte, codeRegion) {
+	if !ref.Pointer.Valid {
 		return []byte{}, codeRegion{}
 	}
 
-	file, err := os.Open(ref.File)
+	file, err := os.Open(ref.Pointer.File)
 	if err != nil {
 		return []byte{}, codeRegion{}
 	}
@@ -86,12 +86,12 @@ func (r *Render) readRaw(ref models.Reference, height int) ([]byte, codeRegion) 
 		return []byte{}, codeRegion{}
 	}
 
-	region := calculateCodeRegion(ref.Line, height, linesCount)
+	region := calculateCodeRegion(ref, linesCount)
 	return readLines(file, region), region
 }
 
-func highlightRawCode(ref models.Reference, code []byte) []byte {
-	lexer := lexers.Match(ref.File)
+func highlightRawCode(ref models.CodeReference, code []byte) []byte {
+	lexer := lexers.Match(ref.Pointer.File)
 	if lexer == nil {
 		lexer = lexers.Fallback
 	}
@@ -158,8 +158,8 @@ func (r *Render) annotate(opt annotateOpts) []byte {
 
 		// add offset pointer
 		if opt.showColumnPointer {
-			if currentLine == opt.region.lineMain && opt.ref.Valid {
-				spaces := strings.Repeat(" ", int(math.Max(0, float64(opt.ref.Offset-1))))
+			if currentLine == opt.region.lineMain && opt.ref.Pointer.Valid {
+				spaces := strings.Repeat(" ", int(math.Max(0, float64(opt.ref.Pointer.Offset-1))))
 				resultBuffer.WriteString(fmt.Sprintf("%s %s^\n", prefixEmpty, spaces))
 			}
 		}

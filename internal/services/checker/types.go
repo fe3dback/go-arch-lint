@@ -17,6 +17,6 @@ type (
 	}
 
 	sourceCodeRenderer interface {
-		SourceCodeWithoutOffset(ref models.Reference, height int, highlight bool) []byte
+		SourceCodeWithoutOffset(ref models.CodeReference, highlight bool) []byte
 	}
 )

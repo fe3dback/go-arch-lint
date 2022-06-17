@@ -1,8 +1,11 @@
 package code
 
 import (
+	"math"
 	"reflect"
 	"testing"
+
+	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 func Test_calculateCodeRegion(t *testing.T) {
@@ -52,7 +55,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 			want: codeRegion{
 				lineFirst: 1,
 				lineMain:  1,
-				lineLast:  7,
+				lineLast:  4,
 			},
 		},
 		{
@@ -65,7 +68,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 			want: codeRegion{
 				lineFirst: 1,
 				lineMain:  2,
-				lineLast:  7,
+				lineLast:  5,
 			},
 		},
 		{
@@ -78,7 +81,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 			want: codeRegion{
 				lineFirst: 1,
 				lineMain:  3,
-				lineLast:  7,
+				lineLast:  6,
 			},
 		},
 		{
@@ -115,7 +118,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 				maxLines:     100,
 			},
 			want: codeRegion{
-				lineFirst: 94,
+				lineFirst: 97,
 				lineMain:  100,
 				lineLast:  100,
 			},
@@ -128,7 +131,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 				maxLines:     100,
 			},
 			want: codeRegion{
-				lineFirst: 94,
+				lineFirst: 96,
 				lineMain:  99,
 				lineLast:  100,
 			},
@@ -141,7 +144,7 @@ func Test_calculateCodeRegion(t *testing.T) {
 				maxLines:     100,
 			},
 			want: codeRegion{
-				lineFirst: 94,
+				lineFirst: 95,
 				lineMain:  98,
 				lineLast:  100,
 			},
@@ -214,7 +217,18 @@ func Test_calculateCodeRegion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := calculateCodeRegion(tt.args.line, tt.args.regionHeight, tt.args.maxLines); !reflect.DeepEqual(got, tt.want) {
+			ref := models.NewCodeReferenceRelative(
+				models.Reference{
+					Valid:  true,
+					File:   "/tmp/dev",
+					Line:   tt.args.line,
+					Offset: 0,
+				},
+				int(math.Ceil(float64(tt.args.regionHeight)/2)),
+				int(math.Floor(float64(tt.args.regionHeight)/2)),
+			)
+
+			if got := calculateCodeRegion(ref, tt.args.maxLines); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("calculateCodeRegion() = %v, want %v", got, tt.want)
 			}
 		})

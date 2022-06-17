@@ -11,9 +11,9 @@ import (
 	terminal "github.com/fe3dback/span-terminal"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/deepscan"
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/pkg/deepscan"
 )
 
 type DeepScan struct {
@@ -36,9 +36,39 @@ func NewDeepScan(projectFilesResolver projectFilesResolver, sourceCodeRenderer s
 	}
 }
 
-func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
-	const maxWorkers = 4
+// How cpus available vs workersCount
+// try to utilize CPU, but not all, user
+// can do other work, and linter is background process
+// 1 = 1   4 = 3   7 = 5
+// 2 = 2   5 = 4   8 = 6
+// 3 = 2   6 = 4   ...
+func (c *DeepScan) workersCount() int {
+	// currently scan algorithm can`t do work in ||
+	// because of mux locks
+	// its working, but 8 workers will scan with same speed that have 1
+	//
+	// todo: adapt scan algorithm to concurrent processing
+	// todo: optimize scan speed
+	return 1
 
+	// max := runtime.NumCPU()
+	// if max == 1 {
+	// 	return 1
+	// }
+	// if max == 2 {
+	// 	return 2
+	// }
+	//
+	// half := int(math.Floor(float64(max) / 1.25))
+	// if half < 2 {
+	// 	half = 2
+	// }
+	//
+	// return half
+}
+
+func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+	maxWorkers := c.workersCount()
 	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("deepscan (%d workers)", maxWorkers))
 	defer span.End()
 
@@ -204,9 +234,12 @@ func (c *DeepScan) checkImplementation(
 	gateComponentID, gateDefined := c.fileComponents[gatePath]
 
 	if !targetDefined || !gateDefined {
-		// target component not described in go-arch-lint config
-		// so skip this warning, because linter show another warning
-		// anyway that this target is not mapped
+		// target component is vendor or std file, not described in mapping
+		// we can check vendor libs too, but this requires another scan process
+
+		// example of skipping target:
+		// - $GOROOT/src/context/context.go (stdlib)
+		// - /home/neo/go/src/example.com/ns/awesome/vendor/libs.example.com/good/producer/client.go (vendor)
 		return nil
 	}
 
@@ -226,7 +259,8 @@ func (c *DeepScan) checkImplementation(
 			InjectionAST:  imp.Injector.CodeName,
 			Injection:     c.definitionToReference(imp.Injector.ParamDefinition.Place),
 			InjectionPath: c.definitionToRelPath(imp.Injector.ParamDefinition.Place),
-			SourceCodePreview: c.renderCodeBetween(
+			SourceCodePreview: c.renderCode(
+				imp.Injector.ParamDefinition.Place,
 				imp.Injector.MethodDefinition.Place,
 				imp.Injector.ParamDefinition.Place,
 			),
@@ -240,36 +274,12 @@ func (c *DeepScan) checkImplementation(
 	return nil
 }
 
-func (c *DeepScan) renderCodeBetween(from, to deepscan.Position) []byte {
-	const maxCodeBlockHeight = 5
-
-	if from.Filename != to.Filename {
-		// invalid references
-		return nil
-	}
-
-	if from.Line == to.Line {
-		// its same line, render only it
-		return c.renderCodeFrom(from, 1)
-	}
-
-	min, max := c.sortPositions(from, to)
-	height := (max.Line - min.Line) + 1
-
-	if height <= maxCodeBlockHeight {
-		// render all block
-		return c.renderCodeFrom(min, height)
-	}
-
-	// render only last useful line
-	return c.renderCodeFrom(max, 1)
-}
-
-func (c *DeepScan) renderCodeFrom(from deepscan.Position, height int) []byte {
+func (c *DeepScan) renderCode(pointer, from, to deepscan.Position) []byte {
 	const highlight = false
 	return c.sourceCodeRenderer.SourceCodeWithoutOffset(
-		c.definitionToReference(from),
-		height,
+		models.NewCodeReference(
+			c.definitionToReference(pointer), from.Line, to.Line,
+		),
 		highlight,
 	)
 }
