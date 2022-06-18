@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	Service struct {
+	Operation struct {
 		specAssembler        SpecAssembler
 		specChecker          SpecChecker
 		referenceRender      ReferenceRender
@@ -23,13 +23,13 @@ type (
 	}
 )
 
-func NewService(
+func NewOperation(
 	specAssembler SpecAssembler,
 	specChecker SpecChecker,
 	referenceRender ReferenceRender,
 	highlightCodePreview bool,
-) *Service {
-	return &Service{
+) *Operation {
+	return &Operation{
 		specAssembler:        specAssembler,
 		specChecker:          specChecker,
 		referenceRender:      referenceRender,
@@ -37,7 +37,7 @@ func NewService(
 	}
 }
 
-func (s *Service) Behave(ctx context.Context, maxWarnings int) (models.Check, error) {
+func (s *Operation) Behave(ctx context.Context, maxWarnings int) (models.Check, error) {
 	spec, err := s.specAssembler.Assemble()
 	if err != nil {
 		return models.Check{}, fmt.Errorf("failed to assemble spec: %w", err)
@@ -68,7 +68,7 @@ func (s *Service) Behave(ctx context.Context, maxWarnings int) (models.Check, er
 	return model, nil
 }
 
-func (s *Service) limitResults(result models.CheckResult, maxWarnings int) limiterResult {
+func (s *Operation) limitResults(result models.CheckResult, maxWarnings int) limiterResult {
 	passCount := 0
 	limitedResults := models.CheckResult{
 		DependencyWarnings: []models.CheckArchWarningDependency{},
@@ -124,7 +124,7 @@ func (s *Service) limitResults(result models.CheckResult, maxWarnings int) limit
 	}
 }
 
-func (s *Service) resultsHasWarnings(result models.CheckResult) bool {
+func (s *Operation) resultsHasWarnings(result models.CheckResult) bool {
 	if len(result.DependencyWarnings) > 0 {
 		return true
 	}
@@ -140,7 +140,7 @@ func (s *Service) resultsHasWarnings(result models.CheckResult) bool {
 	return false
 }
 
-func (s *Service) assembleNotice(integrity speca.Integrity) []models.CheckNotice {
+func (s *Operation) assembleNotice(integrity speca.Integrity) []models.CheckNotice {
 	notices := make([]speca.Notice, 0)
 	notices = append(notices, integrity.DocumentNotices...)
 

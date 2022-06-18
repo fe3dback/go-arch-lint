@@ -6,25 +6,25 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
-type Service struct {
+type Operation struct {
 	version    string
 	buildTime  string
 	commitHash string
 }
 
-func NewService(
+func NewOperation(
 	version string,
 	buildTime string,
 	commitHash string,
-) *Service {
-	return &Service{
+) *Operation {
+	return &Operation{
 		version:    version,
 		buildTime:  buildTime,
 		commitHash: commitHash,
 	}
 }
 
-func (s *Service) Behave() (models.Version, error) {
+func (s *Operation) Behave() (models.Version, error) {
 	return models.Version{
 		LinterVersion:       s.version,
 		GoArchFileSupported: fmt.Sprintf("1 .. %d", models.SupportedVersion),

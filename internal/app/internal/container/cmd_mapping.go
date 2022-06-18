@@ -19,7 +19,7 @@ func (c *Container) provideMappingCommandAssembler() *mapping.CommandAssembler {
 		c.provideProjectInfoAssembler(),
 		func(ctx context.Context, input models.FlagsMapping) error {
 			return c.ProvideRenderer().RenderModel(
-				c.provideMappingService(input).Behave(ctx, input.Scheme),
+				c.provideOperationMapping(input).Behave(ctx, input.Scheme),
 			)
 		},
 	)

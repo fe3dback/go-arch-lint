@@ -9,22 +9,22 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
-type Service struct {
+type Operation struct {
 	specAssembler        SpecAssembler
 	projectFilesResolver ProjectFilesResolver
 }
 
-func NewService(
+func NewOperation(
 	specAssembler SpecAssembler,
 	projectFilesResolver ProjectFilesResolver,
-) *Service {
-	return &Service{
+) *Operation {
+	return &Operation{
 		specAssembler:        specAssembler,
 		projectFilesResolver: projectFilesResolver,
 	}
 }
 
-func (s *Service) Behave(ctx context.Context, scheme models.MappingScheme) (models.Mapping, error) {
+func (s *Operation) Behave(ctx context.Context, scheme models.MappingScheme) (models.Mapping, error) {
 	spec, err := s.specAssembler.Assemble()
 	if err != nil {
 		return models.Mapping{}, fmt.Errorf("failed to assemble spec: %w", err)

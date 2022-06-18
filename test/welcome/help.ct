@@ -7,11 +7,12 @@ Usage:
   go-arch-lint [command]
 
 Available Commands:
-  check       check project architecture by yaml file
-  help        Help about any command
-  mapping     mapping table between files and components
-  schema      json schema for arch file inspection
-  version     Print go arch linter version
+  check        check project architecture by yaml file
+  help         Help about any command
+  mapping      mapping table between files and components
+  schema       json schema for arch file inspection
+  self-inspect will validate arch config and arch setup
+  version      Print go arch linter version
 
 Flags:
   -h, --help                   help for go-arch-lint

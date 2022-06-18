@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	terminal "github.com/fe3dback/span-terminal"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 
 	"github.com/spf13/cobra"
@@ -62,6 +64,11 @@ func (c *CommandAssembler) Assemble() *cobra.Command {
 }
 
 func (c *CommandAssembler) invoke(cmd *cobra.Command, _ []string) error {
+	// track progress of this command, with stdout drawing
+	terminal.CaptureOutput()
+	defer terminal.ReleaseOutput()
+
+	// run
 	input, err := c.assembleInput()
 	if err != nil {
 		return fmt.Errorf("failed to assemble input params: %w", err)

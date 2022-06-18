@@ -19,7 +19,7 @@ func (c *Container) provideCheckCommandAssembler() *check.CommandAssembler {
 		c.provideProjectInfoAssembler(),
 		func(ctx context.Context, input models.FlagsCheck) error {
 			return c.ProvideRenderer().RenderModel(
-				c.provideCheckService(input).Behave(ctx, input.MaxWarnings),
+				c.provideOperationCheck(input).Behave(ctx, input.MaxWarnings),
 			)
 		},
 	)

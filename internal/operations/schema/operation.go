@@ -7,14 +7,14 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
-type Service struct {
+type Operation struct {
 }
 
-func NewService() *Service {
-	return &Service{}
+func NewOperation() *Operation {
+	return &Operation{}
 }
 
-func (s *Service) Behave(schema models.FlagsSchema) (models.Schema, error) {
+func (s *Operation) Behave(schema models.FlagsSchema) (models.Schema, error) {
 	// reformat json to system one line string
 	var data interface{}
 	err := json.Unmarshal([]byte(schema.JSONSchema), &data)

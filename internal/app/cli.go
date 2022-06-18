@@ -26,7 +26,6 @@ func Execute() int {
 			terminal.WithRenderOptSpanMaxDetails(16),
 		),
 	))
-	terminal.CaptureOutput()
 
 	// -- build DI
 	di := container.NewContainer(
@@ -38,8 +37,6 @@ func Execute() int {
 	// -- process
 	rootCmd := di.ProvideRootCommand()
 	err := rootCmd.ExecuteContext(mainCtx)
-
-	terminal.ReleaseOutput()
 
 	// -- handle errors
 	if err != nil {
