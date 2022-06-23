@@ -7,7 +7,7 @@ Linter used to enforce some good project structure and validate top level archit
 
 ## Quick start
 
-### What exactly project architecture
+### What exactly is project architecture
 
 You can imagine some good simple architecture, for example classic onion part:
 
