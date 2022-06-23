@@ -1,6 +1,6 @@
 // do not edit
-// generated at 2022-01-09T14:20:20Z
-// generated for 'go version go1.16.6 linux/amd64'
+// generated at 2022-06-11T09:49:10Z
+// generated for 'go version go1.18.1 linux/amd64'
 
 package stdgo
 
@@ -30,6 +30,7 @@ var StdPackages = map[string]struct{}{
 	"crypto/ed25519/internal/edwards25519/field": {},
 	"crypto/elliptic": {},
 	"crypto/elliptic/internal/fiat": {},
+	"crypto/elliptic/internal/nistec": {},
 	"crypto/hmac": {},
 	"crypto/internal/randutil": {},
 	"crypto/internal/subtle": {},
@@ -46,6 +47,7 @@ var StdPackages = map[string]struct{}{
 	"crypto/x509/pkix": {},
 	"database/sql": {},
 	"database/sql/driver": {},
+	"debug/buildinfo": {},
 	"debug/dwarf": {},
 	"debug/elf": {},
 	"debug/gosym": {},
@@ -110,9 +112,14 @@ var StdPackages = map[string]struct{}{
 	"internal/cpu": {},
 	"internal/execabs": {},
 	"internal/fmtsort": {},
+	"internal/fuzz": {},
+	"internal/goarch": {},
+	"internal/godebug": {},
 	"internal/goexperiment": {},
+	"internal/goos": {},
 	"internal/goroot": {},
 	"internal/goversion": {},
+	"internal/intern": {},
 	"internal/itoa": {},
 	"internal/lazyregexp": {},
 	"internal/lazytemplate": {},
@@ -159,6 +166,7 @@ var StdPackages = map[string]struct{}{
 	"net/http/pprof": {},
 	"net/internal/socktest": {},
 	"net/mail": {},
+	"net/netip": {},
 	"net/rpc": {},
 	"net/rpc/jsonrpc": {},
 	"net/smtp": {},
@@ -166,6 +174,7 @@ var StdPackages = map[string]struct{}{
 	"net/url": {},
 	"os": {},
 	"os/exec": {},
+	"os/exec/internal/fdtest": {},
 	"os/signal": {},
 	"os/signal/internal/pty": {},
 	"os/user": {},
@@ -183,6 +192,7 @@ var StdPackages = map[string]struct{}{
 	"runtime/internal/atomic": {},
 	"runtime/internal/math": {},
 	"runtime/internal/sys": {},
+	"runtime/internal/syscall": {},
 	"runtime/metrics": {},
 	"runtime/pprof": {},
 	"runtime/race": {},
@@ -213,9 +223,10 @@ var StdPackages = map[string]struct{}{
 	"vendor/golang.org/x/crypto/cryptobyte": {},
 	"vendor/golang.org/x/crypto/cryptobyte/asn1": {},
 	"vendor/golang.org/x/crypto/curve25519": {},
+	"vendor/golang.org/x/crypto/curve25519/internal/field": {},
 	"vendor/golang.org/x/crypto/hkdf": {},
+	"vendor/golang.org/x/crypto/internal/poly1305": {},
 	"vendor/golang.org/x/crypto/internal/subtle": {},
-	"vendor/golang.org/x/crypto/poly1305": {},
 	"vendor/golang.org/x/net/dns/dnsmessage": {},
 	"vendor/golang.org/x/net/http/httpguts": {},
 	"vendor/golang.org/x/net/http/httpproxy": {},

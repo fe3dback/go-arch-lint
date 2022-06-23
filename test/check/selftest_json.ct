@@ -6,6 +6,8 @@ $ go-arch-lint check --project-path ${PWD} --json
     "ArchHasWarnings": false,
     "ArchWarningsDeps": [],
     "ArchWarningsNotMatched": [],
+    "ArchWarningsDeepScan": [],
+    "OmittedCount": 0,
     "ModuleName": "github.com/fe3dback/go-arch-lint"
   }
 }

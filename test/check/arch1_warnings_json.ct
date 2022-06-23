@@ -1,4 +1,6 @@
 $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --> FAIL
+skipped other checks, found early lint notices..
+
 {
   "Type": "models.Check",
   "Payload": {
@@ -26,6 +28,8 @@ $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file
         "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/not_covered/nc.go"
       }
     ],
+    "ArchWarningsDeepScan": [],
+    "OmittedCount": 0,
     "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project"
   }
 }

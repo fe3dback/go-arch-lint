@@ -1,0 +1,8 @@
+$ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file arch1_ok.yml --output-color=false
+Usage:
+    $ go-arch-lint self-inspect --json
+ 
+Note:
+    this command created for integration with dev-tools and IDE's
+    and not have any ascii output support for inspection results.
+    please use this command with flag --json

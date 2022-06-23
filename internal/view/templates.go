@@ -7,11 +7,12 @@ import (
 )
 
 var Templates = map[string]string{
-	tpl(models.Error{}):   Error,
-	tpl(models.Version{}): Version,
-	tpl(models.Check{}):   Check,
-	tpl(models.Mapping{}): Mapping,
-	tpl(models.Schema{}):  Schema,
+	tpl(models.Error{}):       Error,
+	tpl(models.Version{}):     Version,
+	tpl(models.SelfInspect{}): SelfInspect,
+	tpl(models.Check{}):       Check,
+	tpl(models.Mapping{}):     Mapping,
+	tpl(models.Schema{}):      Schema,
 }
 
 func tpl(model interface{}) string {

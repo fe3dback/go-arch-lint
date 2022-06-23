@@ -1,9 +1,12 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+
+	terminal "github.com/fe3dback/span-terminal"
 
 	"github.com/fe3dback/go-arch-lint/internal/app/internal/container"
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -11,14 +14,31 @@ import (
 )
 
 func Execute() int {
+	mainCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	terminal.SetGlobalTerminal(terminal.NewTerminal(
+		terminal.WithStdoutMaxLines(6),
+		terminal.WithContainerMaxLines(3),
+		terminal.WithRenderOpts(
+			terminal.WithRenderOptSpanMaxRoots(4),
+			terminal.WithRenderOptSpanMaxChild(8),
+			terminal.WithRenderOptSpanMaxDetails(16),
+		),
+	))
+
+	// -- build DI
 	di := container.NewContainer(
 		version.Version,
 		version.BuildTime,
 		version.CommitHash,
 	)
-	rootCmd := di.ProvideRootCommand()
 
-	err := rootCmd.Execute()
+	// -- process
+	rootCmd := di.ProvideRootCommand()
+	err := rootCmd.ExecuteContext(mainCtx)
+
+	// -- handle errors
 	if err != nil {
 		if errors.Is(err, models.UserSpaceError{}) {
 			// do not display user space errors (usually explain will by in ascii/json output)

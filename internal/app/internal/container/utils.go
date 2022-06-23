@@ -3,8 +3,8 @@ package container
 import (
 	"github.com/logrusorgru/aurora/v3"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/printer"
-	"github.com/fe3dback/go-arch-lint/internal/glue/render"
+	"github.com/fe3dback/go-arch-lint/internal/services/printer"
+	"github.com/fe3dback/go-arch-lint/internal/services/render"
 	"github.com/fe3dback/go-arch-lint/internal/view"
 )
 
@@ -23,6 +23,7 @@ func (c *Container) provideAurora() aurora.Aurora {
 func (c *Container) ProvideRenderer() *render.Renderer {
 	return render.NewRenderer(
 		c.provideColorPrinter(),
+		c.provideReferenceRender(),
 		c.flags.OutputType,
 		c.flags.OutputJsonOneLine,
 		view.Templates,

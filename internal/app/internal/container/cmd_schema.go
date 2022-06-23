@@ -17,7 +17,7 @@ func (c *Container) provideSchemaCommandAssembler() *schema.CommandAssembler {
 		c.provideJsonSchemaProvider(),
 		func(input models.FlagsSchema) error {
 			return c.ProvideRenderer().RenderModel(
-				c.provideSchemaService().Behave(input),
+				c.provideOperationSchema().Behave(input),
 			)
 		},
 	)

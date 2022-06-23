@@ -14,7 +14,7 @@ func (c *Container) ProvideVersionCommand() *cobra.Command {
 func (c *Container) provideVersionCommandAssembler() *version.CommandAssembler {
 	return version.NewVersionCommandAssembler(func() error {
 		return c.ProvideRenderer().RenderModel(
-			c.provideVersionService().Behave(),
+			c.provideOperationVersion().Behave(),
 		)
 	})
 }

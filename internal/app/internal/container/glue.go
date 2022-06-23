@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/fe3dback/go-arch-lint/internal/glue/checker"
-	"github.com/fe3dback/go-arch-lint/internal/glue/code"
-	"github.com/fe3dback/go-arch-lint/internal/glue/path"
-	"github.com/fe3dback/go-arch-lint/internal/glue/project/holder"
-	"github.com/fe3dback/go-arch-lint/internal/glue/project/info"
-	"github.com/fe3dback/go-arch-lint/internal/glue/project/resolver"
-	"github.com/fe3dback/go-arch-lint/internal/glue/project/scanner"
-	specassembler "github.com/fe3dback/go-arch-lint/internal/glue/spec/assembler"
-	specvalidator "github.com/fe3dback/go-arch-lint/internal/glue/spec/validator"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/reference"
-	"github.com/fe3dback/go-arch-lint/internal/glue/yaml/spec"
-	"github.com/fe3dback/go-arch-lint/internal/schema"
+	"github.com/fe3dback/go-arch-lint/internal/pkg/info"
+	"github.com/fe3dback/go-arch-lint/internal/pkg/schema"
+	"github.com/fe3dback/go-arch-lint/internal/services/checker"
+	"github.com/fe3dback/go-arch-lint/internal/services/code"
+	"github.com/fe3dback/go-arch-lint/internal/services/path"
+	"github.com/fe3dback/go-arch-lint/internal/services/project/holder"
+	"github.com/fe3dback/go-arch-lint/internal/services/project/resolver"
+	"github.com/fe3dback/go-arch-lint/internal/services/project/scanner"
+	specassembler "github.com/fe3dback/go-arch-lint/internal/services/spec/assembler"
+	specvalidator "github.com/fe3dback/go-arch-lint/internal/services/spec/validator"
+	"github.com/fe3dback/go-arch-lint/internal/services/yaml/reference"
+	"github.com/fe3dback/go-arch-lint/internal/services/yaml/spec"
 )
 
 func (c *Container) provideSpecAssembler(projectDir, moduleName, archFilePath string) *specassembler.Assembler {
@@ -69,9 +69,23 @@ func (c *Container) provideReferenceRender() *code.Render {
 	)
 }
 
-func (c *Container) provideSpecChecker() *checker.Checker {
-	return checker.NewChecker(
+func (c *Container) provideSpecChecker() *checker.CompositeChecker {
+	return checker.NewCompositeChecker(
+		c.provideSpecImportsChecker(),
+		c.provideSpecDeepScanChecker(),
+	)
+}
+
+func (c *Container) provideSpecImportsChecker() *checker.Imports {
+	return checker.NewImport(
 		c.provideProjectFilesResolver(),
+	)
+}
+
+func (c *Container) provideSpecDeepScanChecker() *checker.DeepScan {
+	return checker.NewDeepScan(
+		c.provideProjectFilesResolver(),
+		c.provideReferenceRender(),
 	)
 }
 

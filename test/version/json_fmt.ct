@@ -3,7 +3,7 @@ $ go-arch-lint version --output-type=json
   "Type": "models.Version",
   "Payload": {
     "LinterVersion": "dev",
-    "GoArchFileSupported": "1, 2",
+    "GoArchFileSupported": "1 .. 3",
     "BuildTime": "unknown",
     "CommitHash": "unknown"
   }

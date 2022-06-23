@@ -22,6 +22,7 @@ func (c *Container) provideRootCommandAssembler() *root.CommandAssembler {
 func (c *Container) provideCommands() []*cobra.Command {
 	return []*cobra.Command{
 		c.ProvideVersionCommand(),
+		c.ProvideSelfInspectCommand(),
 		c.ProvideCheckCommand(),
 		c.ProvideMappingCommand(),
 		c.ProvideSchemaCommand(),

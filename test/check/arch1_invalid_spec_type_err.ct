@@ -1,11 +1,13 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec_type_err.yml --output-color=false --> FAIL
+skipped other checks, found early lint notices..
+
 module: github.com/fe3dback/go-arch-lint/test/check/project
-[Archfile] ($.components) components is required
-[Archfile] ($.allow) Additional property depOnAnyVendore is not allowed
+($.components) components is required
+($.allow) Additional property depOnAnyVendore is not allowed
      4 |   # type error
 >    5 |   depOnAnyVendore: false
                           ^
-[Archfile] ($.deps) Invalid type. Expected: object, given: array
+($.deps) Invalid type. Expected: object, given: array
      6 | 
 >    7 | deps: []
                ^

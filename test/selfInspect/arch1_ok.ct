@@ -1,0 +1,9 @@
+$ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file arch1_ok.yml --json
+{
+  "Type": "models.SelfInspect",
+  "Payload": {
+    "LinterVersion": "dev",
+    "Notices": [],
+    "Suggestions": []
+  }
+}

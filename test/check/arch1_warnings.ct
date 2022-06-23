@@ -1,8 +1,12 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --output-color=false --> FAIL
-module: github.com/fe3dback/go-arch-lint/test/check/project
-[WARN] Component 'c': file '/internal/c/c1.go' shouldn't depend on 'github.com/fe3dback/go-arch-lint/test/check/project/internal/a'
-[WARN] File '/internal/c/not_covered/c1nc.go' not attached to any component in archfile
-[WARN] File '/internal/d/not_covered.go' not attached to any component in archfile
-[WARN] File '/internal/not_covered/nc.go' not attached to any component in archfile
+skipped other checks, found early lint notices..
 
-warnings found: 4
+module: github.com/fe3dback/go-arch-lint/test/check/project
+Component c file /internal/c/c1.go shouldn't depend on github.com/fe3dback/go-arch-lint/test/check/project/internal/a
+File /internal/c/not_covered/c1nc.go not attached to any component in archfile
+File /internal/d/not_covered.go not attached to any component in archfile
+File /internal/not_covered/nc.go not attached to any component in archfile
+
+
+--
+total notices: 4

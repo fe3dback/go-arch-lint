@@ -1,0 +1,91 @@
+$ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec.yml --json
+{
+  "Type": "models.SelfInspect",
+  "Payload": {
+    "LinterVersion": "dev",
+    "Notices": [
+      {
+        "Text": "unknown component 'models'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 23,
+          "Offset": 5
+        }
+      },
+      {
+        "Text": "not found directories for 'internal/not_exist' in '${ROOTDIR}/test/check/project/internal/not_exist'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 17,
+          "Offset": 9
+        }
+      },
+      {
+        "Text": "unknown component 'cmd'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 26,
+          "Offset": 7
+        }
+      },
+      {
+        "Text": "should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 39,
+          "Offset": 18
+        }
+      },
+      {
+        "Text": "unknown component 'not_exist_too_rnd_order'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 28,
+          "Offset": 9
+        }
+      },
+      {
+        "Text": "unknown component 'cmd'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 29,
+          "Offset": 9
+        }
+      },
+      {
+        "Text": "unknown vendor '3rd-cobra-not-defined-too'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 31,
+          "Offset": 9
+        }
+      },
+      {
+        "Text": "unknown vendor '3rd-cobra'",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 32,
+          "Offset": 9
+        }
+      },
+      {
+        "Text": "invalid regexp '(A-Z' at 0: error parsing regexp: missing closing ): `(A-Z`",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 6,
+          "Offset": 5
+        }
+      }
+    ],
+    "Suggestions": []
+  }
+}

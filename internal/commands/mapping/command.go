@@ -1,6 +1,7 @@
 package mapping
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -21,7 +22,7 @@ var validSchemes = []string{
 }
 
 type (
-	processorFn = func(mapping models.FlagsMapping) error
+	processorFn = func(ctx context.Context, mapping models.FlagsMapping) error
 
 	CommandAssembler struct {
 		projectInfoAssembler ProjectInfoAssembler
@@ -66,13 +67,13 @@ func (c *CommandAssembler) Assemble() *cobra.Command {
 	return cmd
 }
 
-func (c *CommandAssembler) invoke(_ *cobra.Command, _ []string) error {
+func (c *CommandAssembler) invoke(cmd *cobra.Command, _ []string) error {
 	input, err := c.assembleInput()
 	if err != nil {
 		return fmt.Errorf("failed to assemble input params: %w", err)
 	}
 
-	return c.processorFn(input)
+	return c.processorFn(cmd.Context(), input)
 }
 
 func (c *CommandAssembler) prePersist(cmd *cobra.Command, _ []string) error {
