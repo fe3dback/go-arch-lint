@@ -97,20 +97,13 @@ func (s *Operation) limitResults(result models.CheckResult, maxWarnings int) lim
 	}
 
 	// append deep scan
-	const maxDeepScan = 10
-	deepScanCount := 0
-
 	for _, notice := range result.DeepscanWarnings {
 		if passCount >= maxWarnings {
-			break
-		}
-		if deepScanCount >= maxDeepScan {
 			break
 		}
 
 		limitedResults.DeepscanWarnings = append(limitedResults.DeepscanWarnings, notice)
 		passCount++
-		deepScanCount++
 	}
 
 	totalCount := 0 +
