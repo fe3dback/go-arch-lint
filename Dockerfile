@@ -1,4 +1,4 @@
-FROM golang:1.18-buster
+FROM golang:1.20-buster
 
 # currently we use `packages.Load(..)` feature of go AST parser
 # this require go binary and some random files from go setup

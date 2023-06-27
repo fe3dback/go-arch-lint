@@ -1,8 +1,8 @@
 package di
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/glue/deepscan/test/project/internal/operations"
-	"github.com/fe3dback/go-arch-lint/internal/glue/deepscan/test/project/internal/repository"
+	"github.com/fe3dback/go-arch-lint/internal/pkg/deepscan/test/project/internal/operations"
+	"github.com/fe3dback/go-arch-lint/internal/pkg/deepscan/test/project/internal/repository"
 )
 
 func TestCases() {

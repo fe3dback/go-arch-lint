@@ -11,12 +11,13 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/fe3dback/go-arch-lint/internal/generated/stdgo"
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"golang.org/x/tools/go/packages"
 )
 
 type (
 	Scanner struct {
+		stdPackages map[string]struct{}
 	}
 
 	resolveContext struct {
@@ -31,7 +32,20 @@ type (
 )
 
 func NewScanner() *Scanner {
-	return &Scanner{}
+	scanner := &Scanner{
+		stdPackages: make(map[string]struct{}, 255),
+	}
+
+	stdPackages, err := packages.Load(nil, "std")
+	if err != nil {
+		panic(fmt.Errorf("failed load std packages"))
+	}
+
+	for _, stdPackage := range stdPackages {
+		scanner.stdPackages[stdPackage.ID] = struct{}{}
+	}
+
+	return scanner
 }
 
 func (r *Scanner) Scan(
@@ -52,7 +66,7 @@ func (r *Scanner) Scan(
 	}
 
 	err := filepath.Walk(rctx.projectDirectory, func(path string, info os.FileInfo, err error) error {
-		return resolveFile(&rctx, path, info, err)
+		return r.resolveFile(&rctx, path, info, err)
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to walk project tree: %w", err)
@@ -61,19 +75,19 @@ func (r *Scanner) Scan(
 	return rctx.results, nil
 }
 
-func resolveFile(ctx *resolveContext, path string, info os.FileInfo, err error) error {
+func (r *Scanner) resolveFile(ctx *resolveContext, path string, info os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
 
-	if info.IsDir() || !inScope(ctx, path) {
+	if info.IsDir() || !r.inScope(ctx, path) {
 		return nil
 	}
 
-	return parse(ctx, path)
+	return r.parse(ctx, path)
 }
 
-func inScope(ctx *resolveContext, path string) bool {
+func (r *Scanner) inScope(ctx *resolveContext, path string) bool {
 	if filepath.Ext(path) != ".go" {
 		return false
 	}
@@ -93,7 +107,7 @@ func inScope(ctx *resolveContext, path string) bool {
 	return true
 }
 
-func parse(ctx *resolveContext, path string) error {
+func (r *Scanner) parse(ctx *resolveContext, path string) error {
 	fileAst, err := parser.ParseFile(ctx.tokenSet, path, nil, parser.ImportsOnly)
 	if err != nil {
 		return fmt.Errorf("failed to parse go source code at '%s': %w", path, err)
@@ -101,28 +115,28 @@ func parse(ctx *resolveContext, path string) error {
 
 	ctx.results = append(ctx.results, models.ProjectFile{
 		Path:    path,
-		Imports: extractImports(ctx, fileAst),
+		Imports: r.extractImports(ctx, fileAst),
 	})
 
 	return nil
 }
 
-func extractImports(ctx *resolveContext, fileAst *ast.File) []models.ResolvedImport {
+func (r *Scanner) extractImports(ctx *resolveContext, fileAst *ast.File) []models.ResolvedImport {
 	imports := make([]models.ResolvedImport, 0)
 
 	for _, goImport := range fileAst.Imports {
 		importPath := strings.Trim(goImport.Path.Value, "\"")
 		imports = append(imports, models.ResolvedImport{
 			Name:       importPath,
-			ImportType: getImportType(ctx, importPath),
+			ImportType: r.getImportType(ctx, importPath),
 		})
 	}
 
 	return imports
 }
 
-func getImportType(ctx *resolveContext, importPath string) models.ImportType {
-	if _, ok := stdgo.StdPackages[importPath]; ok {
+func (r *Scanner) getImportType(ctx *resolveContext, importPath string) models.ImportType {
+	if _, ok := r.stdPackages[importPath]; ok {
 		return models.ImportTypeStdLib
 	}
 
