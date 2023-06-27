@@ -19,14 +19,10 @@ And describe/declare as semantic yaml linter config:
 version: 3
 workdir: internal
 components:
-  handler:
-    in: handlers/* # wildcard one level
-  service:
-    in: services/** # wildcard many levels
-  repository:
-    in: domain/*/repository # find all DDD repositories
-  model:
-    in: models
+  handler:    { in: handlers/* }           # wildcard one level
+  service:    { in: services/** }          # wildcard many levels
+  repository: { in: domain/*/repository }  # wildcard DDD repositories
+  model:      { in: models }               # match exactly one package
 
 commonComponents:
   - models
@@ -56,20 +52,16 @@ docker run --rm -v ${PWD}:/app fe3dback/go-arch-lint:latest-stable-release check
 [other docker tags and versions](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
 
 #### From sources
-It require go 1.18+
+It require go 1.20+
 
 ```bash
 go install github.com/fe3dback/go-arch-lint@latest
 ```
 
-go will download and install `go-arch-lint` binary to go bin folder, usually
-is `~/go/bin`
-
 ```bash
-go-arch-lint check --project-path /home/user/go/src/github.com/fe3dback/galaxy
-
-// or inside project directory:
-cd project_dir
+go-arch-lint check --project-path ~/code/my-project
+# or
+cd ~/code/my-project
 go-arch-lint check
 ```
 
@@ -82,28 +74,6 @@ go-arch-lint check
 <img src="https://user-images.githubusercontent.com/2073883/104641610-0f453900-56bb-11eb-8419-6d94fbcb4d2f.png" alt="jetbrains goland logo" align="left" width="80px" height="80px">
 
 https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
-
-## What`s new in V3 (1.7.0+)
-
-```yaml
-version: 3
-allow:
-  deepScan: true
-```
-
-Biggest change in V3 config (linter 1.7.0+), is deepScan option.
-
-In v1/v2, linter check only file imports, but not analyse code itself.
-deepScan is new advanced code linter, it will analyse all project AST and provide more strict
-and better arch linting
-
---
-
-Linter now is not require `go mod vendor` (vendor directory) for checking vendor deps.
-
---
-
-Better plugin for IDEA goland. 
 
 ## Usage
 
@@ -130,6 +100,29 @@ This linter will return:
 |-------------|----------------------------------|
 | 0           | Project has correct architecture |
 | 1           | Found warnings                   |
+
+
+## What`s new in V3 (1.7.0+)
+
+```yaml
+version: 3
+allow:
+  deepScan: true
+```
+
+Biggest change in V3 config (linter 1.7.0+), is deepScan option.
+
+In v1/v2, linter check only file imports, but not analyse code itself.
+deepScan is new advanced code linter, it will analyse all project AST and provide more strict
+and better arch linting
+
+--
+
+Linter now is not require `go mod vendor` (vendor directory) for checking vendor deps.
+
+--
+
+Better plugin for IDEA goland.
 
 
 ## Archfile example
