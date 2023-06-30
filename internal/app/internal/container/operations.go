@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/operations/check"
+	"github.com/fe3dback/go-arch-lint/internal/operations/graph"
 	"github.com/fe3dback/go-arch-lint/internal/operations/mapping"
 	"github.com/fe3dback/go-arch-lint/internal/operations/schema"
 	"github.com/fe3dback/go-arch-lint/internal/operations/selfInspect"
@@ -49,6 +50,16 @@ func (c *Container) provideOperationMapping(input models.FlagsMapping) *mapping.
 			input.Project.GoArchFilePath,
 		),
 		c.provideProjectFilesResolver(),
+	)
+}
+
+func (c *Container) provideOperationGraph(input models.FlagsGraph) *graph.Operation {
+	return graph.NewOperation(
+		c.provideSpecAssembler(
+			input.Project.Directory,
+			input.Project.ModuleName,
+			input.Project.GoArchFilePath,
+		),
 	)
 }
 

@@ -8,8 +8,7 @@ import (
 )
 
 func (c *Container) ProvideSchemaCommand() *cobra.Command {
-	assembler := c.provideSchemaCommandAssembler()
-	return assembler.Assemble()
+	return c.provideSchemaCommandAssembler().Assemble()
 }
 
 func (c *Container) provideSchemaCommandAssembler() *schema.CommandAssembler {
