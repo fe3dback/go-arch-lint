@@ -14,7 +14,7 @@ jobs:
         id: check-tag
         run: | #
           if [[ ${{ github.event.ref }} =~ ^refs\/tags\/v[0-9]+\.[0-9]+\.[0-9]+(\-rc[0-9]*)?$ ]]; then
-              echo ::set-output name=match::true
+              echo "match=true" >> $GITHUB_OUTPUT
           fi
       -
         name: Checkout
