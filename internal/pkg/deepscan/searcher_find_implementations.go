@@ -102,22 +102,29 @@ func (s *Searcher) applyMethodsImplementationsInPackages(methods []InjectionMeth
 
 // find all implementations for method, and apply it
 func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod, astPackages astPackagesMap) {
-	// default alias is same as package name
-	// example `import "path/filepath"`
-	// `filepath` - is default alias
-	importAlias := path.Base(method.Definition.Import)
-
 	for _, astPackage := range astPackages {
 		for _, astFile := range astPackage.Syntax {
+			// default alias is same as package name
+			// example `import "path/filepath"`
+			// `filepath` - is default alias
+			importAlias := path.Base(method.Definition.Import)
+			fileHasCalls := false
+
 			// find importAlias for current file
 			for _, astImport := range astFile.Imports {
 				if strings.Trim(astImport.Path.Value, `"`) != method.Definition.Import {
 					continue
 				}
 
+				fileHasCalls = true
 				if astImport.Name != nil {
 					importAlias = astImport.Name.Name
+					break
 				}
+			}
+
+			if !fileHasCalls {
+				continue
 			}
 
 			s.findFunctionCalls(importAlias, method.Name, astFile, func(callExpr *ast.CallExpr) {

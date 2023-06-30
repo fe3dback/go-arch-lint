@@ -12,13 +12,6 @@ type (
 		Gates      []Gate // method params with interface type
 	}
 
-	Source struct {
-		Pkg    string   // package name (example: "a")
-		Import string   // package full import path (example: "example.com/myProject/internal/a")
-		Path   string   // package full abs path (example: "/home/user/go/src/myProject/internal/a")
-		Place  Position // exactly place in source code
-	}
-
 	Gate struct {
 		MethodName         string           // function name (func Hello(a,b int), name="Hello")
 		ParamName          string           // function param name (func (_a_,b int), name="a")
@@ -49,6 +42,13 @@ type (
 	Target struct {
 		StructName string // interface implementation type name
 		Definition Source // where this type defined
+	}
+
+	Source struct {
+		Pkg    string   // package name (example: "a")
+		Import string   // package full import path (example: "example.com/myProject/internal/a")
+		Path   string   // package full abs path (example: "/home/user/go/src/myProject/internal/a")
+		Place  Position // exactly place in source code
 	}
 
 	Position struct {
