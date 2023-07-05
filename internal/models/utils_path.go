@@ -17,21 +17,23 @@ type (
 )
 
 // Match check if path is subset of glob, for example:
-//  - github.com/**/library/*/abc
+//   - github.com/**/library/*/abc
+//
 // will match:
-//  - github.com/a/b/c/library/any/abc
-//  - github.com/test/library/another/awesome
+//   - github.com/a/b/c/library/any/abc
+//   - github.com/test/library/another/awesome
 //
 // and not match:
-//  - github.com/a/b/c/library/any
-//  - github.com/library/another/awesome
+//   - github.com/a/b/c/library/any
+//   - github.com/library/another/awesome
 func (glob Glob) Match(testedPath string) (bool, error) {
 	regGlob := string(glob)
 	regGlob = strings.ReplaceAll(regGlob, ".", "\\.") // safe dots
 	regGlob = strings.ReplaceAll(regGlob, "/", "\\/") // safe slash
 
-	regGlob = strings.ReplaceAll(regGlob, "**", ".*")     // super glob
-	regGlob = strings.ReplaceAll(regGlob, "*", "[^\\/]+") // single glob
+	regGlob = strings.ReplaceAll(regGlob, "**", "<M_ALL>") // super glob tmp
+	regGlob = strings.ReplaceAll(regGlob, "*", "[^\\/]+")  // single glob
+	regGlob = strings.ReplaceAll(regGlob, "<M_ALL>", ".*") // super glob
 	regGlob = fmt.Sprintf("^%s$", regGlob)
 
 	matcher, err := regexp.Compile(regGlob)

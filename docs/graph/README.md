@@ -27,10 +27,10 @@ $ go-arch-lint graph
 ```
 
 Is not real "flow" of code execution, but very close to it.
-This graph is actually reversed dependency injections.
+This graph is actually reverse dependency injection.
 
-For example, this is graph of `go-arch-lint`. When you execute some binary command like `graph`,
-execution flow will be like in generated graph: 
+For example: this is graph of `go-arch-lint` itself. When you execute some binary command like `graph`,
+execution flow will be like this: 
 
 ![graph](../images/graph-flow-c.png)
 

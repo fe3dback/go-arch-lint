@@ -39,8 +39,6 @@ func (s *Operation) Behave(
 		return models.Graph{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	// todo: max-levels options when "focus" option is used
-
 	graphCode, err := s.buildGraph(spec, in)
 	if err != nil {
 		return models.Graph{}, fmt.Errorf("failed build graph: %w", err)

@@ -9,6 +9,7 @@ Usage:
 Available Commands:
   check        check project architecture by yaml file
   completion   Generate the autocompletion script for the specified shell
+  graph        output dependencies graph as svg file
   help         Help about any command
   mapping      mapping table between files and components
   schema       json schema for arch file inspection

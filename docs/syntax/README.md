@@ -24,3 +24,6 @@
 | . . mayDependOn    | -    | []str      | list of components that can by imported in %name%                                               |
 | . . canUse         | -    | []str      | list of vendors that can by imported in %name%                                                  |
 | . . deepScan       | -    | bool       | override of allow.deepScan for this component                                                   |
+
+Examples:
+- [.go-arch-lint.yml](../../.go-arch-lint.yml)
