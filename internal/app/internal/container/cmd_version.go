@@ -7,8 +7,7 @@ import (
 )
 
 func (c *Container) ProvideVersionCommand() *cobra.Command {
-	assembler := c.provideVersionCommandAssembler()
-	return assembler.Assemble()
+	return c.provideVersionCommandAssembler().Assemble()
 }
 
 func (c *Container) provideVersionCommandAssembler() *version.CommandAssembler {

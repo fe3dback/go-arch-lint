@@ -8,8 +8,7 @@ import (
 )
 
 func (c *Container) ProvideRootCommand() *cobra.Command {
-	assembler := c.provideRootCommandAssembler()
-	return assembler.Assemble()
+	return c.provideRootCommandAssembler().Assemble()
 }
 
 func (c *Container) provideRootCommandAssembler() *root.CommandAssembler {
@@ -26,6 +25,7 @@ func (c *Container) provideCommands() []*cobra.Command {
 		c.ProvideCheckCommand(),
 		c.ProvideMappingCommand(),
 		c.ProvideSchemaCommand(),
+		c.ProvideGraphCommand(),
 	}
 }
 

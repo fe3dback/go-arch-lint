@@ -35,6 +35,8 @@ deps:
       - repository
 ```
 
+see [config syntax](docs/syntax/README.md) for details. 
+
 And now linter will check all project code inside `internal` workdir
 and show warnings, when code violate this rules.
 
@@ -101,31 +103,16 @@ This linter will return:
 | 1           | Found warnings                   |
 
 
-## What`s new in V3 (1.7.0+)
+## Graph
 
-```yaml
-version: 3
-allow:
-  deepScan: true
+Example config of this repository: [.go-arch-lint.yml](.go-arch-lint.yml)
+
+![graph](./docs/images/graph-example.png)
+
+You can generate dependencies graph with command `graph`:
+
+```bash
+go-arch-lint graph
 ```
 
-Biggest change in V3 config (linter 1.7.0+), is deepScan option.
-
-In v1/v2, linter check only file imports, but not analyse code itself.
-deepScan is new advanced code linter, it will analyse all project AST and provide more strict
-and better arch linting
-
---
-
-Linter now is not require `go mod vendor` (vendor directory) for checking vendor deps.
-
---
-
-Better plugin for IDEA goland.
-
-
-## Archfile example
-
-Read archfile [syntax](docs/syntax/README.md):
-
-Example for this project [.go-arch-lint.yml](.go-arch-lint.yml)
+See full [graph documentation](docs/graph/README.md) for details.

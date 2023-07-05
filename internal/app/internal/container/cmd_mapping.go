@@ -10,8 +10,7 @@ import (
 )
 
 func (c *Container) ProvideMappingCommand() *cobra.Command {
-	assembler := c.provideMappingCommandAssembler()
-	return assembler.Assemble()
+	return c.provideMappingCommandAssembler().Assemble()
 }
 
 func (c *Container) provideMappingCommandAssembler() *mapping.CommandAssembler {
