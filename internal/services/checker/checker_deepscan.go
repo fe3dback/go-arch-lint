@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -20,10 +21,11 @@ type DeepScan struct {
 	projectFilesResolver projectFilesResolver
 	sourceCodeRenderer   sourceCodeRenderer
 
-	scanner        *deepscan.Searcher
-	spec           speca.Spec
-	result         models.CheckResult
-	fileComponents map[string]string
+	scanner           *deepscan.Searcher
+	spec              speca.Spec
+	result            models.CheckResult
+	fileComponents    map[string]string
+	packageComponents map[string]string
 
 	sync.Mutex
 }
@@ -86,12 +88,19 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 	}
 
 	c.fileComponents = map[string]string{}
+	c.packageComponents = map[string]string{}
+
 	for _, hold := range mapping {
 		if hold.ComponentID == nil {
 			continue
 		}
 
+		// cache file -> component ref
 		c.fileComponents[hold.File.Path] = *hold.ComponentID
+
+		// cache package -> component ref
+		packagePath := filepath.Dir(hold.File.Path)
+		c.packageComponents[packagePath] = *hold.ComponentID
 	}
 
 	// -- scan project
@@ -149,6 +158,21 @@ func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) erro
 		checked++
 
 		absPath := packagePath.Value().AbsPath
+		matchedCmp, ok := c.packageComponents[absPath]
+		if !ok {
+			// component in excludes list
+			continue
+		}
+
+		if matchedCmp != cmp.Name.Value() {
+			// this can be in cased of wildcard match, example:
+			// cmp1: in: internal/code/common
+			// cmp2: in: internal/code/**
+			// and when cmp.Name == cmp2, this cmp2 still have "code/common" in resolvedPath's from cmp1
+			// here we can skip this, because deps of cmp1 will be checked later.
+			continue
+		}
+
 		err := c.scanPackage(ctx, &cmp, absPath)
 		if err != nil {
 			return fmt.Errorf("failed scan '%s': %w", absPath, err)
