@@ -70,6 +70,8 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string,
 		return "", err
 	}
 
+	flow := s.componentsFlowArrow(opts)
+
 	for _, cmp := range spec.Components {
 		if _, visible := whiteList[cmp.Name.Value()]; !visible {
 			continue
@@ -80,7 +82,7 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string,
 				continue
 			}
 
-			buff.WriteString(fmt.Sprintf("%s -> %s\n", cmp.Name.Value(), dep.Value()))
+			buff.WriteString(fmt.Sprintf("%s %s %s\n", cmp.Name.Value(), flow, dep.Value()))
 		}
 
 		if opts.IncludeVendors {
@@ -92,11 +94,13 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string,
 
 				tpl := `
 				{{vnd}}.style.font-size: 12
+				{{vnd}}.style.stroke: "#77AA44"
 				{{cmp}} <- {{vnd}} {
-				source-arrowhead: {
-					shape: diamond
-					style.filled: false
-				  }
+					style.stroke: "#77AA44"
+					source-arrowhead: {
+						shape: diamond
+						style.filled: false
+					  }
 				}
 				`
 
@@ -109,6 +113,18 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string,
 	}
 
 	return buff.String(), nil
+}
+
+func (s *Operation) componentsFlowArrow(opts models.FlagsGraph) string {
+	if opts.Type == models.GraphTypeFlow {
+		return "->"
+	}
+
+	if opts.Type == models.GraphTypeDI {
+		return "<-"
+	}
+
+	return "--"
 }
 
 func (s *Operation) populateGraphWhitelist(spec speca.Spec, opts models.FlagsGraph) (map[string]struct{}, error) {
@@ -153,7 +169,6 @@ func (s *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName 
 	for len(resolveList) > 0 {
 		cmp := cmpMap[resolveList[0]]
 		resolveList = resolveList[1:]
-		fmt.Printf("resolve %s, left: %d\n", cmp.Name.Value(), len(resolveList))
 
 		if _, alreadyResolved := resolved[cmp.Name.Value()]; alreadyResolved {
 			continue
