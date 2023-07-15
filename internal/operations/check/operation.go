@@ -7,13 +7,15 @@ import (
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	terminal "github.com/fe3dback/span-terminal"
 )
 
 type (
 	Operation struct {
-		specAssembler        SpecAssembler
-		specChecker          SpecChecker
-		referenceRender      ReferenceRender
+		projectInfoAssembler projectInfoAssembler
+		specAssembler        specAssembler
+		specChecker          specChecker
+		referenceRender      referenceRender
 		highlightCodePreview bool
 	}
 
@@ -24,12 +26,14 @@ type (
 )
 
 func NewOperation(
-	specAssembler SpecAssembler,
-	specChecker SpecChecker,
-	referenceRender ReferenceRender,
+	projectInfoAssembler projectInfoAssembler,
+	specAssembler specAssembler,
+	specChecker specChecker,
+	referenceRender referenceRender,
 	highlightCodePreview bool,
 ) *Operation {
 	return &Operation{
+		projectInfoAssembler: projectInfoAssembler,
 		specAssembler:        specAssembler,
 		specChecker:          specChecker,
 		referenceRender:      referenceRender,
@@ -37,20 +41,29 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave(ctx context.Context, maxWarnings int) (models.Check, error) {
-	spec, err := s.specAssembler.Assemble()
+func (s *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.CmdCheckOut, error) {
+	// track progress of this command, with stdout drawing
+	terminal.CaptureOutput()
+	defer terminal.ReleaseOutput()
+
+	projectInfo, err := s.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
-		return models.Check{}, fmt.Errorf("failed to assemble spec: %w", err)
+		return models.CmdCheckOut{}, fmt.Errorf("failed to assemble project info: %w", err)
+	}
+
+	spec, err := s.specAssembler.Assemble(projectInfo)
+	if err != nil {
+		return models.CmdCheckOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
 	result, err := s.specChecker.Check(ctx, spec)
 	if err != nil {
-		return models.Check{}, fmt.Errorf("failed to check project deps: %w", err)
+		return models.CmdCheckOut{}, fmt.Errorf("failed to check project deps: %w", err)
 	}
 
-	limitedResult := s.limitResults(result, maxWarnings)
+	limitedResult := s.limitResults(result, in.MaxWarnings)
 
-	model := models.Check{
+	model := models.CmdCheckOut{
 		ModuleName:             spec.ModuleName.Value(),
 		DocumentNotices:        s.assembleNotice(spec.Integrity),
 		ArchHasWarnings:        s.resultsHasWarnings(limitedResult.results),

@@ -6,24 +6,21 @@ import (
 )
 
 type Validator struct {
-	pathResolver  PathResolver
-	rootDirectory string
+	pathResolver pathResolver
 }
 
 func NewValidator(
-	pathResolver PathResolver,
-	rootDirectory string,
+	pathResolver pathResolver,
 ) *Validator {
 	return &Validator{
-		pathResolver:  pathResolver,
-		rootDirectory: rootDirectory,
+		pathResolver: pathResolver,
 	}
 }
 
 func (v *Validator) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
-	utils := newUtils(v.pathResolver, doc, v.rootDirectory)
+	utils := newUtils(v.pathResolver, doc)
 	validators := []validator{
 		newValidatorCommonComponents(utils),
 		newValidatorCommonVendors(utils),

@@ -3,6 +3,7 @@ package validator
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
@@ -21,7 +22,8 @@ func newValidatorWorkDir(utils *utils) *validatorWorkDir {
 func (v *validatorWorkDir) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
-	absPath := fmt.Sprintf("%s/%s", v.utils.rootDirectory, doc.WorkingDirectory().Value())
+	rootDir := filepath.Dir(doc.FilePath().Value())
+	absPath := fmt.Sprintf("%s/%s", rootDir, doc.WorkingDirectory().Value())
 	absPath = path.Clean(absPath)
 
 	err := v.utils.assertDirectoriesValid(absPath)

@@ -3,46 +3,41 @@ package assembler
 import (
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	Assembler struct {
-		provider      ArchProvider
-		validator     ArchValidator
-		pathResolver  PathResolver
-		rootDirectory string
-		moduleName    string
+		provider     archProvider
+		validator    archValidator
+		pathResolver pathResolver
 	}
 )
 
 func NewAssembler(
-	provider ArchProvider,
-	validator ArchValidator,
-	pathResolver PathResolver,
-	rootDirectory string,
-	moduleName string,
+	provider archProvider,
+	validator archValidator,
+	pathResolver pathResolver,
 ) *Assembler {
 	return &Assembler{
-		provider:      provider,
-		validator:     validator,
-		pathResolver:  pathResolver,
-		rootDirectory: rootDirectory,
-		moduleName:    moduleName,
+		provider:     provider,
+		validator:    validator,
+		pathResolver: pathResolver,
 	}
 }
 
-func (sa *Assembler) Assemble() (speca.Spec, error) {
+func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
 	spec := speca.Spec{
-		RootDirectory: speca.NewEmptyReferable(sa.rootDirectory),
-		ModuleName:    speca.NewEmptyReferable(sa.moduleName),
+		RootDirectory: speca.NewEmptyReferable(prj.Directory),
+		ModuleName:    speca.NewEmptyReferable(prj.ModuleName),
 		Integrity: speca.Integrity{
 			DocumentNotices: []speca.Notice{},
 			Suggestions:     []speca.Notice{},
 		},
 	}
 
-	yamlSpec, schemeNotices, err := sa.provider.Provide()
+	yamlSpec, schemeNotices, err := sa.provider.Provide(prj.GoArchFilePath)
 	if err != nil {
 		return spec, fmt.Errorf("failed to provide yamlSpec: %w", err)
 	}
@@ -62,15 +57,15 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 
 	resolver := newResolver(
 		sa.pathResolver,
-		sa.rootDirectory,
-		sa.moduleName,
+		prj.Directory,
+		prj.ModuleName,
 	)
 
 	assembler := newSpecCompositeAssembler([]assembler{
 		newComponentsAssembler(
 			resolver,
 			newAllowedProjectImportsAssembler(
-				sa.rootDirectory,
+				prj.Directory,
 				resolver,
 			),
 			newAllowedVendorImportsAssembler(

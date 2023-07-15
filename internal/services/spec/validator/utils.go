@@ -10,26 +10,24 @@ import (
 
 type (
 	utils struct {
-		pathResolver  PathResolver
-		document      arch.Document
-		rootDirectory string
+		pathResolver pathResolver
+		document     arch.Document
 	}
 )
 
 func newUtils(
-	pathResolver PathResolver,
+	pathResolver pathResolver,
 	document arch.Document,
-	rootDirectory string,
 ) *utils {
 	return &utils{
-		pathResolver:  pathResolver,
-		document:      document,
-		rootDirectory: rootDirectory,
+		pathResolver: pathResolver,
+		document:     document,
 	}
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localGlobPath))
+	rootDir := filepath.Dir(u.document.FilePath().Value())
+	absPath := filepath.Clean(fmt.Sprintf("%s/%s", rootDir, localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %w", err)

@@ -5,11 +5,11 @@ import (
 )
 
 type (
-	YAMLSourceCodeReferenceResolver interface {
-		Resolve(yamlPath string) models.Reference
+	yamlSourceCodeReferenceResolver interface {
+		Resolve(filePath string, yamlPath string) models.Reference
 	}
 
-	JSONSchemaProvider interface {
+	jsonSchemaProvider interface {
 		Provide(version int) (string, error)
 	}
 )

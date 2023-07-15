@@ -3,7 +3,9 @@ package spec
 import (
 	"bytes"
 	"fmt"
+	"os"
 
+	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 
@@ -11,36 +13,38 @@ import (
 )
 
 type Provider struct {
-	yamlReferenceResolver YAMLSourceCodeReferenceResolver
-	jsonSchemaProvider    JSONSchemaProvider
-	sourceCode            []byte
+	yamlReferenceResolver yamlSourceCodeReferenceResolver
+	jsonSchemaProvider    jsonSchemaProvider
 }
 
 func NewProvider(
-	yamlReferenceResolver YAMLSourceCodeReferenceResolver,
-	jsonSchemaProvider JSONSchemaProvider,
-	sourceCode []byte,
+	yamlReferenceResolver yamlSourceCodeReferenceResolver,
+	jsonSchemaProvider jsonSchemaProvider,
 ) *Provider {
 	return &Provider{
 		yamlReferenceResolver: yamlReferenceResolver,
 		jsonSchemaProvider:    jsonSchemaProvider,
-		sourceCode:            sourceCode,
 	}
 }
 
-func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
+func (sp *Provider) Provide(archFile string) (arch.Document, []speca.Notice, error) {
+	sourceCode, err := os.ReadFile(archFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to provide source code of archfile: %w", err)
+	}
+
 	// read only doc Version
-	documentVersion, err := sp.readVersion()
+	documentVersion, err := sp.readVersion(sourceCode)
 	if err != nil {
 		// invalid yaml document
 		return nil, nil, fmt.Errorf("failed to read 'version' from arch file: %w", err)
 	}
 
 	// validate yaml scheme by version
-	schemeNotices := sp.jsonSchemeValidate(documentVersion)
+	schemeNotices := sp.jsonSchemeValidate(documentVersion, sourceCode, archFile)
 
 	// try to read all document
-	document, err := sp.decodeDocument(documentVersion)
+	document, err := sp.decodeDocument(documentVersion, sourceCode, archFile)
 	if err != nil {
 		if len(schemeNotices) > 0 {
 			// document invalid, but yaml
@@ -54,49 +58,57 @@ func (sp *Provider) Provide() (arch.Document, []speca.Notice, error) {
 	return document, schemeNotices, nil
 }
 
-func (sp *Provider) decodeDocument(version int) (arch.Document, error) {
-	reader := bytes.NewBuffer(sp.sourceCode)
+func (sp *Provider) decodeDocument(version int, sourceCode []byte, filePath string) (arch.Document, error) {
+	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
 		yaml.DisallowDuplicateKey(),
 		yaml.DisallowUnknownField(),
 		yaml.Strict(),
 	)
+	resolver := sp.createYamlReferenceResolver(filePath)
+	filePathRef := speca.NewReferable(filePath, speca.NewReference(filePath, 0, 0))
 
 	// todo: refactor this somehow (dry)
 	switch version {
 	case 1:
-		document := ArchV1Document{}
+		document := ArchV1Document{filePath: filePathRef}
 		err := decoder.Decode(&document)
 		if err != nil {
 			return nil, err
 		}
 
-		return document.applyReferences(sp.yamlReferenceResolver), nil
+		return document.applyReferences(resolver), nil
 	case 2:
-		document := ArchV2Document{}
+		document := ArchV2Document{filePath: filePathRef}
 		err := decoder.Decode(&document)
 		if err != nil {
 			return nil, err
 		}
 
-		return document.applyReferences(sp.yamlReferenceResolver), nil
+		return document.applyReferences(resolver), nil
 	default:
-		document := ArchV3Document{}
+		document := ArchV3Document{filePath: filePathRef}
 		err := decoder.Decode(&document)
 		if err != nil {
 			return nil, err
 		}
 
-		return document.applyReferences(sp.yamlReferenceResolver), nil
+		return document.applyReferences(resolver), nil
 	}
 }
 
-func (sp *Provider) readVersion() (int, error) {
+func (sp *Provider) createYamlReferenceResolver(archFilePath string) yamlDocumentPathResolver {
+	return func(yamlPath string) models.Reference {
+		return sp.yamlReferenceResolver.Resolve(archFilePath, yamlPath)
+	}
+}
+
+func (sp *Provider) readVersion(sourceCode []byte) (int, error) {
 	type doc struct {
 		Version int `yaml:"version"`
 	}
-	reader := bytes.NewBuffer(sp.sourceCode)
+	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(reader)
 	document := doc{}
 	err := decoder.Decode(&document)
@@ -107,7 +119,7 @@ func (sp *Provider) readVersion() (int, error) {
 	return document.Version, nil
 }
 
-func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
+func (sp *Provider) jsonSchemeValidate(schemeVersion int, sourceCode []byte, filePath string) []speca.Notice {
 	jsonSchema, err := sp.jsonSchemaProvider.Provide(schemeVersion)
 	if err != nil {
 		return []speca.Notice{{
@@ -116,7 +128,7 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
 		}}
 	}
 
-	jsonNotices, err := jsonSchemeValidate(jsonSchema, sp.sourceCode)
+	jsonNotices, err := jsonSchemeValidate(jsonSchema, sourceCode)
 	if err != nil {
 		return []speca.Notice{{
 			Notice: fmt.Errorf("failed to validate arch file with json scheme: %w", err),
@@ -128,7 +140,7 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int) []speca.Notice {
 	for _, jsonNotice := range jsonNotices {
 		schemeRef := speca.NewEmptyReference()
 		if jsonNotice.yamlPath != nil {
-			schemeRef = sp.yamlReferenceResolver.Resolve(*jsonNotice.yamlPath)
+			schemeRef = sp.yamlReferenceResolver.Resolve(filePath, *jsonNotice.yamlPath)
 		}
 
 		schemeNotices = append(schemeNotices, speca.Notice{

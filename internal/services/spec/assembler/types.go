@@ -6,15 +6,15 @@ import (
 )
 
 type (
-	ArchProvider interface {
-		Provide() (arch.Document, []speca.Notice, error)
+	archProvider interface {
+		Provide(archFile string) (arch.Document, []speca.Notice, error)
 	}
 
-	ArchValidator interface {
+	archValidator interface {
 		Validate(doc arch.Document) []speca.Notice
 	}
 
-	PathResolver interface {
+	pathResolver interface {
 		Resolve(absPath string) (resolvePaths []string, err error)
 	}
 )

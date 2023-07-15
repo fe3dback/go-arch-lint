@@ -16,13 +16,13 @@ const (
 
 type (
 	colorizer struct {
-		printer ColorPrinter
+		printer colorPrinter
 	}
 
 	colorName = string
 )
 
-func newColorizer(printer ColorPrinter) *colorizer {
+func newColorizer(printer colorPrinter) *colorizer {
 	return &colorizer{
 		printer: printer,
 	}

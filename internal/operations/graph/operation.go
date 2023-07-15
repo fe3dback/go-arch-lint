@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -19,49 +20,59 @@ import (
 )
 
 type Operation struct {
-	specAssembler SpecAssembler
+	specAssembler        specAssembler
+	projectInfoAssembler projectInfoAssembler
 }
 
 func NewOperation(
-	specAssembler SpecAssembler,
+	specAssembler specAssembler,
+	projectInfoAssembler projectInfoAssembler,
 ) *Operation {
 	return &Operation{
-		specAssembler: specAssembler,
+		specAssembler:        specAssembler,
+		projectInfoAssembler: projectInfoAssembler,
 	}
 }
 
-func (s *Operation) Behave(
-	ctx context.Context,
-	in models.FlagsGraph,
-) (models.Graph, error) {
-	spec, err := s.specAssembler.Assemble()
+func (s *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.CmdGraphOut, error) {
+	projectInfo, err := s.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed to assemble spec: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble project info: %w", err)
+	}
+
+	spec, err := s.specAssembler.Assemble(projectInfo)
+	if err != nil {
+		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
 	graphCode, err := s.buildGraph(spec, in)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed build graph: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed build graph: %w", err)
 	}
 
 	svg, err := s.compileGraph(ctx, graphCode)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed to compile graph: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed to compile graph: %w", err)
 	}
 
-	err = os.WriteFile(in.OutFile, svg, os.ModePerm)
+	outFile, err := filepath.Abs(in.OutFile)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed get abs path from '%s': %w", in.OutFile, err)
 	}
 
-	return models.Graph{
+	err = os.WriteFile(outFile, svg, os.ModePerm)
+	if err != nil {
+		return models.CmdGraphOut{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+	}
+
+	return models.CmdGraphOut{
 		ProjectDirectory: spec.RootDirectory.Value(),
 		ModuleName:       spec.ModuleName.Value(),
-		OutFile:          in.OutFile,
+		OutFile:          outFile,
 	}, nil
 }
 
-func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string, error) {
+func (s *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string, error) {
 	var buff bytes.Buffer
 	whiteList, err := s.populateGraphWhitelist(spec, opts)
 	if err != nil {
@@ -113,7 +124,7 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string,
 	return buff.String(), nil
 }
 
-func (s *Operation) componentsFlowArrow(opts models.FlagsGraph) string {
+func (s *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
 	if opts.Type == models.GraphTypeFlow {
 		return "->"
 	}
@@ -125,7 +136,7 @@ func (s *Operation) componentsFlowArrow(opts models.FlagsGraph) string {
 	return "--"
 }
 
-func (s *Operation) populateGraphWhitelist(spec speca.Spec, opts models.FlagsGraph) (map[string]struct{}, error) {
+func (s *Operation) populateGraphWhitelist(spec speca.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
 	if opts.Focus == "" {
 		return s.populateGraphWhitelistAll(spec)
 	}

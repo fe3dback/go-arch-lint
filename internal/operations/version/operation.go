@@ -24,8 +24,8 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave() (models.Version, error) {
-	return models.Version{
+func (s *Operation) Behave() (models.CmdVersionOut, error) {
+	return models.CmdVersionOut{
 		LinterVersion:       s.version,
 		GoArchFileSupported: fmt.Sprintf("1 .. %d", models.SupportedVersion),
 		BuildTime:           s.buildTime,

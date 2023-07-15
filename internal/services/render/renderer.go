@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -26,8 +27,8 @@ const (
 
 type (
 	Renderer struct {
-		colorPrinter      ColorPrinter
-		referenceRender   ReferenceRender
+		colorPrinter      colorPrinter
+		referenceRender   referenceRender
 		outputType        models.OutputType
 		outputJSONOneLine bool
 		asciiTemplates    map[string]string
@@ -35,8 +36,8 @@ type (
 )
 
 func NewRenderer(
-	colorPrinter ColorPrinter,
-	referenceRender ReferenceRender,
+	colorPrinter colorPrinter,
+	referenceRender referenceRender,
 	outputType models.OutputType,
 	outputJSONOneLine bool,
 	asciiTemplates map[string]string,
@@ -128,11 +129,16 @@ func (r *Renderer) renderJSON(model interface{}) error {
 	var jsonBuffer []byte
 	var marshalErr error
 
+	modelType, err := r.extractModelType(model)
+	if err != nil {
+		return fmt.Errorf("failed extract model type from '%T' (maybe not matched pattern: 'CmdXXXOut') : %w", model, err)
+	}
+
 	wrapperModel := struct {
 		Type    string      `json:"Type"`
 		Payload interface{} `json:"Payload"`
 	}{
-		Type:    fmt.Sprintf("%T", model),
+		Type:    modelType,
 		Payload: model,
 	}
 
@@ -148,4 +154,33 @@ func (r *Renderer) renderJSON(model interface{}) error {
 
 	fmt.Println(string(jsonBuffer))
 	return nil
+}
+
+// Rename "anypackage.CmdXXXXOut" to "models.XXXX"
+// for back compatible with previous response version
+func (r *Renderer) extractModelType(model any) (string, error) {
+	const expectedPrefix = "Cmd"
+	const expectedSuffix = "Out"
+
+	alias := fmt.Sprintf("%T", model)
+	dotIndex := strings.Index(alias, ".")
+
+	if dotIndex == -1 {
+		return "", fmt.Errorf("DTO type '%s' without package name", alias)
+	}
+
+	dtoName := alias[dotIndex+1:]
+
+	if !strings.HasPrefix(dtoName, expectedPrefix) {
+		return "", fmt.Errorf("DTO name '%s' alias '%s' should has prefix '%s'", dtoName, alias, expectedPrefix)
+	}
+
+	if !strings.HasSuffix(dtoName, expectedSuffix) {
+		return "", fmt.Errorf("DTO name '%s' alias '%s' should has suffix '%s'", dtoName, alias, expectedSuffix)
+	}
+
+	return fmt.Sprintf(
+		"models.%s",
+		strings.TrimPrefix(strings.TrimSuffix(dtoName, expectedSuffix), expectedPrefix),
+	), nil
 }

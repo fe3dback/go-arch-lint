@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	ProjectFilesResolver interface {
+	projectFilesResolver interface {
 		Scan(
 			ctx context.Context,
 			projectDirectory string,
@@ -19,7 +19,7 @@ type (
 		) ([]models.ProjectFile, error)
 	}
 
-	ProjectFilesHolder interface {
+	projectFilesHolder interface {
 		HoldProjectFiles(files []models.ProjectFile, components []speca.Component) []models.FileHold
 	}
 )

@@ -10,50 +10,58 @@ import (
 )
 
 type Operation struct {
-	specAssembler        SpecAssembler
-	projectFilesResolver ProjectFilesResolver
+	specAssembler        specAssembler
+	projectFilesResolver projectFilesResolver
+	projectInfoAssembler projectInfoAssembler
 }
 
 func NewOperation(
-	specAssembler SpecAssembler,
-	projectFilesResolver ProjectFilesResolver,
+	specAssembler specAssembler,
+	projectFilesResolver projectFilesResolver,
+	projectInfoAssembler projectInfoAssembler,
 ) *Operation {
 	return &Operation{
 		specAssembler:        specAssembler,
 		projectFilesResolver: projectFilesResolver,
+		projectInfoAssembler: projectInfoAssembler,
 	}
 }
 
-func (s *Operation) Behave(ctx context.Context, scheme models.MappingScheme) (models.Mapping, error) {
-	spec, err := s.specAssembler.Assemble()
+func (s *Operation) Behave(ctx context.Context, in models.CmdMappingIn) (models.CmdMappingOut, error) {
+	projectInfo, err := s.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
-		return models.Mapping{}, fmt.Errorf("failed to assemble spec: %w", err)
+		return models.CmdMappingOut{}, fmt.Errorf("failed to assemble project info: %w", err)
+	}
+
+	spec, err := s.specAssembler.Assemble(projectInfo)
+	if err != nil {
+		return models.CmdMappingOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
 	projectFiles, err := s.projectFilesResolver.ProjectFiles(ctx, spec)
 	if err != nil {
-		return models.Mapping{}, fmt.Errorf("failed to resolve project files: %w", err)
+		return models.CmdMappingOut{}, fmt.Errorf("failed to resolve project files: %w", err)
 	}
 
-	return models.Mapping{
+	return models.CmdMappingOut{
 		ProjectDirectory: spec.RootDirectory.Value(),
 		ModuleName:       spec.ModuleName.Value(),
 		MappingGrouped:   assembleMappingByComponent(spec, projectFiles),
 		MappingList:      assembleMappingByFile(projectFiles),
-		Scheme:           scheme,
+		Scheme:           in.Scheme,
 	}, nil
 }
 
 func assembleMappingByComponent(
 	spec speca.Spec,
 	projectFiles []models.FileHold,
-) []models.MappingGrouped {
-	tmp := make(map[string]*models.MappingGrouped)
+) []models.CmdMappingOutGrouped {
+	tmp := make(map[string]*models.CmdMappingOutGrouped)
 
 	for _, projectFile := range projectFiles {
 		componentName := componentName(projectFile.ComponentID)
 		if _, exist := tmp[componentName]; !exist {
-			tmp[componentName] = &models.MappingGrouped{
+			tmp[componentName] = &models.CmdMappingOutGrouped{
 				ComponentName: componentName,
 				FileNames:     []string{},
 			}
@@ -66,7 +74,7 @@ func assembleMappingByComponent(
 		)
 	}
 
-	mapping := make([]models.MappingGrouped, 0)
+	mapping := make([]models.CmdMappingOutGrouped, 0)
 	for _, component := range spec.Components {
 		componentName := component.Name.Value()
 		if grouped, exist := tmp[componentName]; exist {
@@ -75,7 +83,7 @@ func assembleMappingByComponent(
 			continue
 		}
 
-		mapping = append(mapping, models.MappingGrouped{
+		mapping = append(mapping, models.CmdMappingOutGrouped{
 			ComponentName: componentName,
 			FileNames:     []string{},
 		})
@@ -87,7 +95,7 @@ func assembleMappingByComponent(
 
 		if len(notAttachedFiles) > 0 {
 			sort.Strings(notAttachedFiles)
-			mapping = append(mapping, models.MappingGrouped{
+			mapping = append(mapping, models.CmdMappingOutGrouped{
 				ComponentName: emptyComponentID,
 				FileNames:     notAttachedFiles,
 			})
@@ -101,8 +109,8 @@ func assembleMappingByComponent(
 	return mapping
 }
 
-func assembleMappingByFile(projectFiles []models.FileHold) []models.MappingList {
-	mapping := make([]models.MappingList, 0)
+func assembleMappingByFile(projectFiles []models.FileHold) []models.CmdMappingOutList {
+	mapping := make([]models.CmdMappingOutList, 0)
 	exist := make(map[string]struct{})
 
 	for _, projectFile := range projectFiles {
@@ -112,7 +120,7 @@ func assembleMappingByFile(projectFiles []models.FileHold) []models.MappingList 
 			continue
 		}
 
-		mapping = append(mapping, models.MappingList{
+		mapping = append(mapping, models.CmdMappingOutList{
 			FileName:      fileName,
 			ComponentName: componentName(projectFile.ComponentID),
 		})

@@ -3,11 +3,11 @@ package render
 import "github.com/fe3dback/go-arch-lint/internal/models"
 
 type (
-	ReferenceRender interface {
+	referenceRender interface {
 		SourceCode(ref models.CodeReference, highlight bool) []byte
 	}
 
-	ColorPrinter interface {
+	colorPrinter interface {
 		Red(in string) (out string)
 		Green(in string) (out string)
 		Yellow(in string) (out string)

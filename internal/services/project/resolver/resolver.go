@@ -10,13 +10,13 @@ import (
 )
 
 type Resolver struct {
-	projectFilesResolver ProjectFilesResolver
-	projectFilesHolder   ProjectFilesHolder
+	projectFilesResolver projectFilesResolver
+	projectFilesHolder   projectFilesHolder
 }
 
 func NewResolver(
-	projectFilesResolver ProjectFilesResolver,
-	projectFilesHolder ProjectFilesHolder,
+	projectFilesResolver projectFilesResolver,
+	projectFilesHolder projectFilesHolder,
 ) *Resolver {
 	return &Resolver{
 		projectFilesResolver: projectFilesResolver,

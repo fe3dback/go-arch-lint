@@ -9,13 +9,13 @@ import (
 )
 
 type resolver struct {
-	pathResolver  PathResolver
+	pathResolver  pathResolver
 	rootDirectory string
 	moduleName    string
 }
 
 func newResolver(
-	pathResolver PathResolver,
+	pathResolver pathResolver,
 	rootDirectory string,
 	moduleName string,
 ) *resolver {

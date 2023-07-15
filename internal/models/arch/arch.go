@@ -15,13 +15,16 @@ type (
 	Document interface {
 		Reference() models.Reference
 
-		// Spec Version
+		// FilePath is Abs arch file path
+		FilePath() speca.Referable[string]
+
+		// Version of spec (scheme of document)
 		Version() speca.Referable[int]
 
-		// Spec relative WorkingDirectory to root, prepend this to all path's from spec
+		// WorkingDirectory relative to root, prepend this to all path's from spec
 		WorkingDirectory() speca.Referable[string]
 
-		// Global spec Options
+		// Options is global spec options
 		Options() Options
 
 		// ExcludedDirectories from analyze, each contain relative directory name
@@ -30,16 +33,16 @@ type (
 		// ExcludedFilesRegExp from analyze, each project file will by matched with this regexp rules
 		ExcludedFilesRegExp() ExcludedFilesRegExp
 
-		// Map of Vendors
+		// Vendors (map)
 		Vendors() Vendors
 
-		// List of Vendors that can by imported to any project package
+		// CommonVendors is list of Vendors that can be imported to any project package
 		CommonVendors() CommonVendors
 
-		// Map of Components
+		// Components (map)
 		Components() Components
 
-		// List of Components that can by imported to any project package
+		// CommonComponents is List of Components that can be imported to any project package
 		CommonComponents() CommonComponents
 
 		// Dependencies map between Components and DependencyRule`s

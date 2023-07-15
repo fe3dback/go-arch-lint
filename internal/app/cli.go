@@ -35,8 +35,7 @@ func Execute() int {
 	)
 
 	// -- process
-	rootCmd := di.ProvideRootCommand()
-	err := rootCmd.ExecuteContext(mainCtx)
+	err := di.CommandRoot().ExecuteContext(mainCtx)
 
 	// -- handle errors
 	if err != nil {

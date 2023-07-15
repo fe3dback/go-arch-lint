@@ -4,19 +4,24 @@ import (
 	"context"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
-	SpecAssembler interface {
-		Assemble() (speca.Spec, error)
+	projectInfoAssembler interface {
+		ProjectInfo(rootDirectory string, archFilePath string) (common.Project, error)
 	}
 
-	ReferenceRender interface {
+	specAssembler interface {
+		Assemble(prj common.Project) (speca.Spec, error)
+	}
+
+	referenceRender interface {
 		SourceCode(ref models.CodeReference, highlight bool) []byte
 	}
 
-	SpecChecker interface {
+	specChecker interface {
 		Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error)
 	}
 )
