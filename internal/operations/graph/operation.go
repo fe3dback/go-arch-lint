@@ -34,23 +34,23 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.CmdGraphOut, error) {
-	projectInfo, err := s.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
+func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.CmdGraphOut, error) {
+	projectInfo, err := o.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
 		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	spec, err := s.specAssembler.Assemble(projectInfo)
+	spec, err := o.specAssembler.Assemble(projectInfo)
 	if err != nil {
 		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	graphCode, err := s.buildGraph(spec, in)
+	graphCode, err := o.buildGraph(spec, in)
 	if err != nil {
 		return models.CmdGraphOut{}, fmt.Errorf("failed build graph: %w", err)
 	}
 
-	svg, err := s.compileGraph(ctx, graphCode)
+	svg, err := o.compileGraph(ctx, graphCode)
 	if err != nil {
 		return models.CmdGraphOut{}, fmt.Errorf("failed to compile graph: %w", err)
 	}
@@ -72,14 +72,14 @@ func (s *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.Cm
 	}, nil
 }
 
-func (s *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string, error) {
+func (o *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string, error) {
 	var buff bytes.Buffer
-	whiteList, err := s.populateGraphWhitelist(spec, opts)
+	whiteList, err := o.populateGraphWhitelist(spec, opts)
 	if err != nil {
 		return "", err
 	}
 
-	flow := s.componentsFlowArrow(opts)
+	flow := o.componentsFlowArrow(opts)
 
 	for _, cmp := range spec.Components {
 		if _, visible := whiteList[cmp.Name.Value()]; !visible {
@@ -124,7 +124,7 @@ func (s *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string,
 	return buff.String(), nil
 }
 
-func (s *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
+func (o *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
 	if opts.Type == models.GraphTypeFlow {
 		return "->"
 	}
@@ -136,15 +136,15 @@ func (s *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
 	return "--"
 }
 
-func (s *Operation) populateGraphWhitelist(spec speca.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelist(spec speca.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
 	if opts.Focus == "" {
-		return s.populateGraphWhitelistAll(spec)
+		return o.populateGraphWhitelistAll(spec)
 	}
 
-	return s.populateGraphWhitelistFocused(spec, opts.Focus)
+	return o.populateGraphWhitelistFocused(spec, opts.Focus)
 }
 
-func (s *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struct{}, error) {
 	whiteList := make(map[string]struct{}, len(spec.Components))
 
 	for _, cmp := range spec.Components {
@@ -154,7 +154,7 @@ func (s *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struc
 	return whiteList, nil
 }
 
-func (s *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName string) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName string) (map[string]struct{}, error) {
 	cmpMap := make(map[string]speca.Component)
 	rootExist := false
 
@@ -199,7 +199,7 @@ func (s *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName 
 	return whiteList, nil
 }
 
-func (s *Operation) compileGraph(ctx context.Context, graphCode string) ([]byte, error) {
+func (o *Operation) compileGraph(ctx context.Context, graphCode string) ([]byte, error) {
 	ruler, err := textmeasure.NewRuler()
 	if err != nil {
 		return nil, fmt.Errorf("failed create ruler: %w", err)

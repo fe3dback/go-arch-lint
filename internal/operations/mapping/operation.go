@@ -27,18 +27,18 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave(ctx context.Context, in models.CmdMappingIn) (models.CmdMappingOut, error) {
-	projectInfo, err := s.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
+func (o *Operation) Behave(ctx context.Context, in models.CmdMappingIn) (models.CmdMappingOut, error) {
+	projectInfo, err := o.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
 		return models.CmdMappingOut{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	spec, err := s.specAssembler.Assemble(projectInfo)
+	spec, err := o.specAssembler.Assemble(projectInfo)
 	if err != nil {
 		return models.CmdMappingOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	projectFiles, err := s.projectFilesResolver.ProjectFiles(ctx, spec)
+	projectFiles, err := o.projectFilesResolver.ProjectFiles(ctx, spec)
 	if err != nil {
 		return models.CmdMappingOut{}, fmt.Errorf("failed to resolve project files: %w", err)
 	}

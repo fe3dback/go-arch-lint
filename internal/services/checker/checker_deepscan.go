@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	terminal "github.com/fe3dback/span-terminal"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -71,8 +70,6 @@ func (c *DeepScan) workersCount() int {
 
 func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
 	maxWorkers := c.workersCount()
-	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("deepscan (%d workers)", maxWorkers))
-	defer span.End()
 
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
@@ -104,9 +101,6 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 	}
 
 	// -- scan project
-	checked := 0
-	total := len(spec.Components)
-
 	pool := make(chan struct{}, maxWorkers)
 	var wg errgroup.Group
 
@@ -118,9 +112,6 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 			defer func() {
 				<-pool
 			}()
-
-			span.UpdateProgress(float64(checked) / float64(total))
-			checked++
 
 			if component.DeepScan.Value() != true {
 				return nil
@@ -147,16 +138,7 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 }
 
 func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
-	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf(cmp.Name.Value()))
-	defer span.End()
-
-	checked := 0
-	total := len(cmp.ResolvedPaths)
-
 	for _, packagePath := range cmp.ResolvedPaths {
-		span.UpdateProgress(float64(checked) / float64(total))
-		checked++
-
 		absPath := packagePath.Value().AbsPath
 		matchedCmp, ok := c.packageComponents[absPath]
 		if !ok {

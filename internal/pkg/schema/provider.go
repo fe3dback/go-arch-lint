@@ -1,8 +1,18 @@
 package schema
 
 import (
+	_ "embed"
 	"fmt"
 )
+
+//go:embed v1.json
+var v1 []byte
+
+//go:embed v2.json
+var v2 []byte
+
+//go:embed v3.json
+var v3 []byte
 
 type Provider struct {
 }
@@ -11,15 +21,15 @@ func NewProvider() *Provider {
 	return &Provider{}
 }
 
-func (p *Provider) Provide(version int) (string, error) {
+func (p *Provider) Provide(version int) ([]byte, error) {
 	switch version {
 	case 3:
-		return V3, nil
+		return v3, nil
 	case 2:
-		return V2, nil
+		return v2, nil
 	case 1:
-		return V1, nil
+		return v1, nil
 	default:
-		return "", fmt.Errorf("unknown version: %d", version)
+		return nil, fmt.Errorf("unknown version: %d", version)
 	}
 }

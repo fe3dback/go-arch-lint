@@ -15,7 +15,7 @@ type (
 	}
 )
 
-func jsonSchemeValidate(jsonSchema string, sourceCode []byte) ([]jsonSchemeNotice, error) {
+func jsonSchemeValidate(jsonSchema []byte, sourceCode []byte) ([]jsonSchemeNotice, error) {
 	jsonDocument, err := jsonSchemeDocumentByCode(sourceCode)
 	if err != nil {
 		return nil, fmt.Errorf("failed provide json document loader: %w", err)
@@ -24,7 +24,7 @@ func jsonSchemeValidate(jsonSchema string, sourceCode []byte) ([]jsonSchemeNotic
 		return nil, fmt.Errorf("json document is invalid")
 	}
 
-	jsonScheme := gojsonschema.NewStringLoader(jsonSchema)
+	jsonScheme := gojsonschema.NewBytesLoader(jsonSchema)
 	result, err := gojsonschema.Validate(jsonScheme, *jsonDocument)
 	if err != nil {
 		return nil, fmt.Errorf("json scheme validation error: %w", err)
@@ -85,9 +85,10 @@ func jsonSchemeExtractYamlPathFromError(err gojsonschema.ResultError) *string {
 }
 
 // transform jsonPath to yamlPath
-//   "(root).exclude.1" 		-> "$.exclude[1]"
-//   "(root).some.field.22" 	-> "$.some.field[22]"
-//   "(root).some.field.22a.b" 	-> "$.some.field.22a.b"
+//
+//	"(root).exclude.1" 		-> "$.exclude[1]"
+//	"(root).some.field.22" 	-> "$.some.field[22]"
+//	"(root).some.field.22a.b" 	-> "$.some.field.22a.b"
 func jsonSchemeTransformJSONPathToYamlPath(path string) string {
 	// root -> $
 	path = strings.Replace(path, "(root)", "$", 1)

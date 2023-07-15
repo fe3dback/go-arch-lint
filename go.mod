@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/alecthomas/chroma v0.10.0
-	github.com/fe3dback/span-terminal v1.0.0
 	github.com/goccy/go-yaml v1.8.0
 	github.com/google/go-cmdtest v0.2.0
 	github.com/logrusorgru/aurora/v3 v3.0.0

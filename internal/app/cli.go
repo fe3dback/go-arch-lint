@@ -6,32 +6,19 @@ import (
 	"fmt"
 	"os"
 
-	terminal "github.com/fe3dback/span-terminal"
-
 	"github.com/fe3dback/go-arch-lint/internal/app/internal/container"
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/version"
 )
 
 func Execute() int {
 	mainCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	terminal.SetGlobalTerminal(terminal.NewTerminal(
-		terminal.WithStdoutMaxLines(6),
-		terminal.WithContainerMaxLines(3),
-		terminal.WithRenderOpts(
-			terminal.WithRenderOptSpanMaxRoots(4),
-			terminal.WithRenderOptSpanMaxChild(8),
-			terminal.WithRenderOptSpanMaxDetails(16),
-		),
-	))
-
 	// -- build DI
 	di := container.NewContainer(
-		version.Version,
-		version.BuildTime,
-		version.CommitHash,
+		Version,
+		BuildTime,
+		CommitHash,
 	)
 
 	// -- process

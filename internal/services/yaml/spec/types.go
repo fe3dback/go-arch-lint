@@ -10,6 +10,6 @@ type (
 	}
 
 	jsonSchemaProvider interface {
-		Provide(version int) (string, error)
+		Provide(version int) ([]byte, error)
 	}
 )

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	terminal "github.com/fe3dback/span-terminal"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
@@ -27,9 +25,6 @@ func NewImport(
 }
 
 func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
-	ctx, span := terminal.StartSpan(ctx, "imports check")
-	defer span.End()
-
 	c.spec = spec
 
 	projectFiles, err := c.projectFilesResolver.ProjectFiles(ctx, spec)

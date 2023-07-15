@@ -25,8 +25,8 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave(in models.CmdSelfInspectIn) (models.CmdSelfInspectOut, error) {
-	projectInfo, err := s.projectInfoAssembler.ProjectInfo(
+func (o *Operation) Behave(in models.CmdSelfInspectIn) (models.CmdSelfInspectOut, error) {
+	projectInfo, err := o.projectInfoAssembler.ProjectInfo(
 		in.ProjectPath,
 		in.ArchFile,
 	)
@@ -34,7 +34,7 @@ func (s *Operation) Behave(in models.CmdSelfInspectIn) (models.CmdSelfInspectOut
 		return models.CmdSelfInspectOut{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	spec, err := s.specAssembler.Assemble(projectInfo)
+	spec, err := o.specAssembler.Assemble(projectInfo)
 	if err != nil {
 		return models.CmdSelfInspectOut{}, fmt.Errorf("failed assemble spec: %w", err)
 	}
@@ -42,31 +42,31 @@ func (s *Operation) Behave(in models.CmdSelfInspectIn) (models.CmdSelfInspectOut
 	return models.CmdSelfInspectOut{
 		ModuleName:    projectInfo.ModuleName,
 		RootDirectory: projectInfo.Directory,
-		LinterVersion: s.version,
-		Notices:       s.extractNotices(&spec),
-		Suggestions:   s.extractSuggestions(&spec),
+		LinterVersion: o.version,
+		Notices:       o.extractNotices(&spec),
+		Suggestions:   o.extractSuggestions(&spec),
 	}, nil
 }
 
-func (s *Operation) extractNotices(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
-	return s.asAnnotations(spec.Integrity.DocumentNotices)
+func (o *Operation) extractNotices(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
+	return o.asAnnotations(spec.Integrity.DocumentNotices)
 }
 
-func (s *Operation) extractSuggestions(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
-	return s.asAnnotations(spec.Integrity.Suggestions)
+func (o *Operation) extractSuggestions(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
+	return o.asAnnotations(spec.Integrity.Suggestions)
 }
 
-func (s *Operation) asAnnotations(list []speca.Notice) []models.CmdSelfInspectOutAnnotation {
+func (o *Operation) asAnnotations(list []speca.Notice) []models.CmdSelfInspectOutAnnotation {
 	annotations := make([]models.CmdSelfInspectOutAnnotation, 0, len(list))
 
 	for _, notice := range list {
-		annotations = append(annotations, s.asAnnotation(notice))
+		annotations = append(annotations, o.asAnnotation(notice))
 	}
 
 	return annotations
 }
 
-func (s *Operation) asAnnotation(notice speca.Notice) models.CmdSelfInspectOutAnnotation {
+func (o *Operation) asAnnotation(notice speca.Notice) models.CmdSelfInspectOutAnnotation {
 	return models.CmdSelfInspectOutAnnotation{
 		Text:      notice.Notice.Error(),
 		Reference: notice.Ref,

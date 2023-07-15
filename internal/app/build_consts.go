@@ -1,4 +1,4 @@
-package version
+package app
 
 var (
 	Version    = "dev"     // nolint

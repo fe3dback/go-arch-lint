@@ -17,15 +17,15 @@ func NewOperation(jsonSchemaProvider jsonSchemaProvider) *Operation {
 	}
 }
 
-func (s *Operation) Behave(in models.CmdSchemaIn) (models.CmdSchemaOut, error) {
-	jsonSchema, err := s.jsonSchemaProvider.Provide(in.Version)
+func (o *Operation) Behave(in models.CmdSchemaIn) (models.CmdSchemaOut, error) {
+	jsonSchema, err := o.jsonSchemaProvider.Provide(in.Version)
 	if err != nil {
 		return models.CmdSchemaOut{}, fmt.Errorf("failed to provide json schema: %w", err)
 	}
 
 	// reformat json to system one line string
 	var data interface{}
-	err = json.Unmarshal([]byte(jsonSchema), &data)
+	err = json.Unmarshal(jsonSchema, &data)
 	if err != nil {
 		return models.CmdSchemaOut{}, fmt.Errorf("failed to unmarshal json: %w", err)
 	}
