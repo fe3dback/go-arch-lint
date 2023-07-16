@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 
 	"github.com/goccy/go-yaml"
@@ -67,7 +67,7 @@ func (sp *Provider) decodeDocument(version int, sourceCode []byte, filePath stri
 		yaml.Strict(),
 	)
 	resolver := sp.createYamlReferenceResolver(filePath)
-	filePathRef := speca.NewReferable(filePath, speca.NewReference(filePath, 0, 0))
+	filePathRef := common.NewReferable(filePath, common.NewReferenceSingleLine(filePath, 0, 0))
 
 	// todo: refactor this somehow (dry)
 	switch version {
@@ -99,7 +99,7 @@ func (sp *Provider) decodeDocument(version int, sourceCode []byte, filePath stri
 }
 
 func (sp *Provider) createYamlReferenceResolver(archFilePath string) yamlDocumentPathResolver {
-	return func(yamlPath string) models.Reference {
+	return func(yamlPath string) common.Reference {
 		return sp.yamlReferenceResolver.Resolve(archFilePath, yamlPath)
 	}
 }
@@ -124,7 +124,7 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int, sourceCode []byte, fil
 	if err != nil {
 		return []speca.Notice{{
 			Notice: fmt.Errorf("failed to provide json scheme for validation: %w", err),
-			Ref:    speca.NewEmptyReference(),
+			Ref:    common.NewEmptyReference(),
 		}}
 	}
 
@@ -132,13 +132,13 @@ func (sp *Provider) jsonSchemeValidate(schemeVersion int, sourceCode []byte, fil
 	if err != nil {
 		return []speca.Notice{{
 			Notice: fmt.Errorf("failed to validate arch file with json scheme: %w", err),
-			Ref:    speca.NewEmptyReference(),
+			Ref:    common.NewEmptyReference(),
 		}}
 	}
 
 	schemeNotices := make([]speca.Notice, 0)
 	for _, jsonNotice := range jsonNotices {
-		schemeRef := speca.NewEmptyReference()
+		schemeRef := common.NewEmptyReference()
 		if jsonNotice.yamlPath != nil {
 			schemeRef = sp.yamlReferenceResolver.Resolve(filePath, *jsonNotice.yamlPath)
 		}

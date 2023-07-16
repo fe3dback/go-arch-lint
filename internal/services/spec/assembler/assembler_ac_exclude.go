@@ -24,15 +24,15 @@ func (ea *excludeAssembler) assemble(spec *speca.Spec, document arch.Document) e
 	for _, yamlRelativePath := range document.ExcludedDirectories().List() {
 		tmpResolvedPath, err := ea.resolver.resolveLocalGlobPath(
 			path.Clean(fmt.Sprintf("%s/%s",
-				document.WorkingDirectory().Value(),
-				yamlRelativePath.Value(),
+				document.WorkingDirectory().Value,
+				yamlRelativePath.Value,
 			)),
 		)
 		if err != nil {
-			return fmt.Errorf("failed to assemble exclude '%s' path's: %w", yamlRelativePath.Value(), err)
+			return fmt.Errorf("failed to assemble exclude '%s' path's: %w", yamlRelativePath.Value, err)
 		}
 
-		resolvedPath := wrap(yamlRelativePath.Reference(), tmpResolvedPath)
+		resolvedPath := wrap(yamlRelativePath.Reference, tmpResolvedPath)
 		spec.Exclude = append(spec.Exclude, resolvedPath...)
 	}
 

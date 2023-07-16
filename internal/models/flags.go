@@ -1,12 +1,6 @@
 package models
 
 const (
-	DefaultProjectPath   = "./"
-	DefaultArchFileName  = ".go-arch-lint.yml"
-	DefaultGoModFileName = "go.mod"
-)
-
-const (
 	OutputTypeDefault OutputType = "default"
 	OutputTypeASCII   OutputType = "ascii"
 	OutputTypeJSON    OutputType = "json"

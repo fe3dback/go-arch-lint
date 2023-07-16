@@ -31,11 +31,11 @@ func (v *validatorDeps) Validate(doc arch.Document) []speca.Notice {
 		}
 
 		if len(rules.MayDependOn()) == 0 && len(rules.CanUse()) == 0 {
-			if rules.AnyProjectDeps().Value() {
+			if rules.AnyProjectDeps().Value {
 				continue
 			}
 
-			if rules.AnyVendorDeps().Value() {
+			if rules.AnyVendorDeps().Value {
 				continue
 			}
 

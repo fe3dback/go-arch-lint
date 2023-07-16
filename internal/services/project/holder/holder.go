@@ -126,7 +126,7 @@ func componentsMatchesFile(filePath string, components []speca.Component) []stri
 
 	for _, component := range components {
 		if componentMatchPackage(packagePath, component) {
-			matched = append(matched, component.Name.Value())
+			matched = append(matched, component.Name.Value)
 		}
 	}
 
@@ -135,7 +135,7 @@ func componentsMatchesFile(filePath string, components []speca.Component) []stri
 
 func componentMatchPackage(packagePath string, component speca.Component) bool {
 	for _, componentDirectoryRef := range component.ResolvedPaths {
-		resolvedPackagePath := componentDirectoryRef.Value().AbsPath
+		resolvedPackagePath := componentDirectoryRef.Value.AbsPath
 		if packageMathPath(packagePath, resolvedPackagePath) {
 			return true
 		}

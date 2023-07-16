@@ -1,5 +1,7 @@
 package models
 
+import "github.com/fe3dback/go-arch-lint/internal/models/common"
+
 type (
 	UserSpaceError struct {
 		msg string
@@ -7,7 +9,7 @@ type (
 
 	ReferableErr struct {
 		original  error
-		reference Reference
+		reference common.Reference
 	}
 )
 
@@ -19,7 +21,7 @@ func (r ReferableErr) Error() string {
 	return r.original.Error()
 }
 
-func (r ReferableErr) Reference() Reference {
+func (r ReferableErr) Reference() common.Reference {
 	return r.reference
 }
 
@@ -53,7 +55,7 @@ func NewUserSpaceError(msg string) UserSpaceError {
 	}
 }
 
-func NewReferableErr(err error, ref Reference) ReferableErr {
+func NewReferableErr(err error, ref common.Reference) ReferableErr {
 	return ReferableErr{
 		original:  err,
 		reference: ref,

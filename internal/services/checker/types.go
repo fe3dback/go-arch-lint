@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
@@ -17,6 +18,6 @@ type (
 	}
 
 	sourceCodeRenderer interface {
-		SourceCodeWithoutOffset(ref models.CodeReference, highlight bool) []byte
+		SourceCode(ref common.Reference, highlight bool, showPointer bool) []byte
 	}
 )

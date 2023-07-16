@@ -4,16 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"math"
-	"os"
 	"strings"
 
-	"github.com/alecthomas/chroma/formatters"
-	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/styles"
-
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type Render struct {
@@ -22,8 +16,7 @@ type Render struct {
 
 type annotateOpts struct {
 	code              []byte
-	ref               models.CodeReference
-	region            codeRegion
+	ref               common.Reference
 	showColumnPointer bool
 }
 
@@ -33,110 +26,37 @@ func NewRender(printer colorPrinter) *Render {
 	}
 }
 
-func (r *Render) SourceCode(ref models.CodeReference, highlight bool) []byte {
-	code, region := r.readCode(ref, highlight)
-	return r.annotate(annotateOpts{
-		code:              code,
-		ref:               ref,
-		region:            region,
-		showColumnPointer: true,
-	})
+func (r *Render) SourceCode(ref common.Reference, highlight bool, showPointer bool) []byte {
+	opts := r.fetch(ref, highlight)
+	opts.showColumnPointer = showPointer
+
+	return r.annotate(opts)
 }
 
-func (r *Render) SourceCodeWithoutOffset(ref models.CodeReference, highlight bool) []byte {
-	code, region := r.readCode(ref, highlight)
-	return r.annotate(annotateOpts{
-		code:              code,
-		ref:               ref,
-		region:            region,
-		showColumnPointer: false,
-	})
-}
-
-func (r *Render) readCode(ref models.CodeReference, highlight bool) ([]byte, codeRegion) {
-	if !ref.Pointer.Valid {
-		return []byte{}, codeRegion{}
+func (r *Render) fetch(ref common.Reference, highlight bool) annotateOpts {
+	if !ref.Valid {
+		return annotateOpts{}
 	}
 
-	rawCode, region := r.readRaw(ref)
-	if !highlight {
-		return rawCode, region
+	file, linesCount := readFile(ref.File)
+	if file == nil {
+		return annotateOpts{}
 	}
 
-	return highlightRawCode(ref, rawCode), region
-}
+	ref = ref.ClampWithRealLinesCount(linesCount)
+	content := readLines(file, ref)
 
-func (r *Render) readRaw(ref models.CodeReference) ([]byte, codeRegion) {
-	if !ref.Pointer.Valid {
-		return []byte{}, codeRegion{}
+	if highlight {
+		content = highlightContent(ref.File, content)
 	}
 
-	file, err := os.Open(ref.Pointer.File)
-	if err != nil {
-		return []byte{}, codeRegion{}
-	}
-
-	linesCount, err := lineCounter(file)
-	if err != nil {
-		return []byte{}, codeRegion{}
-	}
-
-	_, err = file.Seek(0, io.SeekStart)
-	if err != nil {
-		return []byte{}, codeRegion{}
-	}
-
-	region := calculateCodeRegion(ref, linesCount)
-	return readLines(file, region), region
-}
-
-func highlightRawCode(ref models.CodeReference, code []byte) []byte {
-	lexer := lexers.Match(ref.Pointer.File)
-	if lexer == nil {
-		lexer = lexers.Fallback
-	}
-
-	style := styles.Trac
-	formatter := formatters.TTY8
-
-	iterator, err := lexer.Tokenise(nil, string(code))
-	if err != nil {
-		return []byte{}
-	}
-
-	var buf bytes.Buffer
-	err = formatter.Format(&buf, style, iterator)
-	if err != nil {
-		return []byte{}
-	}
-
-	return buf.Bytes()
-}
-
-func readLines(r io.Reader, region codeRegion) []byte {
-	sc := bufio.NewScanner(r)
-	currentLine := 0
-	var buffer bytes.Buffer
-
-	for sc.Scan() {
-		currentLine++
-
-		if currentLine >= region.lineFirst && currentLine <= region.lineLast {
-			buffer.Write(sc.Bytes())
-
-			if currentLine != region.lineLast {
-				buffer.WriteByte('\n')
-			}
-		}
-	}
-
-	return buffer.Bytes()
+	return annotateOpts{code: content, ref: ref}
 }
 
 func (r *Render) annotate(opt annotateOpts) []byte {
 	buf := bytes.NewBuffer(opt.code)
 	sc := bufio.NewScanner(buf)
-	currentLine := opt.region.lineFirst
+	currentLine := opt.ref.LineFrom
 
 	var resultBuffer bytes.Buffer
 	for sc.Scan() {
@@ -144,7 +64,7 @@ func (r *Render) annotate(opt annotateOpts) []byte {
 		prefixEmpty := r.printer.Gray("        ")
 
 		// add line pointer
-		if currentLine == opt.region.lineMain {
+		if currentLine == opt.ref.Line {
 			prefixLine = fmt.Sprintf("> %s", prefixLine)
 		} else {
 			prefixLine = fmt.Sprintf("  %s", prefixLine)
@@ -158,8 +78,8 @@ func (r *Render) annotate(opt annotateOpts) []byte {
 
 		// add offset pointer
 		if opt.showColumnPointer {
-			if currentLine == opt.region.lineMain && opt.ref.Pointer.Valid {
-				spaces := strings.Repeat(" ", int(math.Max(0, float64(opt.ref.Pointer.Offset-1))))
+			if currentLine == opt.ref.Line {
+				spaces := strings.Repeat(" ", int(math.Max(0, float64(opt.ref.Column-1))))
 				resultBuffer.WriteString(fmt.Sprintf("%s %s^\n", prefixEmpty, spaces))
 			}
 		}

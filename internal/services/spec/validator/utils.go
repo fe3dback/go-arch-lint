@@ -26,7 +26,7 @@ func newUtils(
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	rootDir := filepath.Dir(u.document.FilePath().Value())
+	rootDir := filepath.Dir(u.document.FilePath().Value)
 	absPath := filepath.Clean(fmt.Sprintf("%s/%s", rootDir, localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {

@@ -98,7 +98,7 @@ func (s *Searcher) Usages(c Criteria) ([]InjectionMethod, error) {
 
 func (s *Searcher) sourceFromToken(pos token.Pos) Source {
 	place := positionFromToken(s.ctx.fileSet.Position(pos))
-	absPath := filepath.Dir(place.Filename)
+	absPath := filepath.Dir(place.File)
 	importRef := s.pathToImport(absPath)
 	pkg := path.Base(importRef)
 

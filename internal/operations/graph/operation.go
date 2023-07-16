@@ -66,8 +66,8 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.Cm
 	}
 
 	return models.CmdGraphOut{
-		ProjectDirectory: spec.RootDirectory.Value(),
-		ModuleName:       spec.ModuleName.Value(),
+		ProjectDirectory: spec.RootDirectory.Value,
+		ModuleName:       spec.ModuleName.Value,
 		OutFile:          outFile,
 	}, nil
 }
@@ -82,23 +82,23 @@ func (o *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string,
 	flow := o.componentsFlowArrow(opts)
 
 	for _, cmp := range spec.Components {
-		if _, visible := whiteList[cmp.Name.Value()]; !visible {
+		if _, visible := whiteList[cmp.Name.Value]; !visible {
 			continue
 		}
 
 		for _, dep := range cmp.MayDependOn {
-			if _, visible := whiteList[dep.Value()]; !visible {
+			if _, visible := whiteList[dep.Value]; !visible {
 				continue
 			}
 
-			buff.WriteString(fmt.Sprintf("%s %s %s\n", cmp.Name.Value(), flow, dep.Value()))
+			buff.WriteString(fmt.Sprintf("%s %s %s\n", cmp.Name.Value, flow, dep.Value))
 		}
 
 		if opts.IncludeVendors {
 			for _, vnd := range cmp.CanUse {
 				vars := map[string]string{
-					"vnd": vnd.Value(),
-					"cmp": cmp.Name.Value(),
+					"vnd": vnd.Value,
+					"cmp": cmp.Name.Value,
 				}
 
 				tpl := `
@@ -148,7 +148,7 @@ func (o *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struc
 	whiteList := make(map[string]struct{}, len(spec.Components))
 
 	for _, cmp := range spec.Components {
-		whiteList[cmp.Name.Value()] = struct{}{}
+		whiteList[cmp.Name.Value] = struct{}{}
 	}
 
 	return whiteList, nil
@@ -159,9 +159,9 @@ func (o *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName 
 	rootExist := false
 
 	for _, cmp := range spec.Components {
-		cmpMap[cmp.Name.Value()] = cmp
+		cmpMap[cmp.Name.Value] = cmp
 
-		if focusCmpName == cmp.Name.Value() {
+		if focusCmpName == cmp.Name.Value {
 			rootExist = true
 		}
 	}
@@ -179,21 +179,21 @@ func (o *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName 
 		cmp := cmpMap[resolveList[0]]
 		resolveList = resolveList[1:]
 
-		if _, alreadyResolved := resolved[cmp.Name.Value()]; alreadyResolved {
+		if _, alreadyResolved := resolved[cmp.Name.Value]; alreadyResolved {
 			continue
 		}
 
 		// cmp itself
-		whiteList[cmp.Name.Value()] = struct{}{}
+		whiteList[cmp.Name.Value] = struct{}{}
 
 		// cmp deps
 		for _, dep := range cmp.MayDependOn {
-			whiteList[dep.Value()] = struct{}{}
-			resolveList = append(resolveList, dep.Value())
+			whiteList[dep.Value] = struct{}{}
+			resolveList = append(resolveList, dep.Value)
 		}
 
 		// mark as resolved (for recursion check)
-		resolved[cmp.Name.Value()] = struct{}{}
+		resolved[cmp.Name.Value] = struct{}{}
 	}
 
 	return whiteList, nil

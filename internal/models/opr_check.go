@@ -1,5 +1,7 @@
 package models
 
+import "github.com/fe3dback/go-arch-lint/internal/models/common"
+
 type (
 	CmdCheckIn struct {
 		ProjectPath string
@@ -21,24 +23,24 @@ type (
 		Text              string `json:"Text"`
 		File              string `json:"File"`
 		Line              int    `json:"Line"`
-		Offset            int    `json:"Offset"`
+		Column            int    `json:"Offset"`
 		SourceCodePreview []byte `json:"-"`
 	}
 
 	CheckArchWarningDependency struct {
-		ComponentName      string    `json:"ComponentName"`
-		FileRelativePath   string    `json:"FileRelativePath"`
-		FileAbsolutePath   string    `json:"FileAbsolutePath"`
-		ResolvedImportName string    `json:"ResolvedImportName"`
-		Reference          Reference `json:"-"`
-		SourceCodePreview  []byte    `json:"-"`
+		ComponentName      string           `json:"ComponentName"`
+		FileRelativePath   string           `json:"FileRelativePath"`
+		FileAbsolutePath   string           `json:"FileAbsolutePath"`
+		ResolvedImportName string           `json:"ResolvedImportName"`
+		Reference          common.Reference `json:"-"`
+		SourceCodePreview  []byte           `json:"-"`
 	}
 
 	CheckArchWarningMatch struct {
-		FileRelativePath  string    `json:"FileRelativePath"`
-		FileAbsolutePath  string    `json:"FileAbsolutePath"`
-		Reference         Reference `json:"-"`
-		SourceCodePreview []byte    `json:"-"`
+		FileRelativePath  string           `json:"FileRelativePath"`
+		FileAbsolutePath  string           `json:"FileAbsolutePath"`
+		Reference         common.Reference `json:"-"`
+		SourceCodePreview []byte           `json:"-"`
 	}
 
 	CheckArchWarningDeepscan struct {
@@ -48,19 +50,19 @@ type (
 	}
 
 	DeepscanWarningGate struct {
-		ComponentName string    // operations
-		MethodName    string    // NewOperation
-		Definition    Reference // internal/glue/code/line_count.go:54
-		RelativePath  string    `json:"-"` // internal/glue/code/line_count.go:54
+		ComponentName string           // operations
+		MethodName    string           // NewOperation
+		Definition    common.Reference // internal/glue/code/line_count.go:54
+		RelativePath  string           `json:"-"` // internal/glue/code/line_count.go:54
 	}
 
 	DeepscanWarningDependency struct {
-		ComponentName     string    // repository
-		Name              string    // micro.ViewRepository
-		InjectionAST      string    // c.provideMicroViewRepository()
-		Injection         Reference // internal/app/internal/container/cmd_mapping.go:15
-		InjectionPath     string    `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
-		SourceCodePreview []byte    `json:"-"`
+		ComponentName     string           // repository
+		Name              string           // micro.ViewRepository
+		InjectionAST      string           // c.provideMicroViewRepository()
+		Injection         common.Reference // internal/app/internal/container/cmd_mapping.go:15
+		InjectionPath     string           `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
+		SourceCodePreview []byte           `json:"-"`
 	}
 
 	DeepscanWarningTarget struct {

@@ -2,7 +2,7 @@ package arch
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type (
@@ -13,16 +13,16 @@ type (
 	VendorName = string
 
 	Document interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// FilePath is Abs arch file path
-		FilePath() speca.Referable[string]
+		FilePath() common.Referable[string]
 
 		// Version of spec (scheme of document)
-		Version() speca.Referable[int]
+		Version() common.Referable[int]
 
 		// WorkingDirectory relative to root, prepend this to all path's from spec
-		WorkingDirectory() speca.Referable[string]
+		WorkingDirectory() common.Referable[string]
 
 		// Options is global spec options
 		Options() Options
@@ -50,109 +50,109 @@ type (
 	}
 
 	Options interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// IsDependOnAnyVendor allows all project code depend on any third party vendor lib
 		// analyze will not check imports with not local namespace's
-		IsDependOnAnyVendor() speca.Referable[bool]
+		IsDependOnAnyVendor() common.Referable[bool]
 
 		// DeepScan turn on usage of advanced AST linter
 		// this is default behavior since v3+ configs
-		DeepScan() speca.Referable[bool]
+		DeepScan() common.Referable[bool]
 	}
 
 	ExcludedDirectories interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// List of directories
 		// examples:
 		// 	- internal/test
 		//	- vendor
 		//	- .idea
-		List() []speca.Referable[string]
+		List() []common.Referable[string]
 	}
 
 	ExcludedFilesRegExp interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// List of regexp's
 		// examples:
 		// 	- "^.*_test\\.go$"
-		List() []speca.Referable[string]
+		List() []common.Referable[string]
 	}
 
 	Vendors interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// Map describe Vendor packages properties
 		Map() map[VendorName]Vendor
 	}
 
 	Vendor interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// ImportPaths is list of full import vendor qualified path
 		// example:
 		// 	- golang.org/x/mod/modfile
 		// 	- example.com/*/libs/**
-		ImportPaths() []speca.Referable[models.Glob]
+		ImportPaths() []common.Referable[models.Glob]
 	}
 
 	CommonVendors interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// List of Vendors that can be imported to any project package
-		List() []speca.Referable[string]
+		List() []common.Referable[string]
 	}
 
 	Components interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// Map with Component packages properties
 		Map() map[ComponentName]Component
 	}
 
 	Component interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// RelativePaths can contain glob's
 		// example:
 		// 	- internal/service/*/models/**
 		// 	- /
 		// 	- tests/**
-		RelativePaths() []speca.Referable[models.Glob]
+		RelativePaths() []common.Referable[models.Glob]
 	}
 
 	CommonComponents interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// List of Components that can be imported to any project package
-		List() []speca.Referable[string]
+		List() []common.Referable[string]
 	}
 
 	Dependencies interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// Map with Dependencies between Components and DependencyRule`s
 		Map() map[ComponentName]DependencyRule
 	}
 
 	DependencyRule interface {
-		Reference() models.Reference
+		Reference() common.Reference
 
 		// MayDependOn is list of Component names, that can be imported to described component
-		MayDependOn() []speca.Referable[string]
+		MayDependOn() []common.Referable[string]
 
 		// CanUse is list of Vendor names, that can be imported to described component
-		CanUse() []speca.Referable[string]
+		CanUse() []common.Referable[string]
 
 		// AnyProjectDeps allow component to import any other local namespace packages
-		AnyProjectDeps() speca.Referable[bool]
+		AnyProjectDeps() common.Referable[bool]
 
 		// AnyVendorDeps allow component to import any other vendor namespace packages
-		AnyVendorDeps() speca.Referable[bool]
+		AnyVendorDeps() common.Referable[bool]
 
 		// DeepScan overrides deepScan global option
-		DeepScan() speca.Referable[bool]
+		DeepScan() common.Referable[bool]
 	}
 )

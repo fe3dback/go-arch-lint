@@ -150,7 +150,7 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 						continue
 					}
 
-					if targetDefinitions.Place.Line == 0 {
+					if !targetDefinitions.Place.Valid {
 						// invalid target
 						// possible is some not importable std const like `errors`
 						// or not known ast at this moment

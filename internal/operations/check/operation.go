@@ -59,7 +59,7 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.Cm
 	limitedResult := o.limitResults(result, in.MaxWarnings)
 
 	model := models.CmdCheckOut{
-		ModuleName:             spec.ModuleName.Value(),
+		ModuleName:             spec.ModuleName.Value,
 		DocumentNotices:        o.assembleNotice(spec.Integrity),
 		ArchHasWarnings:        o.resultsHasWarnings(limitedResult.results),
 		ArchWarningsDependency: limitedResult.results.DependencyWarnings,
@@ -151,10 +151,11 @@ func (o *Operation) assembleNotice(integrity speca.Integrity) []models.CheckNoti
 			Text:   fmt.Sprintf("%s", notice.Notice),
 			File:   notice.Ref.File,
 			Line:   notice.Ref.Line,
-			Offset: notice.Ref.Offset,
+			Column: notice.Ref.Column,
 			SourceCodePreview: o.referenceRender.SourceCode(
-				models.NewCodeReferenceRelative(notice.Ref, 1, 1),
+				notice.Ref.ExtendRange(1, 1),
 				o.highlightCodePreview,
+				true,
 			),
 		})
 	}

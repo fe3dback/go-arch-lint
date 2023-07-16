@@ -26,21 +26,21 @@ func (v *validatorDepsComponents) Validate(doc arch.Document) []speca.Notice {
 		existComponents := make(map[string]bool)
 
 		for _, componentName := range rules.MayDependOn() {
-			if _, ok := existComponents[componentName.Value()]; ok {
+			if _, ok := existComponents[componentName.Value]; ok {
 				notices = append(notices, speca.Notice{
-					Notice: fmt.Errorf("component '%s' dublicated in '%s' deps", componentName.Value(), name),
-					Ref:    componentName.Reference(),
+					Notice: fmt.Errorf("component '%s' dublicated in '%s' deps", componentName.Value, name),
+					Ref:    componentName.Reference,
 				})
 			}
 
-			if err := v.utils.assertKnownComponent(componentName.Value()); err != nil {
+			if err := v.utils.assertKnownComponent(componentName.Value); err != nil {
 				notices = append(notices, speca.Notice{
 					Notice: err,
-					Ref:    componentName.Reference(),
+					Ref:    componentName.Reference,
 				})
 			}
 
-			existComponents[componentName.Value()] = true
+			existComponents[componentName.Value] = true
 		}
 	}
 

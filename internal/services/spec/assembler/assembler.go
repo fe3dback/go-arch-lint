@@ -29,8 +29,8 @@ func NewAssembler(
 
 func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
 	spec := speca.Spec{
-		RootDirectory: speca.NewEmptyReferable(prj.Directory),
-		ModuleName:    speca.NewEmptyReferable(prj.ModuleName),
+		RootDirectory: common.NewEmptyReferable(prj.Directory),
+		ModuleName:    common.NewEmptyReferable(prj.ModuleName),
 		Integrity: speca.Integrity{
 			DocumentNotices: []speca.Notice{},
 			Suggestions:     []speca.Notice{},

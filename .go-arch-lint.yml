@@ -24,13 +24,10 @@ vendors:
 components:
   main:                { in: app }
   container:           { in: app/internal/container/** }
-  commands:            { in: commands/* }
   operations:          { in: operations/* }
   services:            { in: services/** }
-  pkg:                 { in: pkg/* }
   view:                { in: view }
   models:              { in: models/** }
-  version:             { in: version }
 
 commonVendors:
   - go-common
@@ -39,25 +36,14 @@ commonVendors:
 commonComponents:
   - models
 
-# layout:
-# commands <- | operations <- services |
-#             |     \ view             | <- pkg
 deps:
   main:
     mayDependOn:
-      - version
       - container
 
   container:
     anyProjectDeps: true
     anyVendorDeps: true
-
-  commands:
-    mayDependOn:
-      - operations
-      - pkg
-    canUse:
-      - 3rd-cobra
 
   operations:
     mayDependOn:
@@ -68,7 +54,6 @@ deps:
 
   services:
     mayDependOn:
-      - pkg
       - services
     canUse:
       - go-ast
@@ -76,7 +61,3 @@ deps:
       - 3rd-color-fmt
       - 3rd-code-highlight
       - 3rd-json-scheme
-
-  pkg:
-    canUse:
-      - go-ast

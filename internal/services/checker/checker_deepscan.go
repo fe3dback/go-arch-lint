@@ -9,18 +9,18 @@ import (
 	"strings"
 	"sync"
 
-	deepscan2 "github.com/fe3dback/go-arch-lint/internal/services/deepscan"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/deepscan"
+	"golang.org/x/sync/errgroup"
 )
 
 type DeepScan struct {
 	projectFilesResolver projectFilesResolver
 	sourceCodeRenderer   sourceCodeRenderer
 
-	scanner           *deepscan2.Searcher
+	scanner           *deepscan.Searcher
 	spec              speca.Spec
 	result            models.CheckResult
 	fileComponents    map[string]string
@@ -33,7 +33,7 @@ func NewDeepScan(projectFilesResolver projectFilesResolver, sourceCodeRenderer s
 	return &DeepScan{
 		projectFilesResolver: projectFilesResolver,
 		sourceCodeRenderer:   sourceCodeRenderer,
-		scanner:              deepscan2.NewSearcher(),
+		scanner:              deepscan.NewSearcher(),
 	}
 }
 
@@ -113,14 +113,14 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 				<-pool
 			}()
 
-			if component.DeepScan.Value() != true {
+			if component.DeepScan.Value != true {
 				return nil
 			}
 
 			err := c.checkComponent(ctx, component)
 			if err != nil {
 				return fmt.Errorf("component '%s' check failed: %w",
-					component.Name.Value(),
+					component.Name.Value,
 					err,
 				)
 			}
@@ -139,14 +139,14 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 
 func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
 	for _, packagePath := range cmp.ResolvedPaths {
-		absPath := packagePath.Value().AbsPath
+		absPath := packagePath.Value.AbsPath
 		matchedCmp, ok := c.packageComponents[absPath]
 		if !ok {
 			// component in excludes list
 			continue
 		}
 
-		if matchedCmp != cmp.Name.Value() {
+		if matchedCmp != cmp.Name.Value {
 			// this can be in cased of wildcard match, example:
 			// cmp1: in: internal/code/common
 			// cmp2: in: internal/code/**
@@ -188,7 +188,7 @@ func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPac
 	return nil
 }
 
-func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *deepscan2.InjectionMethod) error {
+func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
 	for _, gate := range usage.Gates {
 		if len(gate.Implementations) == 0 {
 			continue
@@ -206,7 +206,7 @@ func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *
 	return nil
 }
 
-func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deepscan2.Gate) error {
+func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
@@ -222,21 +222,21 @@ func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deep
 
 func (c *DeepScan) checkImplementation(
 	cmp *speca.Component,
-	gate *deepscan2.Gate,
-	imp *deepscan2.Implementation,
+	gate *deepscan.Gate,
+	imp *deepscan.Implementation,
 ) error {
 	injectedImport := imp.Target.Definition.Import
 
 	for _, allowedImport := range cmp.AllowedProjectImports {
-		if allowedImport.Value().ImportPath == injectedImport {
+		if allowedImport.Value.ImportPath == injectedImport {
 			return nil
 		}
 	}
 
-	targetPath := imp.Target.Definition.Place.Filename
+	targetPath := imp.Target.Definition.Place.File
 	targetComponentID, targetDefined := c.fileComponents[targetPath]
 
-	gatePath := gate.MethodDefinition.Place.Filename
+	gatePath := gate.MethodDefinition.Place.File
 	gateComponentID, gateDefined := c.fileComponents[gatePath]
 
 	if !targetDefined || !gateDefined {
@@ -254,7 +254,7 @@ func (c *DeepScan) checkImplementation(
 			ComponentName: gateComponentID,
 			MethodName:    gate.MethodName,
 			RelativePath:  c.definitionToRelPath(gate.ArgumentDefinition.Place),
-			Definition:    c.definitionToReference(gate.ArgumentDefinition.Place),
+			Definition:    gate.ArgumentDefinition.Place,
 		},
 		Dependency: models.DeepscanWarningDependency{
 			ComponentName: targetComponentID,
@@ -263,7 +263,7 @@ func (c *DeepScan) checkImplementation(
 				imp.Target.StructName,
 			),
 			InjectionAST:  imp.Injector.CodeName,
-			Injection:     c.definitionToReference(imp.Injector.ParamDefinition.Place),
+			Injection:     imp.Injector.ParamDefinition.Place,
 			InjectionPath: c.definitionToRelPath(imp.Injector.ParamDefinition.Place),
 			SourceCodePreview: c.renderCode(
 				imp.Injector.ParamDefinition.Place,
@@ -280,17 +280,15 @@ func (c *DeepScan) checkImplementation(
 	return nil
 }
 
-func (c *DeepScan) renderCode(pointer, from, to deepscan2.Position) []byte {
-	const highlight = false
-	return c.sourceCodeRenderer.SourceCodeWithoutOffset(
-		models.NewCodeReference(
-			c.definitionToReference(pointer), from.Line, to.Line,
-		),
-		highlight,
+func (c *DeepScan) renderCode(pointer, from, to common.Reference) []byte {
+	return c.sourceCodeRenderer.SourceCode(
+		common.NewReferenceRange(pointer.File, from.Line, pointer.Line, to.Line),
+		false,
+		false,
 	)
 }
 
-func (c *DeepScan) sortPositions(a, b deepscan2.Position) (min, max deepscan2.Position) {
+func (c *DeepScan) sortPositions(a, b common.Reference) (min, max common.Reference) {
 	if a.Line < b.Line {
 		return a, b
 	}
@@ -298,33 +296,24 @@ func (c *DeepScan) sortPositions(a, b deepscan2.Position) (min, max deepscan2.Po
 	return b, a
 }
 
-func (c *DeepScan) definitionToReference(source deepscan2.Position) models.Reference {
-	return models.Reference{
-		Valid:  true,
-		File:   source.Filename,
-		Line:   source.Line,
-		Offset: source.Column,
-	}
-}
-
-func (c *DeepScan) definitionToRelPath(source deepscan2.Position) string {
-	relativePath := strings.TrimPrefix(source.Filename, c.spec.RootDirectory.Value())
+func (c *DeepScan) definitionToRelPath(source common.Reference) string {
+	relativePath := strings.TrimPrefix(source.File, c.spec.RootDirectory.Value)
 	return fmt.Sprintf("%s:%d", relativePath, source.Line)
 }
 
-func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deepscan2.InjectionMethod, error) {
+func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deepscan.InjectionMethod, error) {
 	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
-		c.spec.RootDirectory.Value(),
-		c.spec.WorkingDirectory.Value(),
+		c.spec.RootDirectory.Value,
+		c.spec.WorkingDirectory.Value,
 	))
 	excludeDirectories := c.refPathToList(c.spec.Exclude)
 	excludeMatchers := c.refRegexpToList(c.spec.ExcludeFilesMatcher)
 
-	criteria, err := deepscan2.NewCriteria(
-		deepscan2.WithPackagePath(absPackagePath),
-		deepscan2.WithAnalyseScope(scanDirectory),
-		deepscan2.WithExcludedPath(excludeDirectories),
-		deepscan2.WithExcludedFileMatchers(excludeMatchers),
+	criteria, err := deepscan.NewCriteria(
+		deepscan.WithPackagePath(absPackagePath),
+		deepscan.WithAnalyseScope(scanDirectory),
+		deepscan.WithExcludedPath(excludeDirectories),
+		deepscan.WithExcludedFileMatchers(excludeMatchers),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed prepare scan criteria: %w", err)
@@ -338,21 +327,21 @@ func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deeps
 	return usages, nil
 }
 
-func (c *DeepScan) refPathToList(list []speca.Referable[models.ResolvedPath]) []string {
+func (c *DeepScan) refPathToList(list []common.Referable[models.ResolvedPath]) []string {
 	result := make([]string, 0)
 
 	for _, refPath := range list {
-		result = append(result, refPath.Value().AbsPath)
+		result = append(result, refPath.Value.AbsPath)
 	}
 
 	return result
 }
 
-func (c *DeepScan) refRegexpToList(list []speca.Referable[*regexp.Regexp]) []*regexp.Regexp {
+func (c *DeepScan) refRegexpToList(list []common.Referable[*regexp.Regexp]) []*regexp.Regexp {
 	result := make([]*regexp.Regexp, 0)
 
 	for _, refPath := range list {
-		result = append(result, refPath.Value())
+		result = append(result, refPath.Value)
 	}
 
 	return result

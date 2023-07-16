@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
@@ -75,10 +76,10 @@ func Test_componentMatchPackage(t *testing.T) {
 			args: args{
 				packagePath: "/app/internal/glue/project/package",
 				component: speca.Component{
-					ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-						speca.NewReferable(
+					ResolvedPaths: []common.Referable[models.ResolvedPath]{
+						common.NewReferable(
 							models.ResolvedPath{AbsPath: "/app/internal/glue/project/package"},
-							speca.NewEmptyReference(),
+							common.NewEmptyReference(),
 						),
 					},
 				},
@@ -90,10 +91,10 @@ func Test_componentMatchPackage(t *testing.T) {
 			args: args{
 				packagePath: "/app/internal/glue/project/package",
 				component: speca.Component{
-					ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-						speca.NewReferable(
+					ResolvedPaths: []common.Referable[models.ResolvedPath]{
+						common.NewReferable(
 							models.ResolvedPath{AbsPath: "/app/internal/glue/project/package/sub"},
-							speca.NewEmptyReference(),
+							common.NewEmptyReference(),
 						),
 					},
 				},
@@ -105,14 +106,14 @@ func Test_componentMatchPackage(t *testing.T) {
 			args: args{
 				packagePath: "/app/internal/glue/project/package",
 				component: speca.Component{
-					ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-						speca.NewReferable(
+					ResolvedPaths: []common.Referable[models.ResolvedPath]{
+						common.NewReferable(
 							models.ResolvedPath{AbsPath: "/app/internal/glue/project/package/sub"},
-							speca.NewEmptyReference(),
+							common.NewEmptyReference(),
 						),
-						speca.NewReferable(
+						common.NewReferable(
 							models.ResolvedPath{AbsPath: "/app/internal/glue/project/package"},
-							speca.NewEmptyReference(),
+							common.NewEmptyReference(),
 						),
 					},
 				},
@@ -145,38 +146,38 @@ func Test_componentsMatchesFile(t *testing.T) {
 				filePath: "/app/file.go",
 				components: []speca.Component{
 					{
-						Name: speca.NewReferable("A", speca.NewEmptyReference()),
-						ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-							speca.NewReferable(
+						Name: common.NewReferable("A", common.NewEmptyReference()),
+						ResolvedPaths: []common.Referable[models.ResolvedPath]{
+							common.NewReferable(
 								models.ResolvedPath{AbsPath: "/app"},
-								speca.NewEmptyReference(),
+								common.NewEmptyReference(),
 							),
 						},
 					},
 					{
-						Name: speca.NewReferable("C", speca.NewEmptyReference()),
-						ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-							speca.NewReferable(
+						Name: common.NewReferable("C", common.NewEmptyReference()),
+						ResolvedPaths: []common.Referable[models.ResolvedPath]{
+							common.NewReferable(
 								models.ResolvedPath{AbsPath: "/app/sub"},
-								speca.NewEmptyReference(),
+								common.NewEmptyReference(),
 							),
 						},
 					},
 					{
-						Name: speca.NewReferable("D", speca.NewEmptyReference()),
-						ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-							speca.NewReferable(
+						Name: common.NewReferable("D", common.NewEmptyReference()),
+						ResolvedPaths: []common.Referable[models.ResolvedPath]{
+							common.NewReferable(
 								models.ResolvedPath{AbsPath: "/"},
-								speca.NewEmptyReference(),
+								common.NewEmptyReference(),
 							),
 						},
 					},
 					{
-						Name: speca.NewReferable("B", speca.NewEmptyReference()),
-						ResolvedPaths: []speca.Referable[models.ResolvedPath]{
-							speca.NewReferable(
+						Name: common.NewReferable("B", common.NewEmptyReference()),
+						ResolvedPaths: []common.Referable[models.ResolvedPath]{
+							common.NewReferable(
 								models.ResolvedPath{AbsPath: "/app"},
-								speca.NewEmptyReference(),
+								common.NewEmptyReference(),
 							),
 						},
 					},

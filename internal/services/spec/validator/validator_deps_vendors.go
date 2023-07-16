@@ -26,21 +26,21 @@ func (v *validatorDepsVendors) Validate(doc arch.Document) []speca.Notice {
 		existVendors := make(map[string]bool)
 
 		for _, vendorName := range rules.CanUse() {
-			if _, ok := existVendors[vendorName.Value()]; ok {
+			if _, ok := existVendors[vendorName.Value]; ok {
 				notices = append(notices, speca.Notice{
-					Notice: fmt.Errorf("vendor '%s' dublicated in '%s' deps", vendorName.Value(), name),
-					Ref:    vendorName.Reference(),
+					Notice: fmt.Errorf("vendor '%s' dublicated in '%s' deps", vendorName.Value, name),
+					Ref:    vendorName.Reference,
 				})
 			}
 
-			if err := v.utils.assertKnownVendor(vendorName.Value()); err != nil {
+			if err := v.utils.assertKnownVendor(vendorName.Value); err != nil {
 				notices = append(notices, speca.Notice{
 					Notice: err,
-					Ref:    vendorName.Reference(),
+					Ref:    vendorName.Reference,
 				})
 			}
 
-			existVendors[vendorName.Value()] = true
+			existVendors[vendorName.Value] = true
 		}
 	}
 

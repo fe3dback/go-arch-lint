@@ -1,23 +1,27 @@
-package code
+package common_test
 
 import (
 	"math"
 	"reflect"
 	"testing"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
-func Test_calculateCodeRegion(t *testing.T) {
+func TestReference_ClampWithRealLinesCount(t *testing.T) {
 	type args struct {
 		line         int
 		regionHeight int
 		maxLines     int
 	}
+
 	tests := []struct {
-		name string
-		args args
-		want codeRegion
+		name         string
+		args         args
+		linesCount   int
+		wantLineFrom int
+		wantLineMain int
+		wantLineTo   int
 	}{
 		{
 			name: "6 even",
@@ -26,11 +30,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     37,
 			},
-			want: codeRegion{
-				lineFirst: 19,
-				lineMain:  22,
-				lineLast:  25,
-			},
+			wantLineFrom: 19,
+			wantLineMain: 22,
+			wantLineTo:   25,
 		},
 		{
 			name: "5 odd",
@@ -39,11 +41,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 5,
 				maxLines:     37,
 			},
-			want: codeRegion{
-				lineFirst: 19,
-				lineMain:  22,
-				lineLast:  24,
-			},
+			wantLineFrom: 19,
+			wantLineMain: 22,
+			wantLineTo:   24,
 		},
 		{
 			name: "1",
@@ -52,11 +52,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 1,
-				lineMain:  1,
-				lineLast:  4,
-			},
+			wantLineFrom: 1,
+			wantLineMain: 1,
+			wantLineTo:   4,
 		},
 		{
 			name: "2",
@@ -65,11 +63,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 1,
-				lineMain:  2,
-				lineLast:  5,
-			},
+			wantLineFrom: 1,
+			wantLineMain: 2,
+			wantLineTo:   5,
 		},
 		{
 			name: "3",
@@ -78,11 +74,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 1,
-				lineMain:  3,
-				lineLast:  6,
-			},
+			wantLineFrom: 1,
+			wantLineMain: 3,
+			wantLineTo:   6,
 		},
 		{
 			name: "4",
@@ -91,11 +85,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 1,
-				lineMain:  4,
-				lineLast:  7,
-			},
+			wantLineFrom: 1,
+			wantLineMain: 4,
+			wantLineTo:   7,
 		},
 		{
 			name: "5",
@@ -104,11 +96,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 2,
-				lineMain:  5,
-				lineLast:  8,
-			},
+			wantLineFrom: 2,
+			wantLineMain: 5,
+			wantLineTo:   8,
 		},
 		{
 			name: "-0",
@@ -117,11 +107,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 97,
-				lineMain:  100,
-				lineLast:  100,
-			},
+			wantLineFrom: 97,
+			wantLineMain: 100,
+			wantLineTo:   100,
 		},
 		{
 			name: "-1",
@@ -130,11 +118,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 96,
-				lineMain:  99,
-				lineLast:  100,
-			},
+			wantLineFrom: 96,
+			wantLineMain: 99,
+			wantLineTo:   100,
 		},
 		{
 			name: "-2",
@@ -143,11 +129,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 95,
-				lineMain:  98,
-				lineLast:  100,
-			},
+			wantLineFrom: 95,
+			wantLineMain: 98,
+			wantLineTo:   100,
 		},
 		{
 			name: "-4",
@@ -156,11 +140,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     100,
 			},
-			want: codeRegion{
-				lineFirst: 93,
-				lineMain:  96,
-				lineLast:  99,
-			},
+			wantLineFrom: 93,
+			wantLineMain: 96,
+			wantLineTo:   99,
 		},
 		{
 			name: "zero",
@@ -169,11 +151,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 0,
 				maxLines:     10,
 			},
-			want: codeRegion{
-				lineFirst: 3,
-				lineMain:  3,
-				lineLast:  3,
-			},
+			wantLineFrom: 3,
+			wantLineMain: 3,
+			wantLineTo:   3,
 		},
 		{
 			name: "one",
@@ -182,11 +162,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 1,
 				maxLines:     10,
 			},
-			want: codeRegion{
-				lineFirst: 2,
-				lineMain:  3,
-				lineLast:  3,
-			},
+			wantLineFrom: 2,
+			wantLineMain: 3,
+			wantLineTo:   3,
 		},
 		{
 			name: "two",
@@ -195,11 +173,9 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 2,
 				maxLines:     10,
 			},
-			want: codeRegion{
-				lineFirst: 2,
-				lineMain:  3,
-				lineLast:  4,
-			},
+			wantLineFrom: 2,
+			wantLineMain: 3,
+			wantLineTo:   4,
 		},
 		{
 			name: "small height",
@@ -208,28 +184,50 @@ func Test_calculateCodeRegion(t *testing.T) {
 				regionHeight: 6,
 				maxLines:     5,
 			},
-			want: codeRegion{
-				lineFirst: 1,
-				lineMain:  2,
-				lineLast:  5,
+			wantLineFrom: 1,
+			wantLineMain: 2,
+			wantLineTo:   5,
+		},
+		{
+			name: "main upper bound",
+			args: args{
+				line:         15,
+				regionHeight: 6,
+				maxLines:     13,
 			},
+			wantLineFrom: 12,
+			wantLineMain: 13,
+			wantLineTo:   13,
+		},
+		{
+			name: "main all bound",
+			args: args{
+				line:         15,
+				regionHeight: 6,
+				maxLines:     8,
+			},
+			wantLineFrom: 8,
+			wantLineMain: 8,
+			wantLineTo:   8,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ref := models.NewCodeReferenceRelative(
-				models.Reference{
-					Valid:  true,
-					File:   "/tmp/dev",
-					Line:   tt.args.line,
-					Offset: 0,
-				},
+			ref := common.NewReferenceSingleLine("/tmp/dev", tt.args.line, 0)
+			ref = ref.ExtendRange(
 				int(math.Ceil(float64(tt.args.regionHeight)/2)),
 				int(math.Floor(float64(tt.args.regionHeight)/2)),
 			)
 
-			if got := calculateCodeRegion(ref, tt.args.maxLines); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("calculateCodeRegion() = %v, want %v", got, tt.want)
+			want := common.NewReferenceRange(
+				"/tmp/dev",
+				tt.wantLineFrom,
+				tt.wantLineMain,
+				tt.wantLineTo,
+			)
+
+			if got := ref.ClampWithRealLinesCount(tt.args.maxLines); !reflect.DeepEqual(got, want) {
+				t.Errorf("ClampWithRealLinesCount() = %v, want %v", got, want)
 			}
 		})
 	}

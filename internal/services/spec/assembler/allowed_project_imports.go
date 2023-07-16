@@ -31,7 +31,7 @@ func (aia *allowedProjectImportsAssembler) assemble(
 	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
 	for _, componentName := range yamlDocument.CommonComponents().List() {
-		allowedComponents = append(allowedComponents, componentName.Value())
+		allowedComponents = append(allowedComponents, componentName.Value)
 	}
 
 	for _, name := range allowedComponents {
@@ -41,7 +41,7 @@ func (aia *allowedProjectImportsAssembler) assemble(
 		}
 
 		for _, componentIn := range yamlComponent.RelativePaths() {
-			relativeGlobPath := componentIn.Value()
+			relativeGlobPath := componentIn.Value
 
 			resolved, err := aia.resolver.resolveLocalGlobPath(string(relativeGlobPath))
 			if err != nil {

@@ -1,5 +1,7 @@
 package models
 
+import "github.com/fe3dback/go-arch-lint/internal/models/common"
+
 type (
 	CmdSelfInspectIn struct {
 		ProjectPath string
@@ -15,7 +17,7 @@ type (
 	}
 
 	CmdSelfInspectOutAnnotation struct {
-		Text      string    `json:"Text"`
-		Reference Reference `json:"Reference"`
+		Text      string           `json:"Text"`
+		Reference common.Reference `json:"Reference"`
 	}
 )

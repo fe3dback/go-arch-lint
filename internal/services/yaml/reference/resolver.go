@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/parser"
 )
@@ -20,11 +19,10 @@ func NewResolver() *Resolver {
 	}
 }
 
-func (r *Resolver) Resolve(filePath string, yamlPath string) (ref models.Reference) {
+func (r *Resolver) Resolve(filePath string, yamlPath string) (ref common.Reference) {
 	defer func() {
 		if data := recover(); data != nil {
-			ref = speca.NewEmptyReference()
-			ref.Hint = fmt.Sprintf("%s", data)
+			ref = common.NewEmptyReference()
 			return
 		}
 	}()
@@ -33,22 +31,22 @@ func (r *Resolver) Resolve(filePath string, yamlPath string) (ref models.Referen
 
 	path, err := yaml.PathString(yamlPath)
 	if err != nil {
-		return speca.NewEmptyReference()
+		return common.NewEmptyReference()
 	}
 
 	file, err := parser.ParseBytes(sourceCode, 0)
 	if err != nil {
-		return speca.NewEmptyReference()
+		return common.NewEmptyReference()
 	}
 
 	node, err := path.FilterFile(file)
 	if err != nil {
-		return speca.NewEmptyReference()
+		return common.NewEmptyReference()
 	}
 
 	pos := node.GetToken().Position
 
-	return speca.NewReference(
+	return common.NewReferenceSingleLine(
 		filePath,
 		pos.Line,
 		pos.Column,

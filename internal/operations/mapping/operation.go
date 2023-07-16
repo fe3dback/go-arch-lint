@@ -44,8 +44,8 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdMappingIn) (models.
 	}
 
 	return models.CmdMappingOut{
-		ProjectDirectory: spec.RootDirectory.Value(),
-		ModuleName:       spec.ModuleName.Value(),
+		ProjectDirectory: spec.RootDirectory.Value,
+		ModuleName:       spec.ModuleName.Value,
 		MappingGrouped:   assembleMappingByComponent(spec, projectFiles),
 		MappingList:      assembleMappingByFile(projectFiles),
 		Scheme:           in.Scheme,
@@ -76,7 +76,7 @@ func assembleMappingByComponent(
 
 	mapping := make([]models.CmdMappingOutGrouped, 0)
 	for _, component := range spec.Components {
-		componentName := component.Name.Value()
+		componentName := component.Name.Value
 		if grouped, exist := tmp[componentName]; exist {
 			sort.Strings(grouped.FileNames)
 			mapping = append(mapping, *grouped)

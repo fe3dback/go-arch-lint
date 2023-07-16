@@ -1,8 +1,9 @@
 package deepscan
 
 import (
-	"fmt"
 	"go/token"
+
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type (
@@ -45,29 +46,26 @@ type (
 	}
 
 	Source struct {
-		Pkg    string   // package name (example: "a")
-		Import string   // package full import path (example: "example.com/myProject/internal/a")
-		Path   string   // package full abs path (example: "/home/user/go/src/myProject/internal/a")
-		Place  Position // exactly place in source code
-	}
-
-	Position struct {
-		Filename string // filename, if any
-		Offset   int    // offset, starting at 0
-		Line     int    // line number, starting at 1
-		Column   int    // column number, starting at 1 (byte count)
+		Pkg    string           // package name (example: "a")
+		Import string           // package full import path (example: "example.com/myProject/internal/a")
+		Path   string           // package full abs path (example: "/home/user/go/src/myProject/internal/a")
+		Place  common.Reference // exactly place in source code
 	}
 )
 
-func positionFromToken(pos token.Position) Position {
-	return Position{
-		Filename: pos.Filename,
-		Offset:   pos.Offset,
-		Line:     pos.Line,
-		Column:   pos.Column,
-	}
-}
+func positionFromToken(pos token.Position) common.Reference {
+	ref := common.NewReferenceSingleLine(
+		pos.Filename,
+		pos.Line,
+		pos.Column,
+	)
 
-func (p Position) String() string {
-	return fmt.Sprintf("%s:%d", p.Filename, p.Line)
+	if pos.Line == 0 {
+		ref.Valid = false
+		ref.Line = 0
+
+		return ref
+	}
+
+	return ref
 }

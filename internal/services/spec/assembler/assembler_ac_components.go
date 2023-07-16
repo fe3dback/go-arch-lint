@@ -5,6 +5,7 @@ import (
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
@@ -48,8 +49,8 @@ func (m *componentsAssembler) assembleComponent(
 ) (speca.Component, error) {
 	depMeta, hasDeps := yamlDocument.Dependencies().Map()[yamlName]
 
-	mayDependOn := make([]speca.Referable[string], 0)
-	canUse := make([]speca.Referable[string], 0)
+	mayDependOn := make([]common.Referable[string], 0)
+	canUse := make([]common.Referable[string], 0)
 	deepScan := yamlDocument.Options().DeepScan()
 
 	if hasDeps {
@@ -59,7 +60,7 @@ func (m *componentsAssembler) assembleComponent(
 	}
 
 	cmp := speca.Component{
-		Name:        speca.NewReferable(yamlName, yamlComponent.Reference()),
+		Name:        common.NewReferable(yamlName, yamlComponent.Reference()),
 		MayDependOn: mayDependOn,
 		CanUse:      canUse,
 		DeepScan:    deepScan,
@@ -102,8 +103,8 @@ func (m *componentsAssembler) enrichWithFlags(
 	}
 
 	cmp.SpecialFlags = speca.SpecialFlags{
-		AllowAllProjectDeps: speca.NewReferable(false, yamlComponent.Reference()),
-		AllowAllVendorDeps:  speca.NewReferable(false, yamlComponent.Reference()),
+		AllowAllProjectDeps: common.NewReferable(false, yamlComponent.Reference()),
+		AllowAllVendorDeps:  common.NewReferable(false, yamlComponent.Reference()),
 	}
 
 	return nil
@@ -114,19 +115,19 @@ func (m *componentsAssembler) enrichWithResolvedPaths(
 	yamlName string,
 	yamlComponent arch.Component,
 ) error {
-	resolvedPaths := make([]speca.Referable[models.ResolvedPath], 0)
+	resolvedPaths := make([]common.Referable[models.ResolvedPath], 0)
 
 	for _, componentIn := range yamlComponent.RelativePaths() {
-		tmpResolvedPath, err := m.resolver.resolveLocalGlobPath(string(componentIn.Value()))
+		tmpResolvedPath, err := m.resolver.resolveLocalGlobPath(string(componentIn.Value))
 		if err != nil {
 			return fmt.Errorf("failed to assemble component '%s' path '%s': %w",
 				yamlName,
-				componentIn.Value(),
+				componentIn.Value,
 				err,
 			)
 		}
 
-		wrappedPaths := wrap(componentIn.Reference(), tmpResolvedPath)
+		wrappedPaths := wrap(componentIn.Reference, tmpResolvedPath)
 		resolvedPaths = append(resolvedPaths, wrappedPaths...)
 	}
 
@@ -138,7 +139,7 @@ func (m *componentsAssembler) enrichWithProjectImports(
 	cmp *speca.Component,
 	yamlComponent arch.Component,
 	yamlDocument arch.Document,
-	mayDependOn []speca.Referable[string],
+	mayDependOn []common.Referable[string],
 ) error {
 	projectImports, err := m.allowedProjectImportsAssembler.assemble(yamlDocument, unwrap(mayDependOn))
 	if err != nil {
@@ -152,7 +153,7 @@ func (m *componentsAssembler) enrichWithProjectImports(
 func (m *componentsAssembler) enrichWithVendorGlobs(
 	cmp *speca.Component,
 	yamlDocument arch.Document,
-	canUse []speca.Referable[string],
+	canUse []common.Referable[string],
 ) error {
 	vendorGlobs, err := m.allowedVendorImportsAssembler.assemble(yamlDocument, unwrap(canUse))
 	if err != nil {

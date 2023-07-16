@@ -4,39 +4,40 @@ import (
 	"regexp"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type (
 	Spec struct {
-		RootDirectory       Referable[string]
-		WorkingDirectory    Referable[string]
-		ModuleName          Referable[string]
+		RootDirectory       common.Referable[string]
+		WorkingDirectory    common.Referable[string]
+		ModuleName          common.Referable[string]
 		Allow               Allow
 		Components          []Component
-		Exclude             []Referable[models.ResolvedPath]
-		ExcludeFilesMatcher []Referable[*regexp.Regexp]
+		Exclude             []common.Referable[models.ResolvedPath]
+		ExcludeFilesMatcher []common.Referable[*regexp.Regexp]
 		Integrity           Integrity
 	}
 
 	Allow struct {
-		DepOnAnyVendor Referable[bool]
-		DeepScan       Referable[bool]
+		DepOnAnyVendor common.Referable[bool]
+		DeepScan       common.Referable[bool]
 	}
 
 	Component struct {
-		Name                  Referable[string]
-		DeepScan              Referable[bool]
-		ResolvedPaths         []Referable[models.ResolvedPath]
-		AllowedProjectImports []Referable[models.ResolvedPath]
-		AllowedVendorGlobs    []Referable[models.Glob]
-		MayDependOn           []Referable[string]
-		CanUse                []Referable[string]
+		Name                  common.Referable[string]
+		DeepScan              common.Referable[bool]
+		ResolvedPaths         []common.Referable[models.ResolvedPath]
+		AllowedProjectImports []common.Referable[models.ResolvedPath]
+		AllowedVendorGlobs    []common.Referable[models.Glob]
+		MayDependOn           []common.Referable[string]
+		CanUse                []common.Referable[string]
 		SpecialFlags          SpecialFlags
 	}
 
 	SpecialFlags struct {
-		AllowAllProjectDeps Referable[bool]
-		AllowAllVendorDeps  Referable[bool]
+		AllowAllProjectDeps common.Referable[bool]
+		AllowAllVendorDeps  common.Referable[bool]
 	}
 
 	Integrity struct {
@@ -46,6 +47,6 @@ type (
 
 	Notice struct {
 		Notice error
-		Ref    models.Reference
+		Ref    common.Reference
 	}
 )

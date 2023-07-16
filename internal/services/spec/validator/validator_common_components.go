@@ -21,10 +21,10 @@ func (v *validatorCommonComponents) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
 	for _, componentName := range doc.CommonComponents().List() {
-		if err := v.utils.assertKnownComponent(componentName.Value()); err != nil {
+		if err := v.utils.assertKnownComponent(componentName.Value); err != nil {
 			notices = append(notices, speca.Notice{
 				Notice: err,
-				Ref:    componentName.Reference(),
+				Ref:    componentName.Reference,
 			})
 		}
 	}
