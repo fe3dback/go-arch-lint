@@ -1,9 +1,9 @@
 package container
 
 import (
+	"github.com/fe3dback/go-arch-lint/internal/services/render/printer"
 	"github.com/logrusorgru/aurora/v3"
 
-	"github.com/fe3dback/go-arch-lint/internal/services/printer"
 	"github.com/fe3dback/go-arch-lint/internal/services/render"
 	"github.com/fe3dback/go-arch-lint/internal/view"
 )
