@@ -2,7 +2,6 @@ package deepscan
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -139,7 +138,7 @@ func findRootPath(packagePath string) (moduleName string, rootPath string, err e
 		return "", "", fmt.Errorf("failed stat '%s': %w", goModPath, err)
 	}
 
-	file, err := ioutil.ReadFile(goModPath)
+	file, err := os.ReadFile(goModPath)
 	if err != nil {
 		return "", "", fmt.Errorf("failed read '%s': %w", goModPath, err)
 	}
