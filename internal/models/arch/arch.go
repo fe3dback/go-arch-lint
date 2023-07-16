@@ -6,10 +6,10 @@ import (
 )
 
 type (
-	// abstract ComponentName useful for mapping real packages to one Component.
+	// ComponentName is abstraction useful for mapping real packages to one Component.
 	ComponentName = string
 
-	// abstract VendorName useful for mapping real vendor packages to one Vendor.
+	// VendorName is abstraction useful for mapping real vendor packages to one Vendor.
 	VendorName = string
 
 	Document interface {
@@ -30,7 +30,7 @@ type (
 		// ExcludedDirectories from analyze, each contain relative directory name
 		ExcludedDirectories() ExcludedDirectories
 
-		// ExcludedFilesRegExp from analyze, each project file will by matched with this regexp rules
+		// ExcludedFilesRegExp from analyze, each project file will be matched with this regexp rules
 		ExcludedFilesRegExp() ExcludedFilesRegExp
 
 		// Vendors (map)
@@ -52,11 +52,11 @@ type (
 	Options interface {
 		Reference() models.Reference
 
-		// allow all project code depend on any third party vendor lib
+		// IsDependOnAnyVendor allows all project code depend on any third party vendor lib
 		// analyze will not check imports with not local namespace's
 		IsDependOnAnyVendor() speca.Referable[bool]
 
-		// use advanced AST linter
+		// DeepScan turn on usage of advanced AST linter
 		// this is default behavior since v3+ configs
 		DeepScan() speca.Referable[bool]
 	}
@@ -64,7 +64,7 @@ type (
 	ExcludedDirectories interface {
 		Reference() models.Reference
 
-		// list of directories
+		// List of directories
 		// examples:
 		// 	- internal/test
 		//	- vendor
@@ -75,7 +75,7 @@ type (
 	ExcludedFilesRegExp interface {
 		Reference() models.Reference
 
-		// list of regexp's
+		// List of regexp's
 		// examples:
 		// 	- "^.*_test\\.go$"
 		List() []speca.Referable[string]
@@ -84,14 +84,14 @@ type (
 	Vendors interface {
 		Reference() models.Reference
 
-		// describe Vendor packages properties
+		// Map describe Vendor packages properties
 		Map() map[VendorName]Vendor
 	}
 
 	Vendor interface {
 		Reference() models.Reference
 
-		// Full import vendor qualified path
+		// ImportPaths is list of full import vendor qualified path
 		// example:
 		// 	- golang.org/x/mod/modfile
 		// 	- example.com/*/libs/**
@@ -101,21 +101,21 @@ type (
 	CommonVendors interface {
 		Reference() models.Reference
 
-		// List of Vendors that can by imported to any project package
+		// List of Vendors that can be imported to any project package
 		List() []speca.Referable[string]
 	}
 
 	Components interface {
 		Reference() models.Reference
 
-		// describe Component packages properties
+		// Map with Component packages properties
 		Map() map[ComponentName]Component
 	}
 
 	Component interface {
 		Reference() models.Reference
 
-		// Relative package path, can contain glob's
+		// RelativePaths can contain glob's
 		// example:
 		// 	- internal/service/*/models/**
 		// 	- /
@@ -126,33 +126,33 @@ type (
 	CommonComponents interface {
 		Reference() models.Reference
 
-		// List of Components that can by imported to any project package
+		// List of Components that can be imported to any project package
 		List() []speca.Referable[string]
 	}
 
 	Dependencies interface {
 		Reference() models.Reference
 
-		// Dependencies map between Components and DependencyRule`s
+		// Map with Dependencies between Components and DependencyRule`s
 		Map() map[ComponentName]DependencyRule
 	}
 
 	DependencyRule interface {
 		Reference() models.Reference
 
-		// List of Component names, that can by imported to described component
+		// MayDependOn is list of Component names, that can be imported to described component
 		MayDependOn() []speca.Referable[string]
 
-		// List of Vendor names, that can by imported to described component
+		// CanUse is list of Vendor names, that can be imported to described component
 		CanUse() []speca.Referable[string]
 
-		// described component can import any other local namespace packages
+		// AnyProjectDeps allow component to import any other local namespace packages
 		AnyProjectDeps() speca.Referable[bool]
 
-		// described component can import any other vendor namespace packages
+		// AnyVendorDeps allow component to import any other vendor namespace packages
 		AnyVendorDeps() speca.Referable[bool]
 
-		// override deepScan global option
+		// DeepScan overrides deepScan global option
 		DeepScan() speca.Referable[bool]
 	}
 )

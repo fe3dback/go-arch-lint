@@ -1,7 +1,6 @@
 package container
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/pkg/schema"
 	"github.com/fe3dback/go-arch-lint/internal/services/checker"
 	"github.com/fe3dback/go-arch-lint/internal/services/code"
 	"github.com/fe3dback/go-arch-lint/internal/services/path"
@@ -9,6 +8,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/project/info"
 	"github.com/fe3dback/go-arch-lint/internal/services/project/resolver"
 	"github.com/fe3dback/go-arch-lint/internal/services/project/scanner"
+	"github.com/fe3dback/go-arch-lint/internal/services/schema"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/services/spec/assembler"
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/services/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/services/yaml/reference"

@@ -17,14 +17,15 @@ func newValidatorVersion() *validatorVersion {
 func (v *validatorVersion) Validate(doc arch.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
-	if doc.Version().Value() <= models.SupportedVersion && doc.Version().Value() > 0 {
+	if doc.Version().Value() <= models.SupportedVersionMax && doc.Version().Value() >= models.SupportedVersionMin {
 		return notices
 	}
 
 	notices = append(notices, speca.Notice{
-		Notice: fmt.Errorf("version '%d' is not supported, supported: [1-%d]",
+		Notice: fmt.Errorf("version '%d' is not supported, supported: [%d-%d]",
 			doc.Version().Value(),
-			models.SupportedVersion,
+			models.SupportedVersionMin,
+			models.SupportedVersionMax,
 		),
 		Ref: doc.Version().Reference(),
 	})

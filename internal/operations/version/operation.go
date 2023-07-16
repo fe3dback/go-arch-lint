@@ -27,7 +27,7 @@ func NewOperation(
 func (o *Operation) Behave() (models.CmdVersionOut, error) {
 	return models.CmdVersionOut{
 		LinterVersion:       o.version,
-		GoArchFileSupported: fmt.Sprintf("1 .. %d", models.SupportedVersion),
+		GoArchFileSupported: fmt.Sprintf("%d .. %d", models.SupportedVersionMin, models.SupportedVersionMax),
 		BuildTime:           o.buildTime,
 		CommitHash:          o.commitHash,
 	}, nil

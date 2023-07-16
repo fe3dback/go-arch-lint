@@ -64,10 +64,10 @@ func NewSearcher() *Searcher {
 // This method will find all package functions with interfaces
 // and link it to all callers, with implementations
 // it will skip:
-//  - methods without interface (not injectable)
-//  - private methods (nobody outside can call it)
-//  - only write chan (func (ch chan<-) (our code send something, so we not depend on implementations)
-//  - with placeholder param names (func (_ myInterface)), nobody can use _, so code not depend on interface
+//   - methods without interface (not injectable)
+//   - private methods (nobody outside can call it)
+//   - only write chan (func (ch chan<-) (our code send something, so we not depend on implementations)
+//   - with placeholder param names (func (_ myInterface)), nobody can use _, so code not depend on interface
 //
 // Can`t search from multiple goroutines, but safe for concurrent use (mutex inside)
 func (s *Searcher) Usages(c Criteria) ([]InjectionMethod, error) {

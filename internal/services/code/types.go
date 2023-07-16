@@ -1,7 +1,7 @@
 package code
 
 type (
-	ColorPrinter interface {
+	colorPrinter interface {
 		Gray(in string) string
 	}
 )

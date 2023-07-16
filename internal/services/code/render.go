@@ -17,7 +17,7 @@ import (
 )
 
 type Render struct {
-	printer ColorPrinter
+	printer colorPrinter
 }
 
 type annotateOpts struct {
@@ -27,7 +27,7 @@ type annotateOpts struct {
 	showColumnPointer bool
 }
 
-func NewRender(printer ColorPrinter) *Render {
+func NewRender(printer colorPrinter) *Render {
 	return &Render{
 		printer: printer,
 	}

@@ -11,10 +11,13 @@ import (
 )
 
 type Resolver struct {
+	cache map[string][]byte
 }
 
 func NewResolver() *Resolver {
-	return &Resolver{}
+	return &Resolver{
+		cache: map[string][]byte{},
+	}
 }
 
 func (r *Resolver) Resolve(filePath string, yamlPath string) (ref models.Reference) {
@@ -26,10 +29,7 @@ func (r *Resolver) Resolve(filePath string, yamlPath string) (ref models.Referen
 		}
 	}()
 
-	sourceCode, err := os.ReadFile(filePath)
-	if err != nil {
-		panic(fmt.Sprintf("failed to provide source code of archfile: %v", err))
-	}
+	sourceCode := r.fileSource(filePath)
 
 	path, err := yaml.PathString(yamlPath)
 	if err != nil {
@@ -53,4 +53,18 @@ func (r *Resolver) Resolve(filePath string, yamlPath string) (ref models.Referen
 		pos.Line,
 		pos.Column,
 	)
+}
+
+func (r *Resolver) fileSource(filePath string) []byte {
+	if content, exist := r.cache[filePath]; exist {
+		return content
+	}
+
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		panic(fmt.Sprintf("failed to provide source code of archfile: %v", err))
+	}
+
+	r.cache[filePath] = content
+	return content
 }

@@ -20,8 +20,8 @@ func (c *Container) commandSchema() (*cobra.Command, runner) {
 	}
 
 	cmd.PersistentFlags().IntVar(&in.Version, "version", in.Version, fmt.Sprintf("json schema version to output (min: %d, max: %d)",
-		1,
-		models.SupportedVersion,
+		models.SupportedVersionMin,
+		models.SupportedVersionMax,
 	))
 
 	return cmd, func(act *cobra.Command) (any, error) {

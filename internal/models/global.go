@@ -1,3 +1,4 @@
 package models
 
-const SupportedVersion = 3
+const SupportedVersionMin = 1
+const SupportedVersionMax = 3

@@ -6,9 +6,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/fe3dback/go-arch-lint/internal/services/deepscan"
 	"github.com/stretchr/testify/assert"
-
-	deepscan2 "github.com/fe3dback/go-arch-lint/internal/pkg/deepscan"
 )
 
 func Test1(t *testing.T) {
@@ -19,10 +18,10 @@ func Test1(t *testing.T) {
 	projectDir := filepath.Join(filepath.Dir(callerDir), "project")
 	fmt.Println("project root dir: " + projectDir)
 
-	searcher := deepscan2.NewSearcher()
-	criteria, err := deepscan2.NewCriteria(
-		deepscan2.WithPackagePath(filepath.Join(projectDir, "internal", "operations")),
-		deepscan2.WithAnalyseScope(filepath.Join(projectDir, "internal")),
+	searcher := deepscan.NewSearcher()
+	criteria, err := deepscan.NewCriteria(
+		deepscan.WithPackagePath(filepath.Join(projectDir, "internal", "operations")),
+		deepscan.WithAnalyseScope(filepath.Join(projectDir, "internal")),
 	)
 
 	// act
@@ -37,11 +36,11 @@ func Test1(t *testing.T) {
 	// assert.Equal(t, expected, actual)
 }
 
-func test1Expected() []deepscan2.InjectionMethod {
-	return []deepscan2.InjectionMethod{
+func test1Expected() []deepscan.InjectionMethod {
+	return []deepscan.InjectionMethod{
 		{
 			Name:       "hello",
-			Definition: deepscan2.Source{},
+			Definition: deepscan.Source{},
 			Gates:      nil,
 		},
 	}
