@@ -1,4 +1,4 @@
-package spec
+package decoder
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models/common"

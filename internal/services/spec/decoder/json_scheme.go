@@ -1,4 +1,4 @@
-package spec
+package decoder
 
 import (
 	"fmt"

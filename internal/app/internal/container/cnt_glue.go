@@ -10,9 +10,9 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/project/scanner"
 	"github.com/fe3dback/go-arch-lint/internal/services/schema"
 	specassembler "github.com/fe3dback/go-arch-lint/internal/services/spec/assembler"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec/decoder"
 	specvalidator "github.com/fe3dback/go-arch-lint/internal/services/spec/validator"
 	"github.com/fe3dback/go-arch-lint/internal/services/yaml/reference"
-	"github.com/fe3dback/go-arch-lint/internal/services/yaml/spec"
 )
 
 func (c *Container) provideSpecAssembler() *specassembler.Assembler {
@@ -29,8 +29,8 @@ func (c *Container) provideSpecValidator() *specvalidator.Validator {
 	)
 }
 
-func (c *Container) provideYamlSpecProvider() *spec.Provider {
-	return spec.NewProvider(
+func (c *Container) provideYamlSpecProvider() *decoder.Decoder {
+	return decoder.NewDecoder(
 		c.provideSourceCodeReferenceResolver(),
 		c.provideJsonSchemaProvider(),
 	)

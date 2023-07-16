@@ -9,19 +9,19 @@ import (
 
 type (
 	Assembler struct {
-		provider     archProvider
+		decoder      archDecoder
 		validator    archValidator
 		pathResolver pathResolver
 	}
 )
 
 func NewAssembler(
-	provider archProvider,
+	decoder archDecoder,
 	validator archValidator,
 	pathResolver pathResolver,
 ) *Assembler {
 	return &Assembler{
-		provider:     provider,
+		decoder:      decoder,
 		validator:    validator,
 		pathResolver: pathResolver,
 	}
@@ -37,9 +37,9 @@ func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
 		},
 	}
 
-	yamlSpec, schemeNotices, err := sa.provider.Provide(prj.GoArchFilePath)
+	document, schemeNotices, err := sa.decoder.Decode(prj.GoArchFilePath)
 	if err != nil {
-		return spec, fmt.Errorf("failed to provide yamlSpec: %w", err)
+		return spec, fmt.Errorf("failed to decode document '%s': %w", prj.GoArchFilePath, err)
 	}
 
 	if len(schemeNotices) > 0 {
@@ -47,11 +47,11 @@ func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, schemeNotices...)
 	} else {
 		// if scheme is ok, need check arch errors
-		advancedErrors := sa.validator.Validate(yamlSpec)
+		advancedErrors := sa.validator.Validate(document)
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, advancedErrors...)
 	}
 
-	if yamlSpec == nil {
+	if document == nil {
 		return spec, nil
 	}
 
@@ -78,9 +78,9 @@ func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
 		newWorkdirAssembler(),
 	})
 
-	err = assembler.assemble(&spec, yamlSpec)
+	err = assembler.assemble(&spec, document)
 	if err != nil {
-		return spec, fmt.Errorf("failed to assemble yamlSpec: %w", err)
+		return spec, fmt.Errorf("failed to assemble document: %w", err)
 	}
 
 	return spec, nil

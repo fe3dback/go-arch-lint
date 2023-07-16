@@ -1,9 +1,16 @@
-package arch
+package spec
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
+
+// spec layout:
+//   decoder   - decode different config file formats (v1 ... latest) into one single Document interface
+//   validator - will validate Document interface (check integrity between config fields)
+//   assembler - will assemble arch.Spec from validated Document interface
+//
+// all other operations (business logic) code will use arch.Spec object for reading config values.
 
 type (
 	// ComponentName is abstraction useful for mapping real packages to one Component.

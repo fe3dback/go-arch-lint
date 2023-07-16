@@ -2,8 +2,8 @@ package assembler
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type allowedVendorImportsAssembler struct {
@@ -19,7 +19,7 @@ func newAllowedVendorImportsAssembler(
 }
 
 func (aia *allowedVendorImportsAssembler) assemble(
-	yamlDocument arch.Document,
+	yamlDocument spec.Document,
 	vendorNames []string,
 ) ([]common.Referable[models.Glob], error) {
 	list := make([]common.Referable[models.Glob], 0)

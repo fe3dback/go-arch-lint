@@ -1,33 +1,33 @@
-package spec
+package decoder
 
 import (
 	"bytes"
 	"fmt"
 	"os"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 
 	"github.com/goccy/go-yaml"
 )
 
-type Provider struct {
+type Decoder struct {
 	yamlReferenceResolver yamlSourceCodeReferenceResolver
 	jsonSchemaProvider    jsonSchemaProvider
 }
 
-func NewProvider(
+func NewDecoder(
 	yamlReferenceResolver yamlSourceCodeReferenceResolver,
 	jsonSchemaProvider jsonSchemaProvider,
-) *Provider {
-	return &Provider{
+) *Decoder {
+	return &Decoder{
 		yamlReferenceResolver: yamlReferenceResolver,
 		jsonSchemaProvider:    jsonSchemaProvider,
 	}
 }
 
-func (sp *Provider) Provide(archFile string) (arch.Document, []speca.Notice, error) {
+func (sp *Decoder) Decode(archFile string) (spec.Document, []speca.Notice, error) {
 	sourceCode, err := os.ReadFile(archFile)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to provide source code of archfile: %w", err)
@@ -58,7 +58,7 @@ func (sp *Provider) Provide(archFile string) (arch.Document, []speca.Notice, err
 	return document, schemeNotices, nil
 }
 
-func (sp *Provider) decodeDocument(version int, sourceCode []byte, filePath string) (arch.Document, error) {
+func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath string) (spec.Document, error) {
 	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
@@ -98,13 +98,13 @@ func (sp *Provider) decodeDocument(version int, sourceCode []byte, filePath stri
 	}
 }
 
-func (sp *Provider) createYamlReferenceResolver(archFilePath string) yamlDocumentPathResolver {
+func (sp *Decoder) createYamlReferenceResolver(archFilePath string) yamlDocumentPathResolver {
 	return func(yamlPath string) common.Reference {
 		return sp.yamlReferenceResolver.Resolve(archFilePath, yamlPath)
 	}
 }
 
-func (sp *Provider) readVersion(sourceCode []byte) (int, error) {
+func (sp *Decoder) readVersion(sourceCode []byte) (int, error) {
 	type doc struct {
 		Version int `yaml:"version"`
 	}
@@ -119,7 +119,7 @@ func (sp *Provider) readVersion(sourceCode []byte) (int, error) {
 	return document.Version, nil
 }
 
-func (sp *Provider) jsonSchemeValidate(schemeVersion int, sourceCode []byte, filePath string) []speca.Notice {
+func (sp *Decoder) jsonSchemeValidate(schemeVersion int, sourceCode []byte, filePath string) []speca.Notice {
 	jsonSchema, err := sp.jsonSchemaProvider.Provide(schemeVersion)
 	if err != nil {
 		return []speca.Notice{{

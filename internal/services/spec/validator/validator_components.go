@@ -3,8 +3,8 @@ package validator
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorComponents struct {
@@ -19,7 +19,7 @@ func newValidatorComponents(
 	}
 }
 
-func (v *validatorComponents) Validate(doc arch.Document) []speca.Notice {
+func (v *validatorComponents) Validate(doc spec.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
 	if len(doc.Components().Map()) == 0 {

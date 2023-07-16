@@ -5,19 +5,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
 	utils struct {
 		pathResolver pathResolver
-		document     arch.Document
+		document     spec.Document
 	}
 )
 
 func newUtils(
 	pathResolver pathResolver,
-	document arch.Document,
+	document spec.Document,
 ) *utils {
 	return &utils{
 		pathResolver: pathResolver,

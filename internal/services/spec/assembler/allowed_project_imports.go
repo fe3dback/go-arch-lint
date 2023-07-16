@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type allowedProjectImportsAssembler struct {
@@ -23,7 +23,7 @@ func newAllowedProjectImportsAssembler(
 }
 
 func (aia *allowedProjectImportsAssembler) assemble(
-	yamlDocument arch.Document,
+	yamlDocument spec.Document,
 	componentNames []string,
 ) ([]models.ResolvedPath, error) {
 	list := make([]models.ResolvedPath, 0)

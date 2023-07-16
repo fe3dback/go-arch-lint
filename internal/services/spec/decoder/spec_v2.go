@@ -1,12 +1,12 @@
-package spec
+package decoder
 
 import (
 	"fmt"
 	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
@@ -27,11 +27,11 @@ type (
 		V2Version            int                                    `yaml:"version" json:"version"`
 		V2WorkDir            string                                 `yaml:"workdir" json:"workdir"`
 		V2Allow              ArchV2Allow                            `yaml:"allow" json:"allow"`
-		V2Vendors            map[arch.VendorName]ArchV2Vendor       `yaml:"vendors" json:"vendors"`
+		V2Vendors            map[spec.VendorName]ArchV2Vendor       `yaml:"vendors" json:"vendors"`
 		V2Exclude            []string                               `yaml:"exclude" json:"exclude"`
 		V2ExcludeFilesRegExp []string                               `yaml:"excludeFiles" json:"excludeFiles"`
-		V2Components         map[arch.ComponentName]ArchV2Component `yaml:"components" json:"components"`
-		V2Dependencies       map[arch.ComponentName]ArchV2Rules     `yaml:"deps" json:"deps"`
+		V2Components         map[spec.ComponentName]ArchV2Component `yaml:"components" json:"components"`
+		V2Dependencies       map[spec.ComponentName]ArchV2Rules     `yaml:"deps" json:"deps"`
 		V2CommonComponents   []string                               `yaml:"commonComponents" json:"commonComponents"`
 		V2CommonVendors      []string                               `yaml:"commonVendors" json:"commonVendors"`
 	}
@@ -74,12 +74,12 @@ type (
 type (
 	archV2InternalVendors struct {
 		reference common.Reference
-		data      map[arch.VendorName]ArchV2Vendor
+		data      map[spec.VendorName]ArchV2Vendor
 	}
 
 	archV2InternalComponents struct {
 		reference common.Reference
-		data      map[arch.ComponentName]ArchV2Component
+		data      map[spec.ComponentName]ArchV2Component
 	}
 
 	archV2InternalExclude struct {
@@ -104,7 +104,7 @@ type (
 
 	archV2InternalDependencies struct {
 		reference common.Reference
-		data      map[arch.ComponentName]ArchV2Rules
+		data      map[spec.ComponentName]ArchV2Rules
 	}
 )
 
@@ -126,35 +126,35 @@ func (doc ArchV2Document) WorkingDirectory() common.Referable[string] {
 	return doc.internalWorkingDir
 }
 
-func (doc ArchV2Document) Options() arch.Options {
+func (doc ArchV2Document) Options() spec.Options {
 	return doc.V2Allow
 }
 
-func (doc ArchV2Document) ExcludedDirectories() arch.ExcludedDirectories {
+func (doc ArchV2Document) ExcludedDirectories() spec.ExcludedDirectories {
 	return doc.internalExclude
 }
 
-func (doc ArchV2Document) ExcludedFilesRegExp() arch.ExcludedFilesRegExp {
+func (doc ArchV2Document) ExcludedFilesRegExp() spec.ExcludedFilesRegExp {
 	return doc.internalExcludeFilesRegExp
 }
 
-func (doc ArchV2Document) Vendors() arch.Vendors {
+func (doc ArchV2Document) Vendors() spec.Vendors {
 	return doc.internalVendors
 }
 
-func (doc ArchV2Document) Components() arch.Components {
+func (doc ArchV2Document) Components() spec.Components {
 	return doc.internalComponents
 }
 
-func (doc ArchV2Document) CommonComponents() arch.CommonComponents {
+func (doc ArchV2Document) CommonComponents() spec.CommonComponents {
 	return doc.internalCommonComponents
 }
 
-func (doc ArchV2Document) CommonVendors() arch.CommonVendors {
+func (doc ArchV2Document) CommonVendors() spec.CommonVendors {
 	return doc.internalCommonVendors
 }
 
-func (doc ArchV2Document) Dependencies() arch.Dependencies {
+func (doc ArchV2Document) Dependencies() spec.Dependencies {
 	return doc.internalDependencies
 }
 
@@ -303,7 +303,7 @@ func (v ArchV2Vendor) ImportPaths() []common.Referable[models.Glob] {
 	return v.internalImportPaths
 }
 
-func (v ArchV2Vendor) applyReferences(name arch.VendorName, resolve yamlDocumentPathResolver) ArchV2Vendor {
+func (v ArchV2Vendor) applyReferences(name spec.VendorName, resolve yamlDocumentPathResolver) ArchV2Vendor {
 	v.reference = resolve(fmt.Sprintf("$.vendors.%s", name))
 
 	for ind, importPath := range v.V2ImportPaths.list {
@@ -332,7 +332,7 @@ func (c ArchV2Component) RelativePaths() []common.Referable[models.Glob] {
 }
 
 func (c ArchV2Component) applyReferences(
-	name arch.ComponentName,
+	name spec.ComponentName,
 	workDirectory string,
 	resolve yamlDocumentPathResolver,
 ) ArchV2Component {
@@ -384,7 +384,7 @@ func (rule ArchV2Rules) DeepScan() common.Referable[bool] {
 	return common.NewEmptyReferable(false)
 }
 
-func (rule ArchV2Rules) applyReferences(name arch.ComponentName, resolve yamlDocumentPathResolver) ArchV2Rules {
+func (rule ArchV2Rules) applyReferences(name spec.ComponentName, resolve yamlDocumentPathResolver) ArchV2Rules {
 	rule.reference = resolve(fmt.Sprintf("$.deps.%s", name))
 
 	// --
@@ -429,8 +429,8 @@ func (a archV2InternalDependencies) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV2InternalDependencies) Map() map[arch.ComponentName]arch.DependencyRule {
-	res := make(map[arch.ComponentName]arch.DependencyRule)
+func (a archV2InternalDependencies) Map() map[spec.ComponentName]spec.DependencyRule {
+	res := make(map[spec.ComponentName]spec.DependencyRule)
 	for name, rules := range a.data {
 		res[name] = rules
 	}
@@ -473,8 +473,8 @@ func (a archV2InternalComponents) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV2InternalComponents) Map() map[arch.ComponentName]arch.Component {
-	res := make(map[arch.ComponentName]arch.Component)
+func (a archV2InternalComponents) Map() map[spec.ComponentName]spec.Component {
+	res := make(map[spec.ComponentName]spec.Component)
 	for name, component := range a.data {
 		res[name] = component
 	}
@@ -485,8 +485,8 @@ func (a archV2InternalVendors) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV2InternalVendors) Map() map[arch.VendorName]arch.Vendor {
-	res := make(map[arch.VendorName]arch.Vendor)
+func (a archV2InternalVendors) Map() map[spec.VendorName]spec.Vendor {
+	res := make(map[spec.VendorName]spec.Vendor)
 	for name, vendor := range a.data {
 		res[name] = vendor
 	}

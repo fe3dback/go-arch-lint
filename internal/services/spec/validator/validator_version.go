@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorVersion struct{}
@@ -14,7 +14,7 @@ func newValidatorVersion() *validatorVersion {
 	return &validatorVersion{}
 }
 
-func (v *validatorVersion) Validate(doc arch.Document) []speca.Notice {
+func (v *validatorVersion) Validate(doc spec.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
 	if doc.Version().Value <= models.SupportedVersionMax && doc.Version().Value >= models.SupportedVersionMin {

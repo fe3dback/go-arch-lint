@@ -1,12 +1,12 @@
-package spec
+package decoder
 
 import (
 	"fmt"
 	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
@@ -27,11 +27,11 @@ type (
 		V3Version            int                                    `yaml:"version" json:"version"`
 		V3WorkDir            string                                 `yaml:"workdir" json:"workdir"`
 		V3Allow              ArchV3Allow                            `yaml:"allow" json:"allow"`
-		V3Vendors            map[arch.VendorName]ArchV3Vendor       `yaml:"vendors" json:"vendors"`
+		V3Vendors            map[spec.VendorName]ArchV3Vendor       `yaml:"vendors" json:"vendors"`
 		V3Exclude            []string                               `yaml:"exclude" json:"exclude"`
 		V3ExcludeFilesRegExp []string                               `yaml:"excludeFiles" json:"excludeFiles"`
-		V3Components         map[arch.ComponentName]ArchV3Component `yaml:"components" json:"components"`
-		V3Dependencies       map[arch.ComponentName]ArchV3Rules     `yaml:"deps" json:"deps"`
+		V3Components         map[spec.ComponentName]ArchV3Component `yaml:"components" json:"components"`
+		V3Dependencies       map[spec.ComponentName]ArchV3Rules     `yaml:"deps" json:"deps"`
 		V3CommonComponents   []string                               `yaml:"commonComponents" json:"commonComponents"`
 		V3CommonVendors      []string                               `yaml:"commonVendors" json:"commonVendors"`
 	}
@@ -78,12 +78,12 @@ type (
 type (
 	archV3InternalVendors struct {
 		reference common.Reference
-		data      map[arch.VendorName]ArchV3Vendor
+		data      map[spec.VendorName]ArchV3Vendor
 	}
 
 	archV3InternalComponents struct {
 		reference common.Reference
-		data      map[arch.ComponentName]ArchV3Component
+		data      map[spec.ComponentName]ArchV3Component
 	}
 
 	archV3InternalExclude struct {
@@ -108,7 +108,7 @@ type (
 
 	archV3InternalDependencies struct {
 		reference common.Reference
-		data      map[arch.ComponentName]ArchV3Rules
+		data      map[spec.ComponentName]ArchV3Rules
 	}
 )
 
@@ -130,35 +130,35 @@ func (doc ArchV3Document) WorkingDirectory() common.Referable[string] {
 	return doc.internalWorkingDir
 }
 
-func (doc ArchV3Document) Options() arch.Options {
+func (doc ArchV3Document) Options() spec.Options {
 	return doc.V3Allow
 }
 
-func (doc ArchV3Document) ExcludedDirectories() arch.ExcludedDirectories {
+func (doc ArchV3Document) ExcludedDirectories() spec.ExcludedDirectories {
 	return doc.internalExclude
 }
 
-func (doc ArchV3Document) ExcludedFilesRegExp() arch.ExcludedFilesRegExp {
+func (doc ArchV3Document) ExcludedFilesRegExp() spec.ExcludedFilesRegExp {
 	return doc.internalExcludeFilesRegExp
 }
 
-func (doc ArchV3Document) Vendors() arch.Vendors {
+func (doc ArchV3Document) Vendors() spec.Vendors {
 	return doc.internalVendors
 }
 
-func (doc ArchV3Document) Components() arch.Components {
+func (doc ArchV3Document) Components() spec.Components {
 	return doc.internalComponents
 }
 
-func (doc ArchV3Document) CommonComponents() arch.CommonComponents {
+func (doc ArchV3Document) CommonComponents() spec.CommonComponents {
 	return doc.internalCommonComponents
 }
 
-func (doc ArchV3Document) CommonVendors() arch.CommonVendors {
+func (doc ArchV3Document) CommonVendors() spec.CommonVendors {
 	return doc.internalCommonVendors
 }
 
-func (doc ArchV3Document) Dependencies() arch.Dependencies {
+func (doc ArchV3Document) Dependencies() spec.Dependencies {
 	return doc.internalDependencies
 }
 
@@ -320,7 +320,7 @@ func (v ArchV3Vendor) ImportPaths() []common.Referable[models.Glob] {
 	return v.internalImportPaths
 }
 
-func (v ArchV3Vendor) applyReferences(name arch.VendorName, resolve yamlDocumentPathResolver) ArchV3Vendor {
+func (v ArchV3Vendor) applyReferences(name spec.VendorName, resolve yamlDocumentPathResolver) ArchV3Vendor {
 	v.reference = resolve(fmt.Sprintf("$.vendors.%s", name))
 
 	for ind, importPath := range v.V3ImportPaths.list {
@@ -349,7 +349,7 @@ func (c ArchV3Component) RelativePaths() []common.Referable[models.Glob] {
 }
 
 func (c ArchV3Component) applyReferences(
-	name arch.ComponentName,
+	name spec.ComponentName,
 	workDirectory string,
 	resolve yamlDocumentPathResolver,
 ) ArchV3Component {
@@ -401,7 +401,7 @@ func (rule ArchV3Rules) DeepScan() common.Referable[bool] {
 	return rule.internalDeepScan
 }
 
-func (rule ArchV3Rules) applyReferences(name arch.ComponentName, globalOptions ArchV3Allow, resolve yamlDocumentPathResolver) ArchV3Rules {
+func (rule ArchV3Rules) applyReferences(name spec.ComponentName, globalOptions ArchV3Allow, resolve yamlDocumentPathResolver) ArchV3Rules {
 	rule.reference = resolve(fmt.Sprintf("$.deps.%s", name))
 
 	// --
@@ -457,8 +457,8 @@ func (a archV3InternalDependencies) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV3InternalDependencies) Map() map[arch.ComponentName]arch.DependencyRule {
-	res := make(map[arch.ComponentName]arch.DependencyRule)
+func (a archV3InternalDependencies) Map() map[spec.ComponentName]spec.DependencyRule {
+	res := make(map[spec.ComponentName]spec.DependencyRule)
 	for name, rules := range a.data {
 		res[name] = rules
 	}
@@ -501,8 +501,8 @@ func (a archV3InternalComponents) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV3InternalComponents) Map() map[arch.ComponentName]arch.Component {
-	res := make(map[arch.ComponentName]arch.Component)
+func (a archV3InternalComponents) Map() map[spec.ComponentName]spec.Component {
+	res := make(map[spec.ComponentName]spec.Component)
 	for name, component := range a.data {
 		res[name] = component
 	}
@@ -513,8 +513,8 @@ func (a archV3InternalVendors) Reference() common.Reference {
 	return a.reference
 }
 
-func (a archV3InternalVendors) Map() map[arch.VendorName]arch.Vendor {
-	res := make(map[arch.VendorName]arch.Vendor)
+func (a archV3InternalVendors) Map() map[spec.VendorName]spec.Vendor {
+	res := make(map[spec.VendorName]spec.Vendor)
 	for name, vendor := range a.data {
 		res[name] = vendor
 	}

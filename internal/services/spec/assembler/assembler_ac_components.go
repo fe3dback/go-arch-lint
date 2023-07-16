@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
@@ -29,7 +29,7 @@ func newComponentsAssembler(
 	}
 }
 
-func (m *componentsAssembler) assemble(spec *speca.Spec, document arch.Document) error {
+func (m *componentsAssembler) assemble(spec *speca.Spec, document spec.Document) error {
 	for yamlName, yamlComponent := range document.Components().Map() {
 		component, err := m.assembleComponent(yamlName, yamlComponent, document)
 		if err != nil {
@@ -44,8 +44,8 @@ func (m *componentsAssembler) assemble(spec *speca.Spec, document arch.Document)
 
 func (m *componentsAssembler) assembleComponent(
 	yamlName string,
-	yamlComponent arch.Component,
-	yamlDocument arch.Document,
+	yamlComponent spec.Component,
+	yamlDocument spec.Document,
 ) (speca.Component, error) {
 	depMeta, hasDeps := yamlDocument.Dependencies().Map()[yamlName]
 
@@ -90,9 +90,9 @@ func (m *componentsAssembler) assembleComponent(
 
 func (m *componentsAssembler) enrichWithFlags(
 	cmp *speca.Component,
-	yamlComponent arch.Component,
+	yamlComponent spec.Component,
 	hasDeps bool,
-	depMeta arch.DependencyRule,
+	depMeta spec.DependencyRule,
 ) error {
 	if hasDeps {
 		cmp.SpecialFlags = speca.SpecialFlags{
@@ -113,7 +113,7 @@ func (m *componentsAssembler) enrichWithFlags(
 func (m *componentsAssembler) enrichWithResolvedPaths(
 	cmp *speca.Component,
 	yamlName string,
-	yamlComponent arch.Component,
+	yamlComponent spec.Component,
 ) error {
 	resolvedPaths := make([]common.Referable[models.ResolvedPath], 0)
 
@@ -137,8 +137,8 @@ func (m *componentsAssembler) enrichWithResolvedPaths(
 
 func (m *componentsAssembler) enrichWithProjectImports(
 	cmp *speca.Component,
-	yamlComponent arch.Component,
-	yamlDocument arch.Document,
+	yamlComponent spec.Component,
+	yamlDocument spec.Document,
 	mayDependOn []common.Referable[string],
 ) error {
 	projectImports, err := m.allowedProjectImportsAssembler.assemble(yamlDocument, unwrap(mayDependOn))
@@ -152,7 +152,7 @@ func (m *componentsAssembler) enrichWithProjectImports(
 
 func (m *componentsAssembler) enrichWithVendorGlobs(
 	cmp *speca.Component,
-	yamlDocument arch.Document,
+	yamlDocument spec.Document,
 	canUse []common.Referable[string],
 ) error {
 	vendorGlobs, err := m.allowedVendorImportsAssembler.assemble(yamlDocument, unwrap(canUse))

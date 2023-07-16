@@ -5,8 +5,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorWorkDir struct {
@@ -19,7 +19,7 @@ func newValidatorWorkDir(utils *utils) *validatorWorkDir {
 	}
 }
 
-func (v *validatorWorkDir) Validate(doc arch.Document) []speca.Notice {
+func (v *validatorWorkDir) Validate(doc spec.Document) []speca.Notice {
 	notices := make([]speca.Notice, 0)
 
 	rootDir := filepath.Dir(doc.FilePath().Value)
