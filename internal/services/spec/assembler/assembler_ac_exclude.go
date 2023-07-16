@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
@@ -20,7 +20,7 @@ func newExcludeAssembler(
 	}
 }
 
-func (ea *excludeAssembler) assemble(spec *speca.Spec, document spec.Document) error {
+func (ea *excludeAssembler) assemble(spec *arch.Spec, document spec.Document) error {
 	for _, yamlRelativePath := range document.ExcludedDirectories().List() {
 		tmpResolvedPath, err := ea.resolver.resolveLocalGlobPath(
 			path.Clean(fmt.Sprintf("%s/%s",

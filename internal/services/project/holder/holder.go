@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type (
@@ -22,7 +22,7 @@ func NewHolder() *Holder {
 	return &Holder{}
 }
 
-func (h *Holder) HoldProjectFiles(files []models.ProjectFile, components []speca.Component) []models.FileHold {
+func (h *Holder) HoldProjectFiles(files []models.ProjectFile, components []arch.Component) []models.FileHold {
 	matchedCount := make(map[string]int)
 	// example:
 	// /** 			= 100
@@ -120,7 +120,7 @@ func compare(a, b matchedComponent) bool {
 	return b.id < a.id
 }
 
-func componentsMatchesFile(filePath string, components []speca.Component) []string {
+func componentsMatchesFile(filePath string, components []arch.Component) []string {
 	matched := make([]string, 0)
 	packagePath := filepath.Dir(filePath)
 
@@ -133,7 +133,7 @@ func componentsMatchesFile(filePath string, components []speca.Component) []stri
 	return matched
 }
 
-func componentMatchPackage(packagePath string, component speca.Component) bool {
+func componentMatchPackage(packagePath string, component arch.Component) bool {
 	for _, componentDirectoryRef := range component.ResolvedPaths {
 		resolvedPackagePath := componentDirectoryRef.Value.AbsPath
 		if packageMathPath(packagePath, resolvedPackagePath) {

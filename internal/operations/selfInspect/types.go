@@ -1,13 +1,13 @@
 package selfInspect
 
 import (
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	specAssembler interface {
-		Assemble(prj common.Project) (speca.Spec, error)
+		Assemble(prj common.Project) (arch.Spec, error)
 	}
 
 	projectInfoAssembler interface {

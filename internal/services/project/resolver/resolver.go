@@ -6,7 +6,7 @@ import (
 	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type Resolver struct {
@@ -24,7 +24,7 @@ func NewResolver(
 	}
 }
 
-func (r *Resolver) ProjectFiles(ctx context.Context, spec speca.Spec) ([]models.FileHold, error) {
+func (r *Resolver) ProjectFiles(ctx context.Context, spec arch.Spec) ([]models.FileHold, error) {
 	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
 		spec.RootDirectory.Value,
 		spec.WorkingDirectory.Value,

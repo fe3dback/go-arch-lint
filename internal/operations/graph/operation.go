@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
 	"oss.terrastruct.com/d2/lib/textmeasure"
 
@@ -72,7 +72,7 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.Cm
 	}, nil
 }
 
-func (o *Operation) buildGraph(spec speca.Spec, opts models.CmdGraphIn) (string, error) {
+func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) (string, error) {
 	var buff bytes.Buffer
 	whiteList, err := o.populateGraphWhitelist(spec, opts)
 	if err != nil {
@@ -136,7 +136,7 @@ func (o *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
 	return "--"
 }
 
-func (o *Operation) populateGraphWhitelist(spec speca.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelist(spec arch.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
 	if opts.Focus == "" {
 		return o.populateGraphWhitelistAll(spec)
 	}
@@ -144,7 +144,7 @@ func (o *Operation) populateGraphWhitelist(spec speca.Spec, opts models.CmdGraph
 	return o.populateGraphWhitelistFocused(spec, opts.Focus)
 }
 
-func (o *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelistAll(spec arch.Spec) (map[string]struct{}, error) {
 	whiteList := make(map[string]struct{}, len(spec.Components))
 
 	for _, cmp := range spec.Components {
@@ -154,8 +154,8 @@ func (o *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struc
 	return whiteList, nil
 }
 
-func (o *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName string) (map[string]struct{}, error) {
-	cmpMap := make(map[string]speca.Component)
+func (o *Operation) populateGraphWhitelistFocused(spec arch.Spec, focusCmpName string) (map[string]struct{}, error) {
+	cmpMap := make(map[string]arch.Component)
 	rootExist := false
 
 	for _, cmp := range spec.Components {

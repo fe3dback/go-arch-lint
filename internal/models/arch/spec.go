@@ -1,4 +1,4 @@
-package speca
+package arch
 
 import (
 	"regexp"

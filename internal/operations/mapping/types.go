@@ -4,17 +4,17 @@ import (
 	"context"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
 	specAssembler interface {
-		Assemble(prj common.Project) (speca.Spec, error)
+		Assemble(prj common.Project) (arch.Spec, error)
 	}
 
 	projectFilesResolver interface {
-		ProjectFiles(ctx context.Context, spec speca.Spec) ([]models.FileHold, error)
+		ProjectFiles(ctx context.Context, spec arch.Spec) ([]models.FileHold, error)
 	}
 
 	projectInfoAssembler interface {

@@ -1,17 +1,17 @@
 package assembler
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
 	archDecoder interface {
-		Decode(archFile string) (spec.Document, []speca.Notice, error)
+		Decode(archFile string) (spec.Document, []arch.Notice, error)
 	}
 
 	archValidator interface {
-		Validate(doc spec.Document) []speca.Notice
+		Validate(doc spec.Document) []arch.Notice
 	}
 
 	pathResolver interface {

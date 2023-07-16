@@ -10,8 +10,8 @@ import (
 	"sync"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 	"github.com/fe3dback/go-arch-lint/internal/services/deepscan"
 	"golang.org/x/sync/errgroup"
 )
@@ -21,7 +21,7 @@ type DeepScan struct {
 	sourceCodeRenderer   sourceCodeRenderer
 
 	scanner           *deepscan.Searcher
-	spec              speca.Spec
+	spec              arch.Spec
 	result            models.CheckResult
 	fileComponents    map[string]string
 	packageComponents map[string]string
@@ -68,7 +68,7 @@ func (c *DeepScan) workersCount() int {
 	// return half
 }
 
-func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+func (c *DeepScan) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	maxWorkers := c.workersCount()
 
 	c.Mutex.Lock()
@@ -137,7 +137,7 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 	return c.result, nil
 }
 
-func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
+func (c *DeepScan) checkComponent(ctx context.Context, cmp arch.Component) error {
 	for _, packagePath := range cmp.ResolvedPaths {
 		absPath := packagePath.Value.AbsPath
 		matchedCmp, ok := c.packageComponents[absPath]
@@ -164,7 +164,7 @@ func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) erro
 	return nil
 }
 
-func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPackagePath string) error {
+func (c *DeepScan) scanPackage(ctx context.Context, cmp *arch.Component, absPackagePath string) error {
 	usages, err := c.findUsages(ctx, absPackagePath)
 	if err != nil {
 		return fmt.Errorf("find usages failed: %w", err)
@@ -188,7 +188,7 @@ func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPac
 	return nil
 }
 
-func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
+func (c *DeepScan) checkUsage(ctx context.Context, cmp *arch.Component, usage *deepscan.InjectionMethod) error {
 	for _, gate := range usage.Gates {
 		if len(gate.Implementations) == 0 {
 			continue
@@ -206,7 +206,7 @@ func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *
 	return nil
 }
 
-func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deepscan.Gate) error {
+func (c *DeepScan) checkGate(_ context.Context, cmp *arch.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
@@ -221,7 +221,7 @@ func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deep
 }
 
 func (c *DeepScan) checkImplementation(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	gate *deepscan.Gate,
 	imp *deepscan.Implementation,
 ) error {

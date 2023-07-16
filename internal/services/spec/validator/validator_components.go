@@ -3,7 +3,7 @@ package validator
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
@@ -19,11 +19,11 @@ func newValidatorComponents(
 	}
 }
 
-func (v *validatorComponents) Validate(doc spec.Document) []speca.Notice {
-	notices := make([]speca.Notice, 0)
+func (v *validatorComponents) Validate(doc spec.Document) []arch.Notice {
+	notices := make([]arch.Notice, 0)
 
 	if len(doc.Components().Map()) == 0 {
-		notices = append(notices, speca.Notice{
+		notices = append(notices, arch.Notice{
 			Notice: fmt.Errorf("at least one component should by defined"),
 			Ref:    doc.Components().Reference(),
 		})
@@ -32,7 +32,7 @@ func (v *validatorComponents) Validate(doc spec.Document) []speca.Notice {
 	for _, component := range doc.Components().Map() {
 		for _, componentIn := range component.RelativePaths() {
 			if err := v.utils.assertGlobPathValid(string(componentIn.Value)); err != nil {
-				notices = append(notices, speca.Notice{
+				notices = append(notices, arch.Notice{
 					Notice: err,
 					Ref:    componentIn.Reference,
 				})

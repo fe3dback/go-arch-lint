@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
@@ -29,7 +29,7 @@ func newComponentsAssembler(
 	}
 }
 
-func (m *componentsAssembler) assemble(spec *speca.Spec, document spec.Document) error {
+func (m *componentsAssembler) assemble(spec *arch.Spec, document spec.Document) error {
 	for yamlName, yamlComponent := range document.Components().Map() {
 		component, err := m.assembleComponent(yamlName, yamlComponent, document)
 		if err != nil {
@@ -46,7 +46,7 @@ func (m *componentsAssembler) assembleComponent(
 	yamlName string,
 	yamlComponent spec.Component,
 	yamlDocument spec.Document,
-) (speca.Component, error) {
+) (arch.Component, error) {
 	depMeta, hasDeps := yamlDocument.Dependencies().Map()[yamlName]
 
 	mayDependOn := make([]common.Referable[string], 0)
@@ -59,7 +59,7 @@ func (m *componentsAssembler) assembleComponent(
 		deepScan = depMeta.DeepScan()
 	}
 
-	cmp := speca.Component{
+	cmp := arch.Component{
 		Name:        common.NewReferable(yamlName, yamlComponent.Reference()),
 		MayDependOn: mayDependOn,
 		CanUse:      canUse,
@@ -77,7 +77,7 @@ func (m *componentsAssembler) assembleComponent(
 	for _, enrich := range enrichers {
 		err := enrich()
 		if err != nil {
-			return speca.Component{}, fmt.Errorf("failed assemble component '%s', enrich '%T' err: %w",
+			return arch.Component{}, fmt.Errorf("failed assemble component '%s', enrich '%T' err: %w",
 				yamlName,
 				enrich,
 				err,
@@ -89,20 +89,20 @@ func (m *componentsAssembler) assembleComponent(
 }
 
 func (m *componentsAssembler) enrichWithFlags(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	yamlComponent spec.Component,
 	hasDeps bool,
 	depMeta spec.DependencyRule,
 ) error {
 	if hasDeps {
-		cmp.SpecialFlags = speca.SpecialFlags{
+		cmp.SpecialFlags = arch.SpecialFlags{
 			AllowAllProjectDeps: depMeta.AnyProjectDeps(),
 			AllowAllVendorDeps:  depMeta.AnyVendorDeps(),
 		}
 		return nil
 	}
 
-	cmp.SpecialFlags = speca.SpecialFlags{
+	cmp.SpecialFlags = arch.SpecialFlags{
 		AllowAllProjectDeps: common.NewReferable(false, yamlComponent.Reference()),
 		AllowAllVendorDeps:  common.NewReferable(false, yamlComponent.Reference()),
 	}
@@ -111,7 +111,7 @@ func (m *componentsAssembler) enrichWithFlags(
 }
 
 func (m *componentsAssembler) enrichWithResolvedPaths(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	yamlName string,
 	yamlComponent spec.Component,
 ) error {
@@ -136,7 +136,7 @@ func (m *componentsAssembler) enrichWithResolvedPaths(
 }
 
 func (m *componentsAssembler) enrichWithProjectImports(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	yamlComponent spec.Component,
 	yamlDocument spec.Document,
 	mayDependOn []common.Referable[string],
@@ -151,7 +151,7 @@ func (m *componentsAssembler) enrichWithProjectImports(
 }
 
 func (m *componentsAssembler) enrichWithVendorGlobs(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	yamlDocument spec.Document,
 	canUse []common.Referable[string],
 ) error {

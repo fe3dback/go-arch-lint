@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 
 	"github.com/goccy/go-yaml"
@@ -27,7 +27,7 @@ func NewDecoder(
 	}
 }
 
-func (sp *Decoder) Decode(archFile string) (spec.Document, []speca.Notice, error) {
+func (sp *Decoder) Decode(archFile string) (spec.Document, []arch.Notice, error) {
 	sourceCode, err := os.ReadFile(archFile)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to provide source code of archfile: %w", err)
@@ -119,10 +119,10 @@ func (sp *Decoder) readVersion(sourceCode []byte) (int, error) {
 	return document.Version, nil
 }
 
-func (sp *Decoder) jsonSchemeValidate(schemeVersion int, sourceCode []byte, filePath string) []speca.Notice {
+func (sp *Decoder) jsonSchemeValidate(schemeVersion int, sourceCode []byte, filePath string) []arch.Notice {
 	jsonSchema, err := sp.jsonSchemaProvider.Provide(schemeVersion)
 	if err != nil {
-		return []speca.Notice{{
+		return []arch.Notice{{
 			Notice: fmt.Errorf("failed to provide json scheme for validation: %w", err),
 			Ref:    common.NewEmptyReference(),
 		}}
@@ -130,20 +130,20 @@ func (sp *Decoder) jsonSchemeValidate(schemeVersion int, sourceCode []byte, file
 
 	jsonNotices, err := jsonSchemeValidate(jsonSchema, sourceCode)
 	if err != nil {
-		return []speca.Notice{{
+		return []arch.Notice{{
 			Notice: fmt.Errorf("failed to validate arch file with json scheme: %w", err),
 			Ref:    common.NewEmptyReference(),
 		}}
 	}
 
-	schemeNotices := make([]speca.Notice, 0)
+	schemeNotices := make([]arch.Notice, 0)
 	for _, jsonNotice := range jsonNotices {
 		schemeRef := common.NewEmptyReference()
 		if jsonNotice.yamlPath != nil {
 			schemeRef = sp.yamlReferenceResolver.Resolve(filePath, *jsonNotice.yamlPath)
 		}
 
-		schemeNotices = append(schemeNotices, speca.Notice{
+		schemeNotices = append(schemeNotices, arch.Notice{
 			Notice: fmt.Errorf(jsonNotice.notice),
 			Ref:    schemeRef,
 		})

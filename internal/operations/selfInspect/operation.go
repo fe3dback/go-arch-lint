@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type Operation struct {
@@ -48,15 +48,15 @@ func (o *Operation) Behave(in models.CmdSelfInspectIn) (models.CmdSelfInspectOut
 	}, nil
 }
 
-func (o *Operation) extractNotices(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
+func (o *Operation) extractNotices(spec *arch.Spec) []models.CmdSelfInspectOutAnnotation {
 	return o.asAnnotations(spec.Integrity.DocumentNotices)
 }
 
-func (o *Operation) extractSuggestions(spec *speca.Spec) []models.CmdSelfInspectOutAnnotation {
+func (o *Operation) extractSuggestions(spec *arch.Spec) []models.CmdSelfInspectOutAnnotation {
 	return o.asAnnotations(spec.Integrity.Suggestions)
 }
 
-func (o *Operation) asAnnotations(list []speca.Notice) []models.CmdSelfInspectOutAnnotation {
+func (o *Operation) asAnnotations(list []arch.Notice) []models.CmdSelfInspectOutAnnotation {
 	annotations := make([]models.CmdSelfInspectOutAnnotation, 0, len(list))
 
 	for _, notice := range list {
@@ -66,7 +66,7 @@ func (o *Operation) asAnnotations(list []speca.Notice) []models.CmdSelfInspectOu
 	return annotations
 }
 
-func (o *Operation) asAnnotation(notice speca.Notice) models.CmdSelfInspectOutAnnotation {
+func (o *Operation) asAnnotation(notice arch.Notice) models.CmdSelfInspectOutAnnotation {
 	return models.CmdSelfInspectOutAnnotation{
 		Text:      notice.Notice.Error(),
 		Reference: notice.Ref,

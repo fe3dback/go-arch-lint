@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type Imports struct {
-	spec                 speca.Spec
+	spec                 arch.Spec
 	projectFilesResolver projectFilesResolver
 	result               results
 }
@@ -25,7 +25,7 @@ func NewImport(
 	}
 }
 
-func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+func (c *Imports) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
 	projectFiles, err := c.projectFilesResolver.ProjectFiles(ctx, spec)
@@ -62,8 +62,8 @@ func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResul
 	return c.result.assembleSortedResults(), nil
 }
 
-func (c *Imports) assembleComponentsMap(spec speca.Spec) map[string]speca.Component {
-	results := make(map[string]speca.Component)
+func (c *Imports) assembleComponentsMap(spec arch.Spec) map[string]arch.Component {
+	results := make(map[string]arch.Component)
 
 	for _, component := range spec.Components {
 		results[component.Name.Value] = component
@@ -72,7 +72,7 @@ func (c *Imports) assembleComponentsMap(spec speca.Spec) map[string]speca.Compon
 	return results
 }
 
-func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) error {
+func (c *Imports) checkFile(component arch.Component, file models.ProjectFile) error {
 	for _, resolvedImport := range file.Imports {
 		allowed, err := checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value)
 		if err != nil {
@@ -99,7 +99,7 @@ func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) 
 }
 
 func checkImport(
-	component speca.Component,
+	component arch.Component,
 	resolvedImport models.ResolvedImport,
 	allowDependOnAnyVendor bool,
 ) (bool, error) {
@@ -119,7 +119,7 @@ func checkImport(
 	}
 }
 
-func checkVendorImport(component speca.Component, resolvedImport models.ResolvedImport) (bool, error) {
+func checkVendorImport(component arch.Component, resolvedImport models.ResolvedImport) (bool, error) {
 	if component.SpecialFlags.AllowAllVendorDeps.Value {
 		return true, nil
 	}
@@ -144,7 +144,7 @@ func checkVendorImport(component speca.Component, resolvedImport models.Resolved
 	return false, nil
 }
 
-func checkProjectImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
+func checkProjectImport(component arch.Component, resolvedImport models.ResolvedImport) bool {
 	if component.SpecialFlags.AllowAllProjectDeps.Value {
 		return true
 	}

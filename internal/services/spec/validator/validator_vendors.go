@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
@@ -17,6 +17,6 @@ func newValidatorVendors(
 	}
 }
 
-func (v *validatorVendors) Validate(_ spec.Document) []speca.Notice {
-	return make([]speca.Notice, 0)
+func (v *validatorVendors) Validate(_ spec.Document) []arch.Notice {
+	return make([]arch.Notice, 0)
 }

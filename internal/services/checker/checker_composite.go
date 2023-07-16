@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type CompositeChecker struct {
@@ -16,7 +16,7 @@ func NewCompositeChecker(checkers ...checker) *CompositeChecker {
 	return &CompositeChecker{checkers: checkers}
 }
 
-func (c *CompositeChecker) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+func (c *CompositeChecker) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	overallResults := models.CheckResult{}
 
 	for ind, checker := range c.checkers {

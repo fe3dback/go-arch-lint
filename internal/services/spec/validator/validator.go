@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
@@ -17,8 +17,8 @@ func NewValidator(
 	}
 }
 
-func (v *Validator) Validate(doc spec.Document) []speca.Notice {
-	notices := make([]speca.Notice, 0)
+func (v *Validator) Validate(doc spec.Document) []arch.Notice {
+	notices := make([]arch.Notice, 0)
 
 	utils := newUtils(v.pathResolver, doc)
 	validators := []validator{

@@ -5,11 +5,11 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 const (
@@ -116,7 +116,7 @@ func Test_checkImportPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := speca.Component{
+			cmp := arch.Component{
 				Name:                  common.NewReferable("component", common.NewEmptyReference()),
 				AllowedProjectImports: tt.args.componentImports,
 			}
@@ -131,7 +131,7 @@ func Test_checkImportPath(t *testing.T) {
 func Test_checkProjectImport(t *testing.T) {
 	type args struct {
 		componentImports []common.Referable[models.ResolvedPath]
-		componentFlags   speca.SpecialFlags
+		componentFlags   arch.SpecialFlags
 		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
@@ -143,7 +143,7 @@ func Test_checkProjectImport(t *testing.T) {
 			name: "no flags, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -155,7 +155,7 @@ func Test_checkProjectImport(t *testing.T) {
 			name: "project flag, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -167,7 +167,7 @@ func Test_checkProjectImport(t *testing.T) {
 			name: "vendor flag, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(true),
 				},
@@ -181,7 +181,7 @@ func Test_checkProjectImport(t *testing.T) {
 				componentImports: []common.Referable[models.ResolvedPath]{
 					makeTestResolvedPath("needle"),
 				},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -197,7 +197,7 @@ func Test_checkProjectImport(t *testing.T) {
 					makeTestResolvedPath("needle"),
 					makeTestResolvedPath("module12"),
 				},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -212,7 +212,7 @@ func Test_checkProjectImport(t *testing.T) {
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("module12"),
 				},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -228,7 +228,7 @@ func Test_checkProjectImport(t *testing.T) {
 					makeTestResolvedPath("needle"),
 					makeTestResolvedPath("module12"),
 				},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -243,7 +243,7 @@ func Test_checkProjectImport(t *testing.T) {
 					makeTestResolvedPath("some"),
 					makeTestResolvedPath("module12"),
 				},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -254,7 +254,7 @@ func Test_checkProjectImport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := speca.Component{
+			cmp := arch.Component{
 				Name:                  common.NewReferable("component", common.NewEmptyReference()),
 				SpecialFlags:          tt.args.componentFlags,
 				AllowedProjectImports: tt.args.componentImports,
@@ -270,7 +270,7 @@ func Test_checkProjectImport(t *testing.T) {
 func Test_checkVendorImport(t *testing.T) {
 	type args struct {
 		componentImports []common.Referable[models.ResolvedPath]
-		componentFlags   speca.SpecialFlags
+		componentFlags   arch.SpecialFlags
 		resolvedImport   models.ResolvedImport
 	}
 	tests := []struct {
@@ -282,7 +282,7 @@ func Test_checkVendorImport(t *testing.T) {
 			name: "no flags, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -294,7 +294,7 @@ func Test_checkVendorImport(t *testing.T) {
 			name: "vendor flag, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(false),
 					AllowAllVendorDeps:  makeBool(true),
 				},
@@ -306,7 +306,7 @@ func Test_checkVendorImport(t *testing.T) {
 			name: "project flag, empty list",
 			args: args{
 				componentImports: []common.Referable[models.ResolvedPath]{},
-				componentFlags: speca.SpecialFlags{
+				componentFlags: arch.SpecialFlags{
 					AllowAllProjectDeps: makeBool(true),
 					AllowAllVendorDeps:  makeBool(false),
 				},
@@ -317,7 +317,7 @@ func Test_checkVendorImport(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmp := speca.Component{
+			cmp := arch.Component{
 				Name:                  common.NewReferable("component", common.NewEmptyReference()),
 				SpecialFlags:          tt.args.componentFlags,
 				AllowedProjectImports: tt.args.componentImports,
@@ -390,9 +390,9 @@ func TestChecker_checkImport(t *testing.T) {
 		},
 	}
 
-	cmp := speca.Component{
+	cmp := arch.Component{
 		Name: common.NewReferable("component", common.NewEmptyReference()),
-		SpecialFlags: speca.SpecialFlags{
+		SpecialFlags: arch.SpecialFlags{
 			AllowAllProjectDeps: makeBool(false),
 			AllowAllVendorDeps:  makeBool(false),
 		},

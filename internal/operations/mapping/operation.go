@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type Operation struct {
@@ -53,7 +53,7 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdMappingIn) (models.
 }
 
 func assembleMappingByComponent(
-	spec speca.Spec,
+	spec arch.Spec,
 	projectFiles []models.FileHold,
 ) []models.CmdMappingOutGrouped {
 	tmp := make(map[string]*models.CmdMappingOutGrouped)

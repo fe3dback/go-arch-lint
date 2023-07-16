@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type (
@@ -141,8 +141,8 @@ func (o *Operation) resultsHasWarnings(result models.CheckResult) bool {
 	return false
 }
 
-func (o *Operation) assembleNotice(integrity speca.Integrity) []models.CheckNotice {
-	notices := make([]speca.Notice, 0)
+func (o *Operation) assembleNotice(integrity arch.Integrity) []models.CheckNotice {
+	notices := make([]arch.Notice, 0)
 	notices = append(notices, integrity.DocumentNotices...)
 
 	results := make([]models.CheckNotice, 0)

@@ -3,8 +3,8 @@ package assembler
 import (
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
 )
 
 type (
@@ -27,13 +27,13 @@ func NewAssembler(
 	}
 }
 
-func (sa *Assembler) Assemble(prj common.Project) (speca.Spec, error) {
-	spec := speca.Spec{
+func (sa *Assembler) Assemble(prj common.Project) (arch.Spec, error) {
+	spec := arch.Spec{
 		RootDirectory: common.NewEmptyReferable(prj.Directory),
 		ModuleName:    common.NewEmptyReferable(prj.ModuleName),
-		Integrity: speca.Integrity{
-			DocumentNotices: []speca.Notice{},
-			Suggestions:     []speca.Notice{},
+		Integrity: arch.Integrity{
+			DocumentNotices: []arch.Notice{},
+			Suggestions:     []arch.Notice{},
 		},
 	}
 
