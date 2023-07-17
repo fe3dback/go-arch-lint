@@ -75,6 +75,15 @@ func (r Reference) guaranteeValidState(mutate func(r *Reference)) Reference {
 
 	mutate(&r)
 
+	if r.File == "" {
+		r.Valid = false
+		r.LineFrom = 0
+		r.Line = 0
+		r.LineTo = 0
+		r.Column = 0
+		return r
+	}
+
 	// check lines
 	if r.LineFrom > r.LineTo {
 		r.LineFrom, r.LineTo = r.LineTo, r.LineFrom
@@ -84,10 +93,6 @@ func (r Reference) guaranteeValidState(mutate func(r *Reference)) Reference {
 	r.LineTo = clampInt(r.LineTo, r.LineFrom, math.MaxInt32)
 	r.Line = clampInt(r.Line, r.LineFrom, r.LineTo)
 	r.Column = clampInt(r.Column, 0, math.MaxInt32)
-
-	if r.File == "" {
-		r.Valid = false
-	}
 
 	return r
 }

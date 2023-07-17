@@ -22,10 +22,10 @@ func newValidatorDepsVendors(
 func (v *validatorDepsVendors) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	for name, rules := range doc.Dependencies().Map() {
+	for name, rule := range doc.Dependencies() {
 		existVendors := make(map[string]bool)
 
-		for _, vendorName := range rules.CanUse() {
+		for _, vendorName := range rule.Value.CanUse() {
 			if _, ok := existVendors[vendorName.Value]; ok {
 				notices = append(notices, arch.Notice{
 					Notice: fmt.Errorf("vendor '%s' dublicated in '%s' deps", vendorName.Value, name),

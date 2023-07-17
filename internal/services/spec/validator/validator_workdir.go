@@ -22,7 +22,7 @@ func newValidatorWorkDir(utils *utils) *validatorWorkDir {
 func (v *validatorWorkDir) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	rootDir := filepath.Dir(doc.FilePath().Value)
+	rootDir := filepath.Dir(doc.Version().Reference.File)
 	absPath := fmt.Sprintf("%s/%s", rootDir, doc.WorkingDirectory().Value)
 	absPath = path.Clean(absPath)
 

@@ -15,7 +15,7 @@ func newExcludeFilesMatcherAssembler() *excludeFilesMatcherAssembler {
 }
 
 func (efa *excludeFilesMatcherAssembler) assemble(spec *arch.Spec, yamlSpec spec.Document) error {
-	for _, regString := range yamlSpec.ExcludedFilesRegExp().List() {
+	for _, regString := range yamlSpec.ExcludedFilesRegExp() {
 		matcher, err := regexp.Compile(regString.Value)
 		if err != nil {
 			continue

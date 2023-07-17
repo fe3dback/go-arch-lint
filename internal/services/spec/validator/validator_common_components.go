@@ -20,7 +20,7 @@ func newValidatorCommonComponents(
 func (v *validatorCommonComponents) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	for _, componentName := range doc.CommonComponents().List() {
+	for _, componentName := range doc.CommonComponents() {
 		if err := v.utils.assertKnownComponent(componentName.Value); err != nil {
 			notices = append(notices, arch.Notice{
 				Notice: err,

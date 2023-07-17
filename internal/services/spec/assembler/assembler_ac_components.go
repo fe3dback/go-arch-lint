@@ -2,6 +2,7 @@ package assembler
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
@@ -30,7 +31,7 @@ func newComponentsAssembler(
 }
 
 func (m *componentsAssembler) assemble(spec *arch.Spec, document spec.Document) error {
-	for yamlName, yamlComponent := range document.Components().Map() {
+	for yamlName, yamlComponent := range document.Components() {
 		component, err := m.assembleComponent(yamlName, yamlComponent, document)
 		if err != nil {
 			return fmt.Errorf("failed to assemble component '%s': %w", yamlName, err)
@@ -44,23 +45,23 @@ func (m *componentsAssembler) assemble(spec *arch.Spec, document spec.Document) 
 
 func (m *componentsAssembler) assembleComponent(
 	yamlName string,
-	yamlComponent spec.Component,
+	yamlComponent common.Referable[spec.Component],
 	yamlDocument spec.Document,
 ) (arch.Component, error) {
-	depMeta, hasDeps := yamlDocument.Dependencies().Map()[yamlName]
+	depMeta, hasDeps := yamlDocument.Dependencies()[yamlName]
 
 	mayDependOn := make([]common.Referable[string], 0)
 	canUse := make([]common.Referable[string], 0)
 	deepScan := yamlDocument.Options().DeepScan()
 
 	if hasDeps {
-		mayDependOn = append(mayDependOn, depMeta.MayDependOn()...)
-		canUse = append(canUse, depMeta.CanUse()...)
-		deepScan = depMeta.DeepScan()
+		mayDependOn = append(mayDependOn, depMeta.Value.MayDependOn()...)
+		canUse = append(canUse, depMeta.Value.CanUse()...)
+		deepScan = depMeta.Value.DeepScan()
 	}
 
 	cmp := arch.Component{
-		Name:        common.NewReferable(yamlName, yamlComponent.Reference()),
+		Name:        common.NewReferable(yamlName, yamlComponent.Reference),
 		MayDependOn: mayDependOn,
 		CanUse:      canUse,
 		DeepScan:    deepScan,
@@ -68,8 +69,8 @@ func (m *componentsAssembler) assembleComponent(
 
 	type enricher func() error
 	enrichers := []enricher{
-		func() error { return m.enrichWithFlags(&cmp, yamlComponent, hasDeps, depMeta) },
-		func() error { return m.enrichWithResolvedPaths(&cmp, yamlName, yamlComponent) },
+		func() error { return m.enrichWithFlags(&cmp, yamlComponent, hasDeps, depMeta.Value) },
+		func() error { return m.enrichWithResolvedPaths(&cmp, yamlDocument, yamlName, yamlComponent) },
 		func() error { return m.enrichWithProjectImports(&cmp, yamlComponent, yamlDocument, mayDependOn) },
 		func() error { return m.enrichWithVendorGlobs(&cmp, yamlDocument, canUse) },
 	}
@@ -90,7 +91,7 @@ func (m *componentsAssembler) assembleComponent(
 
 func (m *componentsAssembler) enrichWithFlags(
 	cmp *arch.Component,
-	yamlComponent spec.Component,
+	yamlComponent common.Referable[spec.Component],
 	hasDeps bool,
 	depMeta spec.DependencyRule,
 ) error {
@@ -103,8 +104,8 @@ func (m *componentsAssembler) enrichWithFlags(
 	}
 
 	cmp.SpecialFlags = arch.SpecialFlags{
-		AllowAllProjectDeps: common.NewReferable(false, yamlComponent.Reference()),
-		AllowAllVendorDeps:  common.NewReferable(false, yamlComponent.Reference()),
+		AllowAllProjectDeps: common.NewReferable(false, yamlComponent.Reference),
+		AllowAllVendorDeps:  common.NewReferable(false, yamlComponent.Reference),
 	}
 
 	return nil
@@ -112,22 +113,28 @@ func (m *componentsAssembler) enrichWithFlags(
 
 func (m *componentsAssembler) enrichWithResolvedPaths(
 	cmp *arch.Component,
+	yamlDocument spec.Document,
 	yamlName string,
-	yamlComponent spec.Component,
+	yamlComponent common.Referable[spec.Component],
 ) error {
 	resolvedPaths := make([]common.Referable[models.ResolvedPath], 0)
 
-	for _, componentIn := range yamlComponent.RelativePaths() {
-		tmpResolvedPath, err := m.resolver.resolveLocalGlobPath(string(componentIn.Value))
+	for _, componentIn := range yamlComponent.Value.RelativePaths() {
+		tmpResolvedPath, err := m.resolver.resolveLocalGlobPath(
+			path.Clean(fmt.Sprintf("%s/%s",
+				yamlDocument.WorkingDirectory().Value,
+				string(componentIn),
+			)),
+		)
 		if err != nil {
 			return fmt.Errorf("failed to assemble component '%s' path '%s': %w",
 				yamlName,
-				componentIn.Value,
+				componentIn,
 				err,
 			)
 		}
 
-		wrappedPaths := wrap(componentIn.Reference, tmpResolvedPath)
+		wrappedPaths := wrap(yamlComponent.Reference, tmpResolvedPath)
 		resolvedPaths = append(resolvedPaths, wrappedPaths...)
 	}
 
@@ -137,7 +144,7 @@ func (m *componentsAssembler) enrichWithResolvedPaths(
 
 func (m *componentsAssembler) enrichWithProjectImports(
 	cmp *arch.Component,
-	yamlComponent spec.Component,
+	yamlComponent common.Referable[spec.Component],
 	yamlDocument spec.Document,
 	mayDependOn []common.Referable[string],
 ) error {
@@ -146,7 +153,7 @@ func (m *componentsAssembler) enrichWithProjectImports(
 		return fmt.Errorf("failed to assemble component project imports: %w", err)
 	}
 
-	cmp.AllowedProjectImports = wrap(yamlComponent.Reference(), projectImports)
+	cmp.AllowedProjectImports = wrap(yamlComponent.Reference, projectImports)
 	return nil
 }
 

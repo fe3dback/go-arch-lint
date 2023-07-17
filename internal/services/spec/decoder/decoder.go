@@ -2,13 +2,13 @@ package decoder
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
-
 	"github.com/goccy/go-yaml"
 )
 
@@ -66,47 +66,33 @@ func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath strin
 		yaml.DisallowUnknownField(),
 		yaml.Strict(),
 	)
-	resolver := sp.createYamlReferenceResolver(filePath)
-	filePathRef := common.NewReferable(filePath, common.NewReferenceSingleLine(filePath, 0, 0))
 
-	// todo: refactor this somehow (dry)
-	switch version {
-	case 1:
-		document := ArchV1Document{filePath: filePathRef}
-		err := decoder.Decode(&document)
-		if err != nil {
-			return nil, err
-		}
+	decodeCtx := context.WithValue(context.Background(), yamlParentFileCtx{}, filePath)
+	document := sp.createEmptyDocumentBeVersion(version)
 
-		return document.applyReferences(resolver), nil
-	case 2:
-		document := ArchV2Document{filePath: filePathRef}
-		err := decoder.Decode(&document)
-		if err != nil {
-			return nil, err
-		}
-
-		return document.applyReferences(resolver), nil
-	default:
-		document := ArchV3Document{filePath: filePathRef}
-		err := decoder.Decode(&document)
-		if err != nil {
-			return nil, err
-		}
-
-		return document.applyReferences(resolver), nil
+	err := decoder.DecodeContext(decodeCtx, document)
+	if err != nil {
+		return nil, err
 	}
+
+	return document, nil
 }
 
-func (sp *Decoder) createYamlReferenceResolver(archFilePath string) yamlDocumentPathResolver {
-	return func(yamlPath string) common.Reference {
-		return sp.yamlReferenceResolver.Resolve(archFilePath, yamlPath)
+func (sp *Decoder) createEmptyDocumentBeVersion(version int) spec.Document {
+	switch version {
+	// todo: support lower versions
+	//case 1:
+	//	return ArchV1Document{}
+	//case 2:
+	//	return ArchV2Document{}
+	default:
+		return &ArchV3{}
 	}
 }
 
 func (sp *Decoder) readVersion(sourceCode []byte) (int, error) {
 	type doc struct {
-		Version int `yaml:"version"`
+		Version int `json:"version"`
 	}
 	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(reader)

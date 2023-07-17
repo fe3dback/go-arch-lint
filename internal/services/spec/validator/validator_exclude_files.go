@@ -18,7 +18,7 @@ func newValidatorExcludeFiles() *validatorExcludeFiles {
 func (v *validatorExcludeFiles) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	for index, regExp := range doc.ExcludedFilesRegExp().List() {
+	for index, regExp := range doc.ExcludedFilesRegExp() {
 		if _, err := regexp.Compile(regExp.Value); err != nil {
 			notices = append(notices, arch.Notice{
 				Notice: fmt.Errorf("invalid regexp '%s' at %d: %v", regExp.Value, index, err),

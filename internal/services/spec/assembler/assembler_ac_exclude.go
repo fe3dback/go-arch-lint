@@ -21,7 +21,7 @@ func newExcludeAssembler(
 }
 
 func (ea *excludeAssembler) assemble(spec *arch.Spec, document spec.Document) error {
-	for _, yamlRelativePath := range document.ExcludedDirectories().List() {
+	for _, yamlRelativePath := range document.ExcludedDirectories() {
 		tmpResolvedPath, err := ea.resolver.resolveLocalGlobPath(
 			path.Clean(fmt.Sprintf("%s/%s",
 				document.WorkingDirectory().Value,

@@ -26,18 +26,18 @@ func (aia *allowedVendorImportsAssembler) assemble(
 
 	allowedVendors := make([]string, 0)
 	allowedVendors = append(allowedVendors, vendorNames...)
-	for _, vendorName := range yamlDocument.CommonVendors().List() {
+	for _, vendorName := range yamlDocument.CommonVendors() {
 		allowedVendors = append(allowedVendors, vendorName.Value)
 	}
 
 	for _, name := range allowedVendors {
-		yamlVendor, ok := yamlDocument.Vendors().Map()[name]
+		yamlVendor, ok := yamlDocument.Vendors()[name]
 		if !ok {
 			continue
 		}
 
-		for _, vendorIn := range yamlVendor.ImportPaths() {
-			list = append(list, vendorIn)
+		for _, vendorIn := range yamlVendor.Value.ImportPaths() {
+			list = append(list, common.NewReferable(vendorIn, yamlVendor.Reference))
 		}
 	}
 

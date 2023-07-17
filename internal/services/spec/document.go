@@ -19,12 +19,11 @@ type (
 	// VendorName is abstraction useful for mapping real vendor packages to one Vendor.
 	VendorName = string
 
+	Vendors      = map[VendorName]common.Referable[Vendor]
+	Components   = map[ComponentName]common.Referable[Component]
+	Dependencies = map[ComponentName]common.Referable[DependencyRule]
+
 	Document interface {
-		Reference() common.Reference
-
-		// FilePath is Abs arch file path
-		FilePath() common.Referable[string]
-
 		// Version of spec (scheme of document)
 		Version() common.Referable[int]
 
@@ -35,30 +34,36 @@ type (
 		Options() Options
 
 		// ExcludedDirectories from analyze, each contain relative directory name
-		ExcludedDirectories() ExcludedDirectories
+		// List of directories
+		// examples:
+		// 	- internal/test
+		//	- vendor
+		//	- .idea
+		ExcludedDirectories() []common.Referable[string]
 
 		// ExcludedFilesRegExp from analyze, each project file will be matched with this regexp rules
-		ExcludedFilesRegExp() ExcludedFilesRegExp
+		// List of regexp's
+		// examples:
+		// 	- "^.*_test\\.go$"
+		ExcludedFilesRegExp() []common.Referable[string]
 
 		// Vendors (map)
 		Vendors() Vendors
 
 		// CommonVendors is list of Vendors that can be imported to any project package
-		CommonVendors() CommonVendors
+		CommonVendors() []common.Referable[string]
 
 		// Components (map)
 		Components() Components
 
 		// CommonComponents is List of Components that can be imported to any project package
-		CommonComponents() CommonComponents
+		CommonComponents() []common.Referable[string]
 
 		// Dependencies map between Components and DependencyRule`s
 		Dependencies() Dependencies
 	}
 
 	Options interface {
-		Reference() common.Reference
-
 		// IsDependOnAnyVendor allows all project code depend on any third party vendor lib
 		// analyze will not check imports with not local namespace's
 		IsDependOnAnyVendor() common.Referable[bool]
@@ -68,85 +73,24 @@ type (
 		DeepScan() common.Referable[bool]
 	}
 
-	ExcludedDirectories interface {
-		Reference() common.Reference
-
-		// List of directories
-		// examples:
-		// 	- internal/test
-		//	- vendor
-		//	- .idea
-		List() []common.Referable[string]
-	}
-
-	ExcludedFilesRegExp interface {
-		Reference() common.Reference
-
-		// List of regexp's
-		// examples:
-		// 	- "^.*_test\\.go$"
-		List() []common.Referable[string]
-	}
-
-	Vendors interface {
-		Reference() common.Reference
-
-		// Map describe Vendor packages properties
-		Map() map[VendorName]Vendor
-	}
-
 	Vendor interface {
-		Reference() common.Reference
-
 		// ImportPaths is list of full import vendor qualified path
 		// example:
 		// 	- golang.org/x/mod/modfile
 		// 	- example.com/*/libs/**
-		ImportPaths() []common.Referable[models.Glob]
-	}
-
-	CommonVendors interface {
-		Reference() common.Reference
-
-		// List of Vendors that can be imported to any project package
-		List() []common.Referable[string]
-	}
-
-	Components interface {
-		Reference() common.Reference
-
-		// Map with Component packages properties
-		Map() map[ComponentName]Component
+		ImportPaths() []models.Glob
 	}
 
 	Component interface {
-		Reference() common.Reference
-
 		// RelativePaths can contain glob's
 		// example:
 		// 	- internal/service/*/models/**
 		// 	- /
 		// 	- tests/**
-		RelativePaths() []common.Referable[models.Glob]
-	}
-
-	CommonComponents interface {
-		Reference() common.Reference
-
-		// List of Components that can be imported to any project package
-		List() []common.Referable[string]
-	}
-
-	Dependencies interface {
-		Reference() common.Reference
-
-		// Map with Dependencies between Components and DependencyRule`s
-		Map() map[ComponentName]DependencyRule
+		RelativePaths() []models.Glob
 	}
 
 	DependencyRule interface {
-		Reference() common.Reference
-
 		// MayDependOn is list of Component names, that can be imported to described component
 		MayDependOn() []common.Referable[string]
 

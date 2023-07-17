@@ -22,10 +22,10 @@ func newValidatorDepsComponents(
 func (v *validatorDepsComponents) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	for name, rules := range doc.Dependencies().Map() {
+	for name, rule := range doc.Dependencies() {
 		existComponents := make(map[string]bool)
 
-		for _, componentName := range rules.MayDependOn() {
+		for _, componentName := range rule.Value.MayDependOn() {
 			if _, ok := existComponents[componentName.Value]; ok {
 				notices = append(notices, arch.Notice{
 					Notice: fmt.Errorf("component '%s' dublicated in '%s' deps", componentName.Value, name),

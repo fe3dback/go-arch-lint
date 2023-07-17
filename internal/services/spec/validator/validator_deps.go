@@ -22,26 +22,26 @@ func newValidatorDeps(
 func (v *validatorDeps) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	for name, rules := range doc.Dependencies().Map() {
+	for name, rule := range doc.Dependencies() {
 		if err := v.utils.assertKnownComponent(name); err != nil {
 			notices = append(notices, arch.Notice{
 				Notice: err,
-				Ref:    doc.Dependencies().Reference(),
+				Ref:    rule.Reference,
 			})
 		}
 
-		if len(rules.MayDependOn()) == 0 && len(rules.CanUse()) == 0 {
-			if rules.AnyProjectDeps().Value {
+		if len(rule.Value.MayDependOn()) == 0 && len(rule.Value.CanUse()) == 0 {
+			if rule.Value.AnyProjectDeps().Value {
 				continue
 			}
 
-			if rules.AnyVendorDeps().Value {
+			if rule.Value.AnyVendorDeps().Value {
 				continue
 			}
 
 			notices = append(notices, arch.Notice{
 				Notice: fmt.Errorf("should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']"),
-				Ref:    rules.Reference(),
+				Ref:    rule.Reference,
 			})
 		}
 	}

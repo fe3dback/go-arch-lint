@@ -26,7 +26,7 @@ func newUtils(
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	rootDir := filepath.Dir(u.document.FilePath().Value)
+	rootDir := filepath.Dir(u.document.Version().Reference.File)
 	absPath := filepath.Clean(fmt.Sprintf("%s/%s", rootDir, localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
@@ -51,7 +51,7 @@ func (u *utils) assertDirectoriesValid(paths ...string) error {
 }
 
 func (u *utils) assertKnownComponent(name string) error {
-	for knownName := range u.document.Components().Map() {
+	for knownName := range u.document.Components() {
 		if name == knownName {
 			return nil
 		}
@@ -61,7 +61,7 @@ func (u *utils) assertKnownComponent(name string) error {
 }
 
 func (u *utils) assertKnownVendor(name string) error {
-	for knownName := range u.document.Vendors().Map() {
+	for knownName := range u.document.Vendors() {
 		if name == knownName {
 			return nil
 		}
