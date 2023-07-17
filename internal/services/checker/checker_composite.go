@@ -28,7 +28,6 @@ func (c *CompositeChecker) Check(ctx context.Context, spec arch.Spec) (models.Ch
 		overallResults.Append(results)
 
 		if results.HasNotices() && ind < len(c.checkers)-1 {
-			fmt.Printf("skipped other checks, found early lint notices..\n\n")
 			break
 		}
 	}

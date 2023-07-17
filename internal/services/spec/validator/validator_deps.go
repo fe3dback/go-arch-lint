@@ -30,6 +30,20 @@ func (v *validatorDeps) Validate(doc spec.Document) []arch.Notice {
 			})
 		}
 
+		if len(rule.Value.MayDependOn()) > 0 && rule.Value.AnyProjectDeps().Value {
+			notices = append(notices, arch.Notice{
+				Notice: fmt.Errorf("'anyProjectDeps=true' used with not empty 'MayDependOn' list (likely this is miss configuration)"),
+				Ref:    rule.Value.AnyProjectDeps().Reference,
+			})
+		}
+
+		if len(rule.Value.CanUse()) > 0 && rule.Value.AnyVendorDeps().Value {
+			notices = append(notices, arch.Notice{
+				Notice: fmt.Errorf("'AnyVendorDeps=true' used with not empty 'CanUse' list (likely this is miss configuration)"),
+				Ref:    rule.Value.AnyVendorDeps().Reference,
+			})
+		}
+
 		if len(rule.Value.MayDependOn()) == 0 && len(rule.Value.CanUse()) == 0 {
 			if rule.Value.AnyProjectDeps().Value {
 				continue
@@ -40,7 +54,7 @@ func (v *validatorDeps) Validate(doc spec.Document) []arch.Notice {
 			}
 
 			notices = append(notices, arch.Notice{
-				Notice: fmt.Errorf("should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']"),
+				Notice: fmt.Errorf("should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']"),
 				Ref:    rule.Reference,
 			})
 		}

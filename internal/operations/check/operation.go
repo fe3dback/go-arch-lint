@@ -51,9 +51,12 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.Cm
 		return models.CmdCheckOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	result, err := o.specChecker.Check(ctx, spec)
-	if err != nil {
-		return models.CmdCheckOut{}, fmt.Errorf("failed to check project deps: %w", err)
+	result := models.CheckResult{}
+	if len(spec.Integrity.DocumentNotices) == 0 {
+		result, err = o.specChecker.Check(ctx, spec)
+		if err != nil {
+			return models.CmdCheckOut{}, fmt.Errorf("failed to check project deps: %w", err)
+		}
 	}
 
 	limitedResult := o.limitResults(result, in.MaxWarnings)

@@ -27,7 +27,7 @@ func Execute() int {
 	// -- handle errors
 	if err != nil {
 		if errors.Is(err, models.UserSpaceError{}) {
-			// do not display user space errors (usually explain will by in ascii/json output)
+			// do not display user space errors (usually explain will be in ascii/json output)
 			return 1
 		}
 
