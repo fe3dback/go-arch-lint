@@ -87,7 +87,7 @@ func (c *Imports) checkFile(component arch.Component, file models.ProjectFile) e
 		}
 
 		c.result.addDependencyWarning(models.CheckArchWarningDependency{
-			Reference:          component.Name.Reference,
+			Reference:          resolvedImport.Reference,
 			ComponentName:      component.Name.Value,
 			FileRelativePath:   strings.TrimPrefix(file.Path, c.spec.RootDirectory.Value),
 			FileAbsolutePath:   file.Path,

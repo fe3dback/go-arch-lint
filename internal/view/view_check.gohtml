@@ -11,16 +11,10 @@ module: {{.ModuleName | colorize "green"}}
 	{{ if .ArchHasWarnings -}}
 		{{ $warnCount := (plus (plus (len .ArchWarningsDependency) (len .ArchWarningsMatch)) (len .ArchWarningsDeepScan) ) -}}
 		{{ range .ArchWarningsDependency -}}
-			Component {{.ComponentName | colorize "magenta"}} file {{ .FileRelativePath | colorize "cyan"}} shouldn't depend on {{ .ResolvedImportName | colorize "blue"}}
-			{{ if .SourceCodePreview -}}
-				{{ .SourceCodePreview | printf "%s" -}}
-			{{ end -}}
+			Component {{.ComponentName | colorize "magenta"}} shouldn't depend on {{ .ResolvedImportName | colorize "blue"}} in {{ .Reference | colorize "gray"}}
 		{{ end -}}
 		{{ range .ArchWarningsMatch -}}
 			File {{.FileRelativePath | colorize "cyan"}} not attached to any component in archfile
-			{{ if .SourceCodePreview -}}
-				{{ .SourceCodePreview | printf "%s" -}}
-			{{ end -}}
 		{{ end }}
 		{{ range .ArchWarningsDeepScan }}
 			Dependency {{.Dependency.ComponentName | colorize "magenta"}} -\-> {{.Gate.ComponentName | colorize "magenta"}} not allowed

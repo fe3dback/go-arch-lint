@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -97,7 +98,7 @@ func (s *Searcher) Usages(c Criteria) ([]InjectionMethod, error) {
 }
 
 func (s *Searcher) sourceFromToken(pos token.Pos) Source {
-	place := positionFromToken(s.ctx.fileSet.Position(pos))
+	place := astUtil.PositionFromToken(s.ctx.fileSet.Position(pos))
 	absPath := filepath.Dir(place.File)
 	importRef := s.pathToImport(absPath)
 	pkg := path.Base(importRef)

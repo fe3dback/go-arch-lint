@@ -7,12 +7,12 @@ import (
 
 type (
 	Reference struct {
-		Valid    bool
-		File     string
-		Line     int
-		LineFrom int `json:"-"`
-		LineTo   int `json:"-"`
-		Column   int `json:"Offset"`
+		Valid    bool   `json:"Valid"`
+		File     string `json:"File"`
+		Line     int    `json:"Line"`
+		LineFrom int    `json:"-"`
+		LineTo   int    `json:"-"`
+		Column   int    `json:"Offset"`
 	}
 )
 
