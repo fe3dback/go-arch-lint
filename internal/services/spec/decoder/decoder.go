@@ -80,14 +80,14 @@ func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath strin
 
 func (sp *Decoder) createEmptyDocumentBeVersion(version int) spec.Document {
 	switch version {
-	// todo: support lower versions
-	//case 1:
-	//	return ArchV1Document{}
-	//case 2:
-	//	return ArchV2Document{}
-	default:
-		return &ArchV3{}
+	case 1:
+		return &ArchV1{}
+	case 2:
+		return &ArchV2{}
 	}
+
+	// latest be default (it will be rejected next in spec validator, if version is not v3)
+	return &ArchV3{}
 }
 
 func (sp *Decoder) readVersion(sourceCode []byte) (int, error) {

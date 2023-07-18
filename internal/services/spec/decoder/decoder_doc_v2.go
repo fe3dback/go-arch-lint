@@ -7,48 +7,47 @@ import (
 )
 
 type (
-	// ArchV3 changes since ArchV2:
-	// - added deepScan option in allow and deps rules
-	ArchV3 struct {
+	// ArchV2 changes since ArchV1:
+	// - added global "workdir" option
+	// - vendor/component "in" now accept two types: (string, []string), instead of (string)
+	ArchV2 struct {
 		FVersion            ref[int]                                    `json:"version"`
 		FWorkDir            ref[string]                                 `json:"workdir"`
-		FAllow              ArchV3Allow                                 `json:"allow"`
+		FAllow              ArchV2Allow                                 `json:"allow"`
 		FExclude            []ref[string]                               `json:"exclude"`
 		FExcludeFilesRegExp []ref[string]                               `json:"excludeFiles"`
-		FVendors            map[spec.VendorName]ref[ArchV3Vendor]       `json:"vendors"`
+		FVendors            map[spec.VendorName]ref[ArchV2Vendor]       `json:"vendors"`
 		FCommonVendors      []ref[string]                               `json:"commonVendors"`
-		FComponents         map[spec.ComponentName]ref[ArchV3Component] `json:"components"`
+		FComponents         map[spec.ComponentName]ref[ArchV2Component] `json:"components"`
 		FCommonComponents   []ref[string]                               `json:"commonComponents"`
-		FDependencies       map[spec.ComponentName]ref[ArchV3Rule]      `json:"deps"`
+		FDependencies       map[spec.ComponentName]ref[ArchV2Rule]      `json:"deps"`
 	}
 
-	ArchV3Allow struct {
-		FDepOnAnyVendor ref[bool]  `json:"depOnAnyVendor"`
-		FDeepScan       ref[*bool] `json:"deepScan"`
+	ArchV2Allow struct {
+		FDepOnAnyVendor ref[bool] `json:"depOnAnyVendor"`
 	}
 
-	ArchV3Vendor struct {
+	ArchV2Vendor struct {
 		FImportPaths stringList `json:"in"`
 	}
 
-	ArchV3Component struct {
+	ArchV2Component struct {
 		FLocalPaths stringList `json:"in"`
 	}
 
-	ArchV3Rule struct {
+	ArchV2Rule struct {
 		FMayDependOn    []ref[string] `json:"mayDependOn"`
 		FCanUse         []ref[string] `json:"canUse"`
 		FAnyProjectDeps ref[bool]     `json:"anyProjectDeps"`
 		FAnyVendorDeps  ref[bool]     `json:"anyVendorDeps"`
-		FDeepScan       ref[*bool]    `json:"deepScan"`
 	}
 )
 
-func (a *ArchV3) Version() common.Referable[int] {
+func (a *ArchV2) Version() common.Referable[int] {
 	return castRef(a.FVersion)
 }
 
-func (a *ArchV3) WorkingDirectory() common.Referable[string] {
+func (a *ArchV2) WorkingDirectory() common.Referable[string] {
 	// fallback from version 1
 	actualWorkDirectory := "./"
 
@@ -59,19 +58,19 @@ func (a *ArchV3) WorkingDirectory() common.Referable[string] {
 	return common.NewReferable(actualWorkDirectory, a.FWorkDir.Reference)
 }
 
-func (a *ArchV3) Options() spec.Options {
+func (a *ArchV2) Options() spec.Options {
 	return a.FAllow
 }
 
-func (a *ArchV3) ExcludedDirectories() []common.Referable[string] {
+func (a *ArchV2) ExcludedDirectories() []common.Referable[string] {
 	return castRefList(a.FExclude)
 }
 
-func (a *ArchV3) ExcludedFilesRegExp() []common.Referable[string] {
+func (a *ArchV2) ExcludedFilesRegExp() []common.Referable[string] {
 	return castRefList(a.FExcludeFilesRegExp)
 }
 
-func (a *ArchV3) Vendors() spec.Vendors {
+func (a *ArchV2) Vendors() spec.Vendors {
 	casted := make(spec.Vendors, len(a.FVendors))
 	for name, vendor := range a.FVendors {
 		casted[name] = common.NewReferable(spec.Vendor(vendor.Value), vendor.Reference)
@@ -80,11 +79,11 @@ func (a *ArchV3) Vendors() spec.Vendors {
 	return casted
 }
 
-func (a *ArchV3) CommonVendors() []common.Referable[string] {
+func (a *ArchV2) CommonVendors() []common.Referable[string] {
 	return castRefList(a.FCommonVendors)
 }
 
-func (a *ArchV3) Components() spec.Components {
+func (a *ArchV2) Components() spec.Components {
 	casted := make(spec.Components, len(a.FComponents))
 	for name, cmp := range a.FComponents {
 		casted[name] = common.NewReferable(spec.Component(cmp.Value), cmp.Reference)
@@ -93,11 +92,11 @@ func (a *ArchV3) Components() spec.Components {
 	return casted
 }
 
-func (a *ArchV3) CommonComponents() []common.Referable[string] {
+func (a *ArchV2) CommonComponents() []common.Referable[string] {
 	return castRefList(a.FCommonComponents)
 }
 
-func (a *ArchV3) Dependencies() spec.Dependencies {
+func (a *ArchV2) Dependencies() spec.Dependencies {
 	casted := make(spec.Dependencies, len(a.FDependencies))
 	for name, dep := range a.FDependencies {
 		casted[name] = common.NewReferable(spec.DependencyRule(dep.Value), dep.Reference)
@@ -108,25 +107,17 @@ func (a *ArchV3) Dependencies() spec.Dependencies {
 
 // --
 
-func (a ArchV3Allow) IsDependOnAnyVendor() common.Referable[bool] {
+func (a ArchV2Allow) IsDependOnAnyVendor() common.Referable[bool] {
 	return castRef(a.FDepOnAnyVendor)
 }
 
-func (a ArchV3Allow) DeepScan() common.Referable[bool] {
-	deepScan := false
-	if a.FDeepScan.Value == nil {
-		// be default it`s on from V3+
-		deepScan = true
-	} else {
-		deepScan = *a.FDeepScan.Value
-	}
-
-	return common.NewReferable(deepScan, a.FDeepScan.Reference)
+func (a ArchV2Allow) DeepScan() common.Referable[bool] {
+	return common.NewEmptyReferable(false)
 }
 
 // --
 
-func (a ArchV3Vendor) ImportPaths() []models.Glob {
+func (a ArchV2Vendor) ImportPaths() []models.Glob {
 	casted := make([]models.Glob, 0, len(a.FImportPaths))
 
 	for _, path := range a.FImportPaths {
@@ -138,7 +129,7 @@ func (a ArchV3Vendor) ImportPaths() []models.Glob {
 
 // --
 
-func (a ArchV3Component) RelativePaths() []models.Glob {
+func (a ArchV2Component) RelativePaths() []models.Glob {
 	casted := make([]models.Glob, 0, len(a.FLocalPaths))
 
 	for _, path := range a.FLocalPaths {
@@ -150,30 +141,22 @@ func (a ArchV3Component) RelativePaths() []models.Glob {
 
 // --
 
-func (a ArchV3Rule) MayDependOn() []common.Referable[string] {
+func (a ArchV2Rule) MayDependOn() []common.Referable[string] {
 	return castRefList(a.FMayDependOn)
 }
 
-func (a ArchV3Rule) CanUse() []common.Referable[string] {
+func (a ArchV2Rule) CanUse() []common.Referable[string] {
 	return castRefList(a.FCanUse)
 }
 
-func (a ArchV3Rule) AnyProjectDeps() common.Referable[bool] {
+func (a ArchV2Rule) AnyProjectDeps() common.Referable[bool] {
 	return castRef(a.FAnyProjectDeps)
 }
 
-func (a ArchV3Rule) AnyVendorDeps() common.Referable[bool] {
+func (a ArchV2Rule) AnyVendorDeps() common.Referable[bool] {
 	return castRef(a.FAnyVendorDeps)
 }
 
-func (a ArchV3Rule) DeepScan() common.Referable[bool] {
-	deepScan := false
-	if a.FDeepScan.Value == nil {
-		// be default it`s on from V3+
-		deepScan = true
-	} else {
-		deepScan = *a.FDeepScan.Value
-	}
-
-	return common.NewReferable(deepScan, a.FDeepScan.Reference)
+func (a ArchV2Rule) DeepScan() common.Referable[bool] {
+	return common.NewEmptyReferable(false)
 }
