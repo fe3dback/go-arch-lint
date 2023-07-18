@@ -13,7 +13,7 @@ Flags:
   -h, --help                  help for graph
   -r, --include-vendors       include vendor dependencies (from "canUse" block)?
       --out string            svg graph output file (default "./go-arch-lint-graph.svg")
-      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located) (default "./")
+      --project-path string   absolute path to project directory (default "./")
   -t, --type string           render graph type [flow,di] (default "flow")
 
 Global Flags:

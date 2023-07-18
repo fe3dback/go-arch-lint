@@ -1,6 +1,4 @@
 $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --> FAIL
-skipped other checks, found early lint notices..
-
 {
   "Type": "models.Check",
   "Payload": {

@@ -10,9 +10,9 @@ type (
 		Valid    bool
 		File     string
 		Line     int
-		LineFrom int
-		LineTo   int
-		Column   int
+		LineFrom int `json:"-"`
+		LineTo   int `json:"-"`
+		Column   int `json:"Offset"`
 	}
 )
 

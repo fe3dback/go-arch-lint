@@ -25,11 +25,11 @@ type (
 	}
 
 	ArchV1Vendor struct {
-		FImportPaths string `json:"in"`
+		FImportPath string `json:"in"`
 	}
 
 	ArchV1Component struct {
-		FLocalPaths string `json:"in"`
+		FLocalPath string `json:"in"`
 	}
 
 	ArchV1Rule struct {
@@ -108,25 +108,13 @@ func (a ArchV1Allow) DeepScan() common.Referable[bool] {
 // --
 
 func (a ArchV1Vendor) ImportPaths() []models.Glob {
-	casted := make([]models.Glob, 0, len(a.FImportPaths))
-
-	for _, path := range a.FImportPaths {
-		casted = append(casted, models.Glob(path))
-	}
-
-	return casted
+	return []models.Glob{models.Glob(a.FImportPath)}
 }
 
 // --
 
 func (a ArchV1Component) RelativePaths() []models.Glob {
-	casted := make([]models.Glob, 0, len(a.FLocalPaths))
-
-	for _, path := range a.FLocalPaths {
-		casted = append(casted, models.Glob(path))
-	}
-
-	return casted
+	return []models.Glob{models.Glob(a.FLocalPath)}
 }
 
 // --

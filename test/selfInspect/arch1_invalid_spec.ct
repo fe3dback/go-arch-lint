@@ -2,6 +2,8 @@ $ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file
 {
   "Type": "models.SelfInspect",
   "Payload": {
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project",
+    "RootDirectory": "${ROOTDIR}/test/check/project",
     "LinterVersion": "dev",
     "Notices": [
       {
@@ -19,7 +21,16 @@ $ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file
           "Valid": true,
           "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
           "Line": 17,
-          "Offset": 9
+          "Offset": 7
+        }
+      },
+      {
+        "Text": "should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 39,
+          "Offset": 18
         }
       },
       {
@@ -27,17 +38,8 @@ $ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file
         "Reference": {
           "Valid": true,
           "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
-          "Line": 26,
-          "Offset": 7
-        }
-      },
-      {
-        "Text": "should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']",
-        "Reference": {
-          "Valid": true,
-          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
-          "Line": 39,
-          "Offset": 18
+          "Line": 35,
+          "Offset": 11
         }
       },
       {
