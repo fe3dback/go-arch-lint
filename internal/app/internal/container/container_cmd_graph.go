@@ -24,6 +24,7 @@ func (c *Container) commandGraph() (*cobra.Command, runner) {
 		OutFile:        "./go-arch-lint-graph.svg",
 		Focus:          "",
 		IncludeVendors: false,
+		ExportD2:       false,
 	}
 
 	cmd.PersistentFlags().StringVar(&in.ProjectPath, "project-path", in.ProjectPath, "absolute path to project directory")
@@ -32,8 +33,11 @@ func (c *Container) commandGraph() (*cobra.Command, runner) {
 	cmd.PersistentFlags().StringVar(&in.OutFile, "out", in.OutFile, "svg graph output file")
 	cmd.PersistentFlags().StringVar(&in.Focus, "focus", in.Focus, "render only specified component (should match component name exactly)")
 	cmd.PersistentFlags().BoolVarP(&in.IncludeVendors, "include-vendors", "r", in.IncludeVendors, "include vendor dependencies (from \"canUse\" block)?")
+	cmd.PersistentFlags().BoolVar(&in.ExportD2, "d2", in.ExportD2, "output raw d2 definitions to stdout (from which svg is generated)")
 
 	return cmd, func(act *cobra.Command) (any, error) {
+		in.OutputType = c.flags.OutputType
+
 		return c.commandGraphOperation().Behave(act.Context(), in)
 	}
 }

@@ -9,6 +9,7 @@ Aliases:
 
 Flags:
       --arch-file string      arch file path (default ".go-arch-lint.yml")
+      --d2                    output raw d2 definitions to stdout (from which svg is generated)
       --focus string          render only specified component (should match component name exactly)
   -h, --help                  help for graph
   -r, --include-vendors       include vendor dependencies (from "canUse" block)?

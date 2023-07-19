@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
@@ -60,26 +61,43 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.Cm
 		return models.CmdGraphOut{}, fmt.Errorf("failed get abs path from '%s': %w", in.OutFile, err)
 	}
 
-	err = os.WriteFile(outFile, svg, os.ModePerm)
-	if err != nil {
-		return models.CmdGraphOut{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+	if o.isFileShouldBeWritten(in) {
+		err = os.WriteFile(outFile, svg, os.ModePerm)
+		if err != nil {
+			return models.CmdGraphOut{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+		}
 	}
 
 	return models.CmdGraphOut{
 		ProjectDirectory: spec.RootDirectory.Value,
 		ModuleName:       spec.ModuleName.Value,
 		OutFile:          outFile,
+		D2Definitions:    string(graphCode),
+		ExportD2:         in.ExportD2,
 	}, nil
 }
 
-func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) (string, error) {
-	var buff bytes.Buffer
+func (o *Operation) isFileShouldBeWritten(in models.CmdGraphIn) bool {
+	if in.OutputType == models.OutputTypeJSON {
+		return false
+	}
+
+	if in.ExportD2 {
+		return false
+	}
+
+	return true
+}
+
+func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) ([]byte, error) {
 	whiteList, err := o.populateGraphWhitelist(spec, opts)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	flow := o.componentsFlowArrow(opts)
+
+	linesBuff := make([]string, 0, 256)
 
 	for _, cmp := range spec.Components {
 		if _, visible := whiteList[cmp.Name.Value]; !visible {
@@ -91,7 +109,7 @@ func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) (string, 
 				continue
 			}
 
-			buff.WriteString(fmt.Sprintf("%s %s %s\n", cmp.Name.Value, flow, dep.Value))
+			linesBuff = append(linesBuff, fmt.Sprintf("%s %s %s\n", cmp.Name.Value, flow, dep.Value))
 		}
 
 		if opts.IncludeVendors {
@@ -105,23 +123,30 @@ func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) (string, 
 				{{vnd}}.style.font-size: 12
 				{{vnd}}.style.stroke: "#77AA44"
 				{{cmp}} <- {{vnd}} {
-					style.stroke: "#77AA44"
-					source-arrowhead: {
-						shape: diamond
-						style.filled: false
-					  }
+				  style.stroke: "#77AA44"
+				  source-arrowhead: {
+				    shape: diamond
+				    style.filled: false
+				  }
 				}
 				`
 
 				for name, value := range vars {
 					tpl = strings.ReplaceAll(tpl, fmt.Sprintf("{{%s}}", name), value)
 				}
-				buff.WriteString(tpl)
+				linesBuff = append(linesBuff, tpl)
 			}
 		}
 	}
 
-	return buff.String(), nil
+	var buff bytes.Buffer
+	sort.Strings(linesBuff)
+
+	for _, line := range linesBuff {
+		buff.WriteString(strings.ReplaceAll(line, "\t", ""))
+	}
+
+	return buff.Bytes(), nil
 }
 
 func (o *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
@@ -199,13 +224,13 @@ func (o *Operation) populateGraphWhitelistFocused(spec arch.Spec, focusCmpName s
 	return whiteList, nil
 }
 
-func (o *Operation) compileGraph(ctx context.Context, graphCode string) ([]byte, error) {
+func (o *Operation) compileGraph(ctx context.Context, graphCode []byte) ([]byte, error) {
 	ruler, err := textmeasure.NewRuler()
 	if err != nil {
 		return nil, fmt.Errorf("failed create ruler: %w", err)
 	}
 
-	diagram, _, err := d2lib.Compile(ctx, graphCode, &d2lib.CompileOptions{
+	diagram, _, err := d2lib.Compile(ctx, string(graphCode), &d2lib.CompileOptions{
 		Layout: func(ctx context.Context, g *d2graph.Graph) error {
 			return d2dagrelayout.Layout(ctx, g, nil)
 		},
