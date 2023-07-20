@@ -3,9 +3,6 @@ workdir: internal
 allow:
   depOnAnyVendor: false
 
-exclude:
-  - ./glue/deepscan/test
-
 excludeFiles:
   - "^.*_test\\.go$"
   - "^.*\/test\/.*$"
@@ -13,12 +10,11 @@ excludeFiles:
 vendors:
   go-common:           { in: golang.org/x/sync/errgroup }
   go-ast:              { in: [ golang.org/x/mod/modfile, golang.org/x/tools/go/packages ] }
-  mod-term:            { in: github.com/fe3dback/span-terminal }
   3rd-cobra:           { in: github.com/spf13/cobra }
   3rd-color-fmt:       { in: github.com/logrusorgru/aurora/v3 }
   3rd-code-highlight:  { in: github.com/alecthomas/chroma/* }
   3rd-json-scheme:     { in: github.com/xeipuuv/gojsonschema }
-  3rd-yaml:            { in: [ github.com/goccy/go-yaml, github.com/goccy/go-yaml/parser ] }
+  3rd-yaml:            { in: [ github.com/goccy/go-yaml, github.com/goccy/go-yaml/** ] }
   3rd-graph:           { in: oss.terrastruct.com/d2/** }
 
 components:
@@ -31,7 +27,6 @@ components:
 
 commonVendors:
   - go-common
-  - mod-term
 
 commonComponents:
   - models
@@ -42,13 +37,15 @@ deps:
       - container
 
   container:
-    anyProjectDeps: true
     anyVendorDeps: true
+    mayDependOn:
+      - operations
+      - services
+      - view
 
   operations:
     mayDependOn:
       - services
-      - view
     canUse:
       - 3rd-graph
 
