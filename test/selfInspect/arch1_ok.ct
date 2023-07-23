@@ -2,6 +2,8 @@ $ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file
 {
   "Type": "models.SelfInspect",
   "Payload": {
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project",
+    "RootDirectory": "${ROOTDIR}/test/check/project",
     "LinterVersion": "dev",
     "Notices": [],
     "Suggestions": []

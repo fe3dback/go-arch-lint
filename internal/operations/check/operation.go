@@ -6,14 +6,15 @@ import (
 	"sort"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type (
 	Operation struct {
-		specAssembler        SpecAssembler
-		specChecker          SpecChecker
-		referenceRender      ReferenceRender
+		projectInfoAssembler projectInfoAssembler
+		specAssembler        specAssembler
+		specChecker          specChecker
+		referenceRender      referenceRender
 		highlightCodePreview bool
 	}
 
@@ -24,12 +25,14 @@ type (
 )
 
 func NewOperation(
-	specAssembler SpecAssembler,
-	specChecker SpecChecker,
-	referenceRender ReferenceRender,
+	projectInfoAssembler projectInfoAssembler,
+	specAssembler specAssembler,
+	specChecker specChecker,
+	referenceRender referenceRender,
 	highlightCodePreview bool,
 ) *Operation {
 	return &Operation{
+		projectInfoAssembler: projectInfoAssembler,
 		specAssembler:        specAssembler,
 		specChecker:          specChecker,
 		referenceRender:      referenceRender,
@@ -37,23 +40,31 @@ func NewOperation(
 	}
 }
 
-func (s *Operation) Behave(ctx context.Context, maxWarnings int) (models.Check, error) {
-	spec, err := s.specAssembler.Assemble()
+func (o *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.CmdCheckOut, error) {
+	projectInfo, err := o.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
-		return models.Check{}, fmt.Errorf("failed to assemble spec: %w", err)
+		return models.CmdCheckOut{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	result, err := s.specChecker.Check(ctx, spec)
+	spec, err := o.specAssembler.Assemble(projectInfo)
 	if err != nil {
-		return models.Check{}, fmt.Errorf("failed to check project deps: %w", err)
+		return models.CmdCheckOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	limitedResult := s.limitResults(result, maxWarnings)
+	result := models.CheckResult{}
+	if len(spec.Integrity.DocumentNotices) == 0 {
+		result, err = o.specChecker.Check(ctx, spec)
+		if err != nil {
+			return models.CmdCheckOut{}, fmt.Errorf("failed to check project deps: %w", err)
+		}
+	}
 
-	model := models.Check{
-		ModuleName:             spec.ModuleName.Value(),
-		DocumentNotices:        s.assembleNotice(spec.Integrity),
-		ArchHasWarnings:        s.resultsHasWarnings(limitedResult.results),
+	limitedResult := o.limitResults(result, in.MaxWarnings)
+
+	model := models.CmdCheckOut{
+		ModuleName:             spec.ModuleName.Value,
+		DocumentNotices:        o.assembleNotice(spec.Integrity),
+		ArchHasWarnings:        o.resultsHasWarnings(limitedResult.results),
 		ArchWarningsDependency: limitedResult.results.DependencyWarnings,
 		ArchWarningsMatch:      limitedResult.results.MatchWarnings,
 		ArchWarningsDeepScan:   limitedResult.results.DeepscanWarnings,
@@ -68,7 +79,7 @@ func (s *Operation) Behave(ctx context.Context, maxWarnings int) (models.Check, 
 	return model, nil
 }
 
-func (s *Operation) limitResults(result models.CheckResult, maxWarnings int) limiterResult {
+func (o *Operation) limitResults(result models.CheckResult, maxWarnings int) limiterResult {
 	passCount := 0
 	limitedResults := models.CheckResult{
 		DependencyWarnings: []models.CheckArchWarningDependency{},
@@ -117,7 +128,7 @@ func (s *Operation) limitResults(result models.CheckResult, maxWarnings int) lim
 	}
 }
 
-func (s *Operation) resultsHasWarnings(result models.CheckResult) bool {
+func (o *Operation) resultsHasWarnings(result models.CheckResult) bool {
 	if len(result.DependencyWarnings) > 0 {
 		return true
 	}
@@ -133,8 +144,8 @@ func (s *Operation) resultsHasWarnings(result models.CheckResult) bool {
 	return false
 }
 
-func (s *Operation) assembleNotice(integrity speca.Integrity) []models.CheckNotice {
-	notices := make([]speca.Notice, 0)
+func (o *Operation) assembleNotice(integrity arch.Integrity) []models.CheckNotice {
+	notices := make([]arch.Notice, 0)
 	notices = append(notices, integrity.DocumentNotices...)
 
 	results := make([]models.CheckNotice, 0)
@@ -143,10 +154,11 @@ func (s *Operation) assembleNotice(integrity speca.Integrity) []models.CheckNoti
 			Text:   fmt.Sprintf("%s", notice.Notice),
 			File:   notice.Ref.File,
 			Line:   notice.Ref.Line,
-			Offset: notice.Ref.Offset,
-			SourceCodePreview: s.referenceRender.SourceCode(
-				models.NewCodeReferenceRelative(notice.Ref, 1, 1),
-				s.highlightCodePreview,
+			Column: notice.Ref.Column,
+			SourceCodePreview: o.referenceRender.SourceCode(
+				notice.Ref.ExtendRange(1, 1),
+				o.highlightCodePreview,
+				true,
 			),
 		})
 	}

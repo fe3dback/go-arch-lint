@@ -1,13 +1,15 @@
 package render
 
-import "github.com/fe3dback/go-arch-lint/internal/models"
+import (
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
+)
 
 type (
-	ReferenceRender interface {
-		SourceCode(ref models.CodeReference, highlight bool) []byte
+	referenceRender interface {
+		SourceCode(ref common.Reference, highlight bool, showPointer bool) []byte
 	}
 
-	ColorPrinter interface {
+	colorPrinter interface {
 		Red(in string) (out string)
 		Green(in string) (out string)
 		Yellow(in string) (out string)

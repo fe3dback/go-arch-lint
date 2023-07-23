@@ -1,6 +1,4 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec_type_err.yml --output-color=false --> FAIL
-skipped other checks, found early lint notices..
-
 module: github.com/fe3dback/go-arch-lint/test/check/project
 ($.components) components is required
 ($.allow) Additional property depOnAnyVendore is not allowed

@@ -1,0 +1,8 @@
+{{- /*gotype: github.com/fe3dback/go-arch-lint/internal/models.CmdGraphOut*/ -}}
+
+{{ if .ExportD2 -}}
+	{{ .D2Definitions -}}
+{{ else -}}
+	Graph outputted to:
+	{{ .OutFile | colorize "blue" }}
+{{ end -}}

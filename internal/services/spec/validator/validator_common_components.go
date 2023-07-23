@@ -2,7 +2,7 @@ package validator
 
 import (
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorCommonComponents struct {
@@ -17,14 +17,14 @@ func newValidatorCommonComponents(
 	}
 }
 
-func (v *validatorCommonComponents) Validate(doc arch.Document) []speca.Notice {
-	notices := make([]speca.Notice, 0)
+func (v *validatorCommonComponents) Validate(doc spec.Document) []arch.Notice {
+	notices := make([]arch.Notice, 0)
 
-	for _, componentName := range doc.CommonComponents().List() {
-		if err := v.utils.assertKnownComponent(componentName.Value()); err != nil {
-			notices = append(notices, speca.Notice{
+	for _, componentName := range doc.CommonComponents() {
+		if err := v.utils.assertKnownComponent(componentName.Value); err != nil {
+			notices = append(notices, arch.Notice{
 				Notice: err,
-				Ref:    componentName.Reference(),
+				Ref:    componentName.Reference,
 			})
 		}
 	}

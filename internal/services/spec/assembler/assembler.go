@@ -3,48 +3,43 @@ package assembler
 import (
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type (
 	Assembler struct {
-		provider      ArchProvider
-		validator     ArchValidator
-		pathResolver  PathResolver
-		rootDirectory string
-		moduleName    string
+		decoder      archDecoder
+		validator    archValidator
+		pathResolver pathResolver
 	}
 )
 
 func NewAssembler(
-	provider ArchProvider,
-	validator ArchValidator,
-	pathResolver PathResolver,
-	rootDirectory string,
-	moduleName string,
+	decoder archDecoder,
+	validator archValidator,
+	pathResolver pathResolver,
 ) *Assembler {
 	return &Assembler{
-		provider:      provider,
-		validator:     validator,
-		pathResolver:  pathResolver,
-		rootDirectory: rootDirectory,
-		moduleName:    moduleName,
+		decoder:      decoder,
+		validator:    validator,
+		pathResolver: pathResolver,
 	}
 }
 
-func (sa *Assembler) Assemble() (speca.Spec, error) {
-	spec := speca.Spec{
-		RootDirectory: speca.NewEmptyReferable(sa.rootDirectory),
-		ModuleName:    speca.NewEmptyReferable(sa.moduleName),
-		Integrity: speca.Integrity{
-			DocumentNotices: []speca.Notice{},
-			Suggestions:     []speca.Notice{},
+func (sa *Assembler) Assemble(prj common.Project) (arch.Spec, error) {
+	spec := arch.Spec{
+		RootDirectory: common.NewEmptyReferable(prj.Directory),
+		ModuleName:    common.NewEmptyReferable(prj.ModuleName),
+		Integrity: arch.Integrity{
+			DocumentNotices: []arch.Notice{},
+			Suggestions:     []arch.Notice{},
 		},
 	}
 
-	yamlSpec, schemeNotices, err := sa.provider.Provide()
+	document, schemeNotices, err := sa.decoder.Decode(prj.GoArchFilePath)
 	if err != nil {
-		return spec, fmt.Errorf("failed to provide yamlSpec: %w", err)
+		return spec, fmt.Errorf("failed to decode document '%s': %w", prj.GoArchFilePath, err)
 	}
 
 	if len(schemeNotices) > 0 {
@@ -52,25 +47,25 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, schemeNotices...)
 	} else {
 		// if scheme is ok, need check arch errors
-		advancedErrors := sa.validator.Validate(yamlSpec)
+		advancedErrors := sa.validator.Validate(document)
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, advancedErrors...)
 	}
 
-	if yamlSpec == nil {
+	if document == nil {
 		return spec, nil
 	}
 
 	resolver := newResolver(
 		sa.pathResolver,
-		sa.rootDirectory,
-		sa.moduleName,
+		prj.Directory,
+		prj.ModuleName,
 	)
 
 	assembler := newSpecCompositeAssembler([]assembler{
 		newComponentsAssembler(
 			resolver,
 			newAllowedProjectImportsAssembler(
-				sa.rootDirectory,
+				prj.Directory,
 				resolver,
 			),
 			newAllowedVendorImportsAssembler(
@@ -83,9 +78,9 @@ func (sa *Assembler) Assemble() (speca.Spec, error) {
 		newWorkdirAssembler(),
 	})
 
-	err = assembler.assemble(&spec, yamlSpec)
+	err = assembler.assemble(&spec, document)
 	if err != nil {
-		return spec, fmt.Errorf("failed to assemble yamlSpec: %w", err)
+		return spec, fmt.Errorf("failed to assemble document: %w", err)
 	}
 
 	return spec, nil

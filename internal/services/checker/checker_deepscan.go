@@ -9,12 +9,11 @@ import (
 	"strings"
 	"sync"
 
-	terminal "github.com/fe3dback/span-terminal"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
-	"github.com/fe3dback/go-arch-lint/internal/pkg/deepscan"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
+	"github.com/fe3dback/go-arch-lint/internal/services/checker/deepscan"
+	"golang.org/x/sync/errgroup"
 )
 
 type DeepScan struct {
@@ -22,7 +21,7 @@ type DeepScan struct {
 	sourceCodeRenderer   sourceCodeRenderer
 
 	scanner           *deepscan.Searcher
-	spec              speca.Spec
+	spec              arch.Spec
 	result            models.CheckResult
 	fileComponents    map[string]string
 	packageComponents map[string]string
@@ -69,10 +68,8 @@ func (c *DeepScan) workersCount() int {
 	// return half
 }
 
-func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
+func (c *DeepScan) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	maxWorkers := c.workersCount()
-	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf("deepscan (%d workers)", maxWorkers))
-	defer span.End()
 
 	c.Mutex.Lock()
 	defer c.Mutex.Unlock()
@@ -104,9 +101,6 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 	}
 
 	// -- scan project
-	checked := 0
-	total := len(spec.Components)
-
 	pool := make(chan struct{}, maxWorkers)
 	var wg errgroup.Group
 
@@ -119,17 +113,14 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 				<-pool
 			}()
 
-			span.UpdateProgress(float64(checked) / float64(total))
-			checked++
-
-			if component.DeepScan.Value() != true {
+			if component.DeepScan.Value != true {
 				return nil
 			}
 
 			err := c.checkComponent(ctx, component)
 			if err != nil {
 				return fmt.Errorf("component '%s' check failed: %w",
-					component.Name.Value(),
+					component.Name.Value,
 					err,
 				)
 			}
@@ -146,25 +137,16 @@ func (c *DeepScan) Check(ctx context.Context, spec speca.Spec) (models.CheckResu
 	return c.result, nil
 }
 
-func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) error {
-	ctx, span := terminal.StartSpan(ctx, fmt.Sprintf(cmp.Name.Value()))
-	defer span.End()
-
-	checked := 0
-	total := len(cmp.ResolvedPaths)
-
+func (c *DeepScan) checkComponent(ctx context.Context, cmp arch.Component) error {
 	for _, packagePath := range cmp.ResolvedPaths {
-		span.UpdateProgress(float64(checked) / float64(total))
-		checked++
-
-		absPath := packagePath.Value().AbsPath
+		absPath := packagePath.Value.AbsPath
 		matchedCmp, ok := c.packageComponents[absPath]
 		if !ok {
 			// component in excludes list
 			continue
 		}
 
-		if matchedCmp != cmp.Name.Value() {
+		if matchedCmp != cmp.Name.Value {
 			// this can be in cased of wildcard match, example:
 			// cmp1: in: internal/code/common
 			// cmp2: in: internal/code/**
@@ -182,7 +164,7 @@ func (c *DeepScan) checkComponent(ctx context.Context, cmp speca.Component) erro
 	return nil
 }
 
-func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPackagePath string) error {
+func (c *DeepScan) scanPackage(ctx context.Context, cmp *arch.Component, absPackagePath string) error {
 	usages, err := c.findUsages(ctx, absPackagePath)
 	if err != nil {
 		return fmt.Errorf("find usages failed: %w", err)
@@ -206,7 +188,7 @@ func (c *DeepScan) scanPackage(ctx context.Context, cmp *speca.Component, absPac
 	return nil
 }
 
-func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *deepscan.InjectionMethod) error {
+func (c *DeepScan) checkUsage(ctx context.Context, cmp *arch.Component, usage *deepscan.InjectionMethod) error {
 	for _, gate := range usage.Gates {
 		if len(gate.Implementations) == 0 {
 			continue
@@ -224,7 +206,7 @@ func (c *DeepScan) checkUsage(ctx context.Context, cmp *speca.Component, usage *
 	return nil
 }
 
-func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deepscan.Gate) error {
+func (c *DeepScan) checkGate(_ context.Context, cmp *arch.Component, gate *deepscan.Gate) error {
 	for _, implementation := range gate.Implementations {
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
@@ -239,22 +221,22 @@ func (c *DeepScan) checkGate(_ context.Context, cmp *speca.Component, gate *deep
 }
 
 func (c *DeepScan) checkImplementation(
-	cmp *speca.Component,
+	cmp *arch.Component,
 	gate *deepscan.Gate,
 	imp *deepscan.Implementation,
 ) error {
 	injectedImport := imp.Target.Definition.Import
 
 	for _, allowedImport := range cmp.AllowedProjectImports {
-		if allowedImport.Value().ImportPath == injectedImport {
+		if allowedImport.Value.ImportPath == injectedImport {
 			return nil
 		}
 	}
 
-	targetPath := imp.Target.Definition.Place.Filename
+	targetPath := imp.Target.Definition.Place.File
 	targetComponentID, targetDefined := c.fileComponents[targetPath]
 
-	gatePath := gate.MethodDefinition.Place.Filename
+	gatePath := gate.MethodDefinition.Place.File
 	gateComponentID, gateDefined := c.fileComponents[gatePath]
 
 	if !targetDefined || !gateDefined {
@@ -272,7 +254,7 @@ func (c *DeepScan) checkImplementation(
 			ComponentName: gateComponentID,
 			MethodName:    gate.MethodName,
 			RelativePath:  c.definitionToRelPath(gate.ArgumentDefinition.Place),
-			Definition:    c.definitionToReference(gate.ArgumentDefinition.Place),
+			Definition:    gate.ArgumentDefinition.Place,
 		},
 		Dependency: models.DeepscanWarningDependency{
 			ComponentName: targetComponentID,
@@ -281,7 +263,7 @@ func (c *DeepScan) checkImplementation(
 				imp.Target.StructName,
 			),
 			InjectionAST:  imp.Injector.CodeName,
-			Injection:     c.definitionToReference(imp.Injector.ParamDefinition.Place),
+			Injection:     imp.Injector.ParamDefinition.Place,
 			InjectionPath: c.definitionToRelPath(imp.Injector.ParamDefinition.Place),
 			SourceCodePreview: c.renderCode(
 				imp.Injector.ParamDefinition.Place,
@@ -290,6 +272,7 @@ func (c *DeepScan) checkImplementation(
 			),
 		},
 		Target: models.DeepscanWarningTarget{
+			Definition:   imp.Target.Definition.Place,
 			RelativePath: c.definitionToRelPath(imp.Target.Definition.Place),
 		},
 	}
@@ -298,17 +281,15 @@ func (c *DeepScan) checkImplementation(
 	return nil
 }
 
-func (c *DeepScan) renderCode(pointer, from, to deepscan.Position) []byte {
-	const highlight = false
-	return c.sourceCodeRenderer.SourceCodeWithoutOffset(
-		models.NewCodeReference(
-			c.definitionToReference(pointer), from.Line, to.Line,
-		),
-		highlight,
+func (c *DeepScan) renderCode(pointer, from, to common.Reference) []byte {
+	return c.sourceCodeRenderer.SourceCode(
+		common.NewReferenceRange(pointer.File, from.Line, pointer.Line, to.Line),
+		false,
+		false,
 	)
 }
 
-func (c *DeepScan) sortPositions(a, b deepscan.Position) (min, max deepscan.Position) {
+func (c *DeepScan) sortPositions(a, b common.Reference) (min, max common.Reference) {
 	if a.Line < b.Line {
 		return a, b
 	}
@@ -316,24 +297,15 @@ func (c *DeepScan) sortPositions(a, b deepscan.Position) (min, max deepscan.Posi
 	return b, a
 }
 
-func (c *DeepScan) definitionToReference(source deepscan.Position) models.Reference {
-	return models.Reference{
-		Valid:  true,
-		File:   source.Filename,
-		Line:   source.Line,
-		Offset: source.Column,
-	}
-}
-
-func (c *DeepScan) definitionToRelPath(source deepscan.Position) string {
-	relativePath := strings.TrimPrefix(source.Filename, c.spec.RootDirectory.Value())
+func (c *DeepScan) definitionToRelPath(source common.Reference) string {
+	relativePath := strings.TrimPrefix(source.File, c.spec.RootDirectory.Value)
 	return fmt.Sprintf("%s:%d", relativePath, source.Line)
 }
 
 func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deepscan.InjectionMethod, error) {
 	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
-		c.spec.RootDirectory.Value(),
-		c.spec.WorkingDirectory.Value(),
+		c.spec.RootDirectory.Value,
+		c.spec.WorkingDirectory.Value,
 	))
 	excludeDirectories := c.refPathToList(c.spec.Exclude)
 	excludeMatchers := c.refRegexpToList(c.spec.ExcludeFilesMatcher)
@@ -356,21 +328,21 @@ func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deeps
 	return usages, nil
 }
 
-func (c *DeepScan) refPathToList(list []speca.Referable[models.ResolvedPath]) []string {
+func (c *DeepScan) refPathToList(list []common.Referable[models.ResolvedPath]) []string {
 	result := make([]string, 0)
 
 	for _, refPath := range list {
-		result = append(result, refPath.Value().AbsPath)
+		result = append(result, refPath.Value.AbsPath)
 	}
 
 	return result
 }
 
-func (c *DeepScan) refRegexpToList(list []speca.Referable[*regexp.Regexp]) []*regexp.Regexp {
+func (c *DeepScan) refRegexpToList(list []common.Referable[*regexp.Regexp]) []*regexp.Regexp {
 	result := make([]*regexp.Regexp, 0)
 
 	for _, refPath := range list {
-		result = append(result, refPath.Value())
+		result = append(result, refPath.Value)
 	}
 
 	return result

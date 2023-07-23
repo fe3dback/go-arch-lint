@@ -4,8 +4,7 @@ go 1.20
 
 require (
 	github.com/alecthomas/chroma v0.10.0
-	github.com/fe3dback/span-terminal v1.0.0
-	github.com/goccy/go-yaml v1.8.0
+	github.com/goccy/go-yaml v1.11.0
 	github.com/google/go-cmdtest v0.2.0
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/spf13/cobra v1.7.0
@@ -17,12 +16,13 @@ require (
 	oss.terrastruct.com/d2 v0.5.1
 )
 
+replace github.com/goccy/go-yaml v1.11.0 => github.com/fe3dback/go-yaml v1.12.0
+
 require (
 	cdr.dev/slog v1.4.2-0.20221206192828-e4803b10ae17 // indirect
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/alecthomas/chroma/v2 v2.5.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/charmbracelet/lipgloss v0.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/dop251/goja v0.0.0-20230122112309-96b1610dd4f7 // indirect
@@ -30,17 +30,13 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/renameio v0.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/kopoli/go-terminal-size v0.0.0-20170219200355-5c97524c8b54 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mazznoer/csscolorparser v0.1.3 // indirect
-	github.com/muesli/reflow v0.3.0 // indirect
-	github.com/muesli/termenv v0.11.1-0.20220212125758-44cd13922739 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

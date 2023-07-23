@@ -2,9 +2,10 @@ package assembler
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type allowedProjectImportsAssembler struct {
@@ -23,27 +24,32 @@ func newAllowedProjectImportsAssembler(
 }
 
 func (aia *allowedProjectImportsAssembler) assemble(
-	yamlDocument arch.Document,
+	yamlDocument spec.Document,
 	componentNames []string,
 ) ([]models.ResolvedPath, error) {
 	list := make([]models.ResolvedPath, 0)
 
 	allowedComponents := make([]string, 0)
 	allowedComponents = append(allowedComponents, componentNames...)
-	for _, componentName := range yamlDocument.CommonComponents().List() {
-		allowedComponents = append(allowedComponents, componentName.Value())
+	for _, componentName := range yamlDocument.CommonComponents() {
+		allowedComponents = append(allowedComponents, componentName.Value)
 	}
 
 	for _, name := range allowedComponents {
-		yamlComponent, ok := yamlDocument.Components().Map()[name]
+		yamlComponent, ok := yamlDocument.Components()[name]
 		if !ok {
 			continue
 		}
 
-		for _, componentIn := range yamlComponent.RelativePaths() {
-			relativeGlobPath := componentIn.Value()
+		for _, componentIn := range yamlComponent.Value.RelativePaths() {
+			relativeGlobPath := componentIn
 
-			resolved, err := aia.resolver.resolveLocalGlobPath(string(relativeGlobPath))
+			resolved, err := aia.resolver.resolveLocalGlobPath(
+				path.Clean(fmt.Sprintf("%s/%s",
+					yamlDocument.WorkingDirectory().Value,
+					string(relativeGlobPath),
+				)),
+			)
 			if err != nil {
 				return nil, fmt.Errorf("failed to resolve component path '%s'", relativeGlobPath)
 			}

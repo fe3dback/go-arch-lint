@@ -3,9 +3,10 @@ package validator
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorWorkDir struct {
@@ -18,20 +19,21 @@ func newValidatorWorkDir(utils *utils) *validatorWorkDir {
 	}
 }
 
-func (v *validatorWorkDir) Validate(doc arch.Document) []speca.Notice {
-	notices := make([]speca.Notice, 0)
+func (v *validatorWorkDir) Validate(doc spec.Document) []arch.Notice {
+	notices := make([]arch.Notice, 0)
 
-	absPath := fmt.Sprintf("%s/%s", v.utils.rootDirectory, doc.WorkingDirectory().Value())
+	rootDir := filepath.Dir(doc.Version().Reference.File)
+	absPath := fmt.Sprintf("%s/%s", rootDir, doc.WorkingDirectory().Value)
 	absPath = path.Clean(absPath)
 
 	err := v.utils.assertDirectoriesValid(absPath)
 	if err != nil {
-		notices = append(notices, speca.Notice{
+		notices = append(notices, arch.Notice{
 			Notice: fmt.Errorf("invalid workdir '%s' (%s), directory not exist",
-				doc.WorkingDirectory().Value(),
+				doc.WorkingDirectory().Value,
 				absPath,
 			),
-			Ref: doc.WorkingDirectory().Reference(),
+			Ref: doc.WorkingDirectory().Reference,
 		})
 	}
 

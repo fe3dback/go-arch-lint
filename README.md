@@ -1,4 +1,4 @@
-![Logo image](https://user-images.githubusercontent.com/2073883/94179282-f82cd200-fea4-11ea-85c5-bf685293220e.png)
+![Logo image](./docs/images/logo.png)
 
 Linter used to enforce some good project structure and validate top level architecture (code layers) 
 
@@ -6,13 +6,13 @@ Linter used to enforce some good project structure and validate top level archit
 
 ## Quick start
 
-### What exactly is project architecture
+### What exactly is project architecture?
 
-You can imagine some good simple architecture, for example classic onion part:
+You can imagine some simple architecture, for example classic onion part from "clean architecture":
 
-![Logo image](./docs/images/layout_example.png)
+![Layouts example](./docs/images/layout_example.png)
 
-And describe/declare as semantic yaml linter config:
+And describe/declare it as semantic yaml linter config:
 
 ```yaml
 version: 3
@@ -40,7 +40,28 @@ see [config syntax](docs/syntax/README.md) for details.
 And now linter will check all project code inside `internal` workdir
 and show warnings, when code violate this rules.
 
-For best experience you can add linter to you CI workflow
+For best experience you can add linter into CI workflow
+
+### Example of broken code
+
+Imagine some `main.go`, when we provide `repository` into `handler` and get some bad
+flow:
+
+```
+func main() {
+  // ..
+  repository := booksRepository.NewRepository()
+  handler := booksHandler.NewHandler(
+    service,
+    repository, // !!!
+  )
+  // ..
+}
+```
+
+Linter will easily found this issue:
+
+![Check stdout example](./docs/images/check-example.png)
 
 ### Install/Run
 
@@ -78,6 +99,20 @@ https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
 
 ## Usage
 
+### How to add linter to existing project?
+
+![Adding linter steps](./docs/images/add-linter-steps.png)
+
+Adding a linter to a project takes several steps:
+
+1. Current state of the project
+2. Create a `.go-arch-lint.yml` file describing the ideal project architecture
+3. Linter find some issues in the project. Don’t fix them right now, but “legalize” them by adding them to the config and marking `todo` with the label
+4. In your free time, technical debt, etc. fix the code
+5. After fixes, clean up config to target state
+
+### Execute
+
 ```
 Usage:
   go-arch-lint check [flags]
@@ -102,6 +137,17 @@ This linter will return:
 | 0           | Project has correct architecture |
 | 1           | Found warnings                   |
 
+
+### How is working?
+
+![How is working](./docs/images/how-is-working.png)
+
+Linter will:
+- match/mark **go packages** with **components**
+- finds all dependencies between components
+- build a dependency graph
+- compares the actual (code) and desired (config) dependency graph
+- if it got a non-empty DIFF, then project has some issues
 
 ## Graph
 

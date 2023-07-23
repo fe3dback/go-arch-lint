@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	terminal "github.com/fe3dback/span-terminal"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type Imports struct {
-	spec                 speca.Spec
+	spec                 arch.Spec
 	projectFilesResolver projectFilesResolver
 	result               results
 }
@@ -26,10 +25,7 @@ func NewImport(
 	}
 }
 
-func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResult, error) {
-	ctx, span := terminal.StartSpan(ctx, "imports check")
-	defer span.End()
-
+func (c *Imports) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	c.spec = spec
 
 	projectFiles, err := c.projectFilesResolver.ProjectFiles(ctx, spec)
@@ -42,8 +38,8 @@ func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResul
 	for _, projectFile := range projectFiles {
 		if projectFile.ComponentID == nil {
 			c.result.addNotMatchedWarning(models.CheckArchWarningMatch{
-				Reference:        speca.NewEmptyReference(),
-				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, spec.RootDirectory.Value()),
+				Reference:        common.NewEmptyReference(),
+				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, spec.RootDirectory.Value),
 				FileAbsolutePath: projectFile.File.Path,
 			})
 
@@ -66,19 +62,19 @@ func (c *Imports) Check(ctx context.Context, spec speca.Spec) (models.CheckResul
 	return c.result.assembleSortedResults(), nil
 }
 
-func (c *Imports) assembleComponentsMap(spec speca.Spec) map[string]speca.Component {
-	results := make(map[string]speca.Component)
+func (c *Imports) assembleComponentsMap(spec arch.Spec) map[string]arch.Component {
+	results := make(map[string]arch.Component)
 
 	for _, component := range spec.Components {
-		results[component.Name.Value()] = component
+		results[component.Name.Value] = component
 	}
 
 	return results
 }
 
-func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) error {
+func (c *Imports) checkFile(component arch.Component, file models.ProjectFile) error {
 	for _, resolvedImport := range file.Imports {
-		allowed, err := checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value())
+		allowed, err := checkImport(component, resolvedImport, c.spec.Allow.DepOnAnyVendor.Value)
 		if err != nil {
 			return fmt.Errorf("failed check import '%s': %w",
 				resolvedImport.Name,
@@ -91,9 +87,9 @@ func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) 
 		}
 
 		c.result.addDependencyWarning(models.CheckArchWarningDependency{
-			Reference:          component.Name.Reference(),
-			ComponentName:      component.Name.Value(),
-			FileRelativePath:   strings.TrimPrefix(file.Path, c.spec.RootDirectory.Value()),
+			Reference:          resolvedImport.Reference,
+			ComponentName:      component.Name.Value,
+			FileRelativePath:   strings.TrimPrefix(file.Path, c.spec.RootDirectory.Value),
 			FileAbsolutePath:   file.Path,
 			ResolvedImportName: resolvedImport.Name,
 		})
@@ -103,7 +99,7 @@ func (c *Imports) checkFile(component speca.Component, file models.ProjectFile) 
 }
 
 func checkImport(
-	component speca.Component,
+	component arch.Component,
 	resolvedImport models.ResolvedImport,
 	allowDependOnAnyVendor bool,
 ) (bool, error) {
@@ -123,20 +119,20 @@ func checkImport(
 	}
 }
 
-func checkVendorImport(component speca.Component, resolvedImport models.ResolvedImport) (bool, error) {
-	if component.SpecialFlags.AllowAllVendorDeps.Value() {
+func checkVendorImport(component arch.Component, resolvedImport models.ResolvedImport) (bool, error) {
+	if component.SpecialFlags.AllowAllVendorDeps.Value {
 		return true, nil
 	}
 
 	for _, vendorGlob := range component.AllowedVendorGlobs {
-		matched, err := vendorGlob.Value().Match(resolvedImport.Name)
+		matched, err := vendorGlob.Value.Match(resolvedImport.Name)
 		if err != nil {
 			return false, models.NewReferableErr(
 				fmt.Errorf("invalid vendor glob '%s': %w",
-					string(vendorGlob.Value()),
+					string(vendorGlob.Value),
 					err,
 				),
-				vendorGlob.Reference(),
+				vendorGlob.Reference,
 			)
 		}
 
@@ -148,13 +144,13 @@ func checkVendorImport(component speca.Component, resolvedImport models.Resolved
 	return false, nil
 }
 
-func checkProjectImport(component speca.Component, resolvedImport models.ResolvedImport) bool {
-	if component.SpecialFlags.AllowAllProjectDeps.Value() {
+func checkProjectImport(component arch.Component, resolvedImport models.ResolvedImport) bool {
+	if component.SpecialFlags.AllowAllProjectDeps.Value {
 		return true
 	}
 
 	for _, allowedImportRef := range component.AllowedProjectImports {
-		allowedImport := allowedImportRef.Value()
+		allowedImport := allowedImportRef.Value
 
 		if allowedImport.ImportPath == resolvedImport.Name {
 			return true

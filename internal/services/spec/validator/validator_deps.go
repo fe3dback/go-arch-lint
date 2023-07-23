@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type validatorDeps struct {
@@ -19,29 +19,43 @@ func newValidatorDeps(
 	}
 }
 
-func (v *validatorDeps) Validate(doc arch.Document) []speca.Notice {
-	notices := make([]speca.Notice, 0)
+func (v *validatorDeps) Validate(doc spec.Document) []arch.Notice {
+	notices := make([]arch.Notice, 0)
 
-	for name, rules := range doc.Dependencies().Map() {
+	for name, rule := range doc.Dependencies() {
 		if err := v.utils.assertKnownComponent(name); err != nil {
-			notices = append(notices, speca.Notice{
+			notices = append(notices, arch.Notice{
 				Notice: err,
-				Ref:    doc.Dependencies().Reference(),
+				Ref:    rule.Reference,
 			})
 		}
 
-		if len(rules.MayDependOn()) == 0 && len(rules.CanUse()) == 0 {
-			if rules.AnyProjectDeps().Value() {
+		if len(rule.Value.MayDependOn()) > 0 && rule.Value.AnyProjectDeps().Value {
+			notices = append(notices, arch.Notice{
+				Notice: fmt.Errorf("'anyProjectDeps=true' used with not empty 'MayDependOn' list (likely this is miss configuration)"),
+				Ref:    rule.Value.AnyProjectDeps().Reference,
+			})
+		}
+
+		if len(rule.Value.CanUse()) > 0 && rule.Value.AnyVendorDeps().Value {
+			notices = append(notices, arch.Notice{
+				Notice: fmt.Errorf("'AnyVendorDeps=true' used with not empty 'CanUse' list (likely this is miss configuration)"),
+				Ref:    rule.Value.AnyVendorDeps().Reference,
+			})
+		}
+
+		if len(rule.Value.MayDependOn()) == 0 && len(rule.Value.CanUse()) == 0 {
+			if rule.Value.AnyProjectDeps().Value {
 				continue
 			}
 
-			if rules.AnyVendorDeps().Value() {
+			if rule.Value.AnyVendorDeps().Value {
 				continue
 			}
 
-			notices = append(notices, speca.Notice{
-				Notice: fmt.Errorf("should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']"),
-				Ref:    rules.Reference(),
+			notices = append(notices, arch.Notice{
+				Notice: fmt.Errorf("should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']"),
+				Ref:    rule.Reference,
 			})
 		}
 	}

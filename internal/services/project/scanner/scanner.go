@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
+	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -129,6 +130,7 @@ func (r *Scanner) extractImports(ctx *resolveContext, fileAst *ast.File) []model
 		imports = append(imports, models.ResolvedImport{
 			Name:       importPath,
 			ImportType: r.getImportType(ctx, importPath),
+			Reference:  astUtil.PositionFromToken(ctx.tokenSet.Position(goImport.Pos())),
 		})
 	}
 

@@ -1,6 +1,4 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec.yml --output-color=false --> FAIL
-skipped other checks, found early lint notices..
-
 module: github.com/fe3dback/go-arch-lint/test/check/project
 invalid regexp '(A-Z' at 0: error parsing regexp: missing closing ): `(A-Z`
      5 | excludeFiles:
@@ -9,16 +7,11 @@ invalid regexp '(A-Z' at 0: error parsing regexp: missing closing ): `(A-Z`
 not found directories for 'internal/not_exist' in '${ROOTDIR}/test/check/project/internal/not_exist'
     16 |   not_exist:
 >   17 |     in: internal/not_exist # not exist path (V)
-                 ^
+               ^
 unknown component 'models'
     22 | commonComponents:
 >   23 |   - models # not exist component (V)
              ^
-unknown component 'cmd'
-    25 | deps:
->   26 |   main:
-               ^
-    27 |     mayDependOn:
 unknown component 'not_exist_too_rnd_order'
     27 |     mayDependOn:
 >   28 |       - not_exist_too_rnd_order # not exist dep (V)
@@ -38,7 +31,12 @@ unknown vendor '3rd-cobra'
     31 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
 >   32 |       - 3rd-cobra # not defined vendor (V)
                  ^
-should have ref in 'mayDependOn' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']
+unknown component 'cmd'
+    34 |   cmd: # not exist component
+>   35 |     canUse:
+                   ^
+    36 |       - go-modfile
+should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']
     38 |   a:
 >   39 |     anyVendorDeps: false
                           ^

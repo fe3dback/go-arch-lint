@@ -1,5 +1,7 @@
 package models
 
+import "github.com/fe3dback/go-arch-lint/internal/models/common"
+
 const (
 	ImportTypeStdLib ImportType = iota
 	ImportTypeProject
@@ -9,9 +11,9 @@ const (
 type (
 	ImportType uint8
 
-	ResolvedImport struct {
-		Name       string
-		ImportType ImportType
+	FileHold struct {
+		File        ProjectFile
+		ComponentID *string
 	}
 
 	ProjectFile struct {
@@ -19,8 +21,9 @@ type (
 		Imports []ResolvedImport
 	}
 
-	FileHold struct {
-		File        ProjectFile
-		ComponentID *string
+	ResolvedImport struct {
+		Name       string
+		ImportType ImportType
+		Reference  common.Reference
 	}
 )

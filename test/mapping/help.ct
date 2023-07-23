@@ -10,7 +10,7 @@ Aliases:
 Flags:
       --arch-file string      arch file path (default ".go-arch-lint.yml")
   -h, --help                  help for mapping
-      --project-path string   absolute path to project directory (where '.go-arch-lint.yml' is located) (default "./")
+      --project-path string   absolute path to project directory (default "./")
   -s, --scheme string         display scheme [list,grouped] (default "list")
 
 Global Flags:

@@ -1,6 +1,4 @@
 $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --> FAIL
-skipped other checks, found early lint notices..
-
 {
   "Type": "models.Check",
   "Payload": {
@@ -11,7 +9,13 @@ skipped other checks, found early lint notices..
         "ComponentName": "c",
         "FileRelativePath": "/internal/c/c1.go",
         "FileAbsolutePath": "${ROOTDIR}/test/check/project/internal/c/c1.go",
-        "ResolvedImportName": "github.com/fe3dback/go-arch-lint/test/check/project/internal/a"
+        "ResolvedImportName": "github.com/fe3dback/go-arch-lint/test/check/project/internal/a",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/internal/c/c1.go",
+          "Line": 3,
+          "Offset": 8
+        }
       }
     ],
     "ArchWarningsNotMatched": [

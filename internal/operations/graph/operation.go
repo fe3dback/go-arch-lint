@@ -5,10 +5,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/speca"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
 	"oss.terrastruct.com/d2/lib/textmeasure"
 
@@ -19,101 +21,135 @@ import (
 )
 
 type Operation struct {
-	specAssembler SpecAssembler
+	specAssembler        specAssembler
+	projectInfoAssembler projectInfoAssembler
 }
 
 func NewOperation(
-	specAssembler SpecAssembler,
+	specAssembler specAssembler,
+	projectInfoAssembler projectInfoAssembler,
 ) *Operation {
 	return &Operation{
-		specAssembler: specAssembler,
+		specAssembler:        specAssembler,
+		projectInfoAssembler: projectInfoAssembler,
 	}
 }
 
-func (s *Operation) Behave(
-	ctx context.Context,
-	in models.FlagsGraph,
-) (models.Graph, error) {
-	spec, err := s.specAssembler.Assemble()
+func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.CmdGraphOut, error) {
+	projectInfo, err := o.projectInfoAssembler.ProjectInfo(in.ProjectPath, in.ArchFile)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed to assemble spec: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble project info: %w", err)
 	}
 
-	graphCode, err := s.buildGraph(spec, in)
+	spec, err := o.specAssembler.Assemble(projectInfo)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed build graph: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed to assemble spec: %w", err)
 	}
 
-	svg, err := s.compileGraph(ctx, graphCode)
+	graphCode, err := o.buildGraph(spec, in)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed to compile graph: %w", err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed build graph: %w", err)
 	}
 
-	err = os.WriteFile(in.OutFile, svg, os.ModePerm)
+	svg, err := o.compileGraph(ctx, graphCode)
 	if err != nil {
-		return models.Graph{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+		return models.CmdGraphOut{}, fmt.Errorf("failed to compile graph: %w", err)
 	}
 
-	return models.Graph{
-		ProjectDirectory: spec.RootDirectory.Value(),
-		ModuleName:       spec.ModuleName.Value(),
-		OutFile:          in.OutFile,
+	outFile, err := filepath.Abs(in.OutFile)
+	if err != nil {
+		return models.CmdGraphOut{}, fmt.Errorf("failed get abs path from '%s': %w", in.OutFile, err)
+	}
+
+	if o.isFileShouldBeWritten(in) {
+		err = os.WriteFile(outFile, svg, os.ModePerm)
+		if err != nil {
+			return models.CmdGraphOut{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
+		}
+	}
+
+	return models.CmdGraphOut{
+		ProjectDirectory: spec.RootDirectory.Value,
+		ModuleName:       spec.ModuleName.Value,
+		OutFile:          outFile,
+		D2Definitions:    string(graphCode),
+		ExportD2:         in.ExportD2,
 	}, nil
 }
 
-func (s *Operation) buildGraph(spec speca.Spec, opts models.FlagsGraph) (string, error) {
-	var buff bytes.Buffer
-	whiteList, err := s.populateGraphWhitelist(spec, opts)
-	if err != nil {
-		return "", err
+func (o *Operation) isFileShouldBeWritten(in models.CmdGraphIn) bool {
+	if in.OutputType == models.OutputTypeJSON {
+		return false
 	}
 
-	flow := s.componentsFlowArrow(opts)
+	if in.ExportD2 {
+		return false
+	}
+
+	return true
+}
+
+func (o *Operation) buildGraph(spec arch.Spec, opts models.CmdGraphIn) ([]byte, error) {
+	whiteList, err := o.populateGraphWhitelist(spec, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	flow := o.componentsFlowArrow(opts)
+
+	linesBuff := make([]string, 0, 256)
 
 	for _, cmp := range spec.Components {
-		if _, visible := whiteList[cmp.Name.Value()]; !visible {
+		if _, visible := whiteList[cmp.Name.Value]; !visible {
 			continue
 		}
 
 		for _, dep := range cmp.MayDependOn {
-			if _, visible := whiteList[dep.Value()]; !visible {
+			if _, visible := whiteList[dep.Value]; !visible {
 				continue
 			}
 
-			buff.WriteString(fmt.Sprintf("%s %s %s\n", cmp.Name.Value(), flow, dep.Value()))
+			linesBuff = append(linesBuff, fmt.Sprintf("%s %s %s\n", cmp.Name.Value, flow, dep.Value))
 		}
 
 		if opts.IncludeVendors {
 			for _, vnd := range cmp.CanUse {
 				vars := map[string]string{
-					"vnd": vnd.Value(),
-					"cmp": cmp.Name.Value(),
+					"vnd": vnd.Value,
+					"cmp": cmp.Name.Value,
 				}
 
 				tpl := `
 				{{vnd}}.style.font-size: 12
 				{{vnd}}.style.stroke: "#77AA44"
 				{{cmp}} <- {{vnd}} {
-					style.stroke: "#77AA44"
-					source-arrowhead: {
-						shape: diamond
-						style.filled: false
-					  }
+				  style.stroke: "#77AA44"
+				  source-arrowhead: {
+				    shape: diamond
+				    style.filled: false
+				  }
 				}
 				`
 
 				for name, value := range vars {
 					tpl = strings.ReplaceAll(tpl, fmt.Sprintf("{{%s}}", name), value)
 				}
-				buff.WriteString(tpl)
+				linesBuff = append(linesBuff, tpl)
 			}
 		}
 	}
 
-	return buff.String(), nil
+	var buff bytes.Buffer
+	sort.Strings(linesBuff)
+
+	for _, line := range linesBuff {
+		buff.WriteString(strings.ReplaceAll(line, "\t", ""))
+	}
+
+	return buff.Bytes(), nil
 }
 
-func (s *Operation) componentsFlowArrow(opts models.FlagsGraph) string {
+func (o *Operation) componentsFlowArrow(opts models.CmdGraphIn) string {
 	if opts.Type == models.GraphTypeFlow {
 		return "->"
 	}
@@ -125,32 +161,32 @@ func (s *Operation) componentsFlowArrow(opts models.FlagsGraph) string {
 	return "--"
 }
 
-func (s *Operation) populateGraphWhitelist(spec speca.Spec, opts models.FlagsGraph) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelist(spec arch.Spec, opts models.CmdGraphIn) (map[string]struct{}, error) {
 	if opts.Focus == "" {
-		return s.populateGraphWhitelistAll(spec)
+		return o.populateGraphWhitelistAll(spec)
 	}
 
-	return s.populateGraphWhitelistFocused(spec, opts.Focus)
+	return o.populateGraphWhitelistFocused(spec, opts.Focus)
 }
 
-func (s *Operation) populateGraphWhitelistAll(spec speca.Spec) (map[string]struct{}, error) {
+func (o *Operation) populateGraphWhitelistAll(spec arch.Spec) (map[string]struct{}, error) {
 	whiteList := make(map[string]struct{}, len(spec.Components))
 
 	for _, cmp := range spec.Components {
-		whiteList[cmp.Name.Value()] = struct{}{}
+		whiteList[cmp.Name.Value] = struct{}{}
 	}
 
 	return whiteList, nil
 }
 
-func (s *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName string) (map[string]struct{}, error) {
-	cmpMap := make(map[string]speca.Component)
+func (o *Operation) populateGraphWhitelistFocused(spec arch.Spec, focusCmpName string) (map[string]struct{}, error) {
+	cmpMap := make(map[string]arch.Component)
 	rootExist := false
 
 	for _, cmp := range spec.Components {
-		cmpMap[cmp.Name.Value()] = cmp
+		cmpMap[cmp.Name.Value] = cmp
 
-		if focusCmpName == cmp.Name.Value() {
+		if focusCmpName == cmp.Name.Value {
 			rootExist = true
 		}
 	}
@@ -168,33 +204,33 @@ func (s *Operation) populateGraphWhitelistFocused(spec speca.Spec, focusCmpName 
 		cmp := cmpMap[resolveList[0]]
 		resolveList = resolveList[1:]
 
-		if _, alreadyResolved := resolved[cmp.Name.Value()]; alreadyResolved {
+		if _, alreadyResolved := resolved[cmp.Name.Value]; alreadyResolved {
 			continue
 		}
 
 		// cmp itself
-		whiteList[cmp.Name.Value()] = struct{}{}
+		whiteList[cmp.Name.Value] = struct{}{}
 
 		// cmp deps
 		for _, dep := range cmp.MayDependOn {
-			whiteList[dep.Value()] = struct{}{}
-			resolveList = append(resolveList, dep.Value())
+			whiteList[dep.Value] = struct{}{}
+			resolveList = append(resolveList, dep.Value)
 		}
 
 		// mark as resolved (for recursion check)
-		resolved[cmp.Name.Value()] = struct{}{}
+		resolved[cmp.Name.Value] = struct{}{}
 	}
 
 	return whiteList, nil
 }
 
-func (s *Operation) compileGraph(ctx context.Context, graphCode string) ([]byte, error) {
+func (o *Operation) compileGraph(ctx context.Context, graphCode []byte) ([]byte, error) {
 	ruler, err := textmeasure.NewRuler()
 	if err != nil {
 		return nil, fmt.Errorf("failed create ruler: %w", err)
 	}
 
-	diagram, _, err := d2lib.Compile(ctx, graphCode, &d2lib.CompileOptions{
+	diagram, _, err := d2lib.Compile(ctx, string(graphCode), &d2lib.CompileOptions{
 		Layout: func(ctx context.Context, g *d2graph.Graph) error {
 			return d2dagrelayout.Layout(ctx, g, nil)
 		},

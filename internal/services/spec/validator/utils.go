@@ -5,31 +5,29 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
+	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
 type (
 	utils struct {
-		pathResolver  PathResolver
-		document      arch.Document
-		rootDirectory string
+		pathResolver pathResolver
+		document     spec.Document
 	}
 )
 
 func newUtils(
-	pathResolver PathResolver,
-	document arch.Document,
-	rootDirectory string,
+	pathResolver pathResolver,
+	document spec.Document,
 ) *utils {
 	return &utils{
-		pathResolver:  pathResolver,
-		document:      document,
-		rootDirectory: rootDirectory,
+		pathResolver: pathResolver,
+		document:     document,
 	}
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	absPath := filepath.Clean(fmt.Sprintf("%s/%s", u.rootDirectory, localGlobPath))
+	rootDir := filepath.Dir(u.document.Version().Reference.File)
+	absPath := filepath.Clean(fmt.Sprintf("%s/%s", rootDir, localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %w", err)
@@ -53,7 +51,7 @@ func (u *utils) assertDirectoriesValid(paths ...string) error {
 }
 
 func (u *utils) assertKnownComponent(name string) error {
-	for knownName := range u.document.Components().Map() {
+	for knownName := range u.document.Components() {
 		if name == knownName {
 			return nil
 		}
@@ -63,7 +61,7 @@ func (u *utils) assertKnownComponent(name string) error {
 }
 
 func (u *utils) assertKnownVendor(name string) error {
-	for knownName := range u.document.Vendors().Map() {
+	for knownName := range u.document.Vendors() {
 		if name == knownName {
 			return nil
 		}

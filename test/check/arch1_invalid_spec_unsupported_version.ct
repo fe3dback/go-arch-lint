@@ -1,5 +1,3 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec_unsupported_version.yml --output-color=false --> FAIL
-skipped other checks, found early lint notices..
-
 module: github.com/fe3dback/go-arch-lint/test/check/project
 failed to provide json scheme for validation: unknown version: 999

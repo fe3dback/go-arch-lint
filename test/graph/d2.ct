@@ -1,0 +1,64 @@
+$ go-arch-lint graph --project-path ${PWD} --include-vendors --focus operations --d2
+
+3rd-code-highlight.style.font-size: 12
+3rd-code-highlight.style.stroke: "#77AA44"
+services <- 3rd-code-highlight {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+3rd-color-fmt.style.font-size: 12
+3rd-color-fmt.style.stroke: "#77AA44"
+services <- 3rd-color-fmt {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+3rd-graph.style.font-size: 12
+3rd-graph.style.stroke: "#77AA44"
+operations <- 3rd-graph {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+3rd-json-scheme.style.font-size: 12
+3rd-json-scheme.style.stroke: "#77AA44"
+services <- 3rd-json-scheme {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+3rd-yaml.style.font-size: 12
+3rd-yaml.style.stroke: "#77AA44"
+services <- 3rd-yaml {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+go-ast.style.font-size: 12
+go-ast.style.stroke: "#77AA44"
+services <- go-ast {
+  style.stroke: "#77AA44"
+  source-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+operations -> services
+operations -> view
+services -> services
