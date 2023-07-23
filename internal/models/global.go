@@ -1,5 +1,7 @@
 package models
 
+const UnknownVersion = "dev"
+
 const (
 	DefaultProjectPath   = "./"
 	DefaultArchFileName  = ".go-arch-lint.yml"

@@ -272,6 +272,7 @@ func (c *DeepScan) checkImplementation(
 			),
 		},
 		Target: models.DeepscanWarningTarget{
+			Definition:   imp.Target.Definition.Place,
 			RelativePath: c.definitionToRelPath(imp.Target.Definition.Place),
 		},
 	}

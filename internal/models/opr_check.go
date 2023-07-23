@@ -42,29 +42,30 @@ type (
 	}
 
 	CheckArchWarningDeepscan struct {
-		Gate       DeepscanWarningGate
-		Dependency DeepscanWarningDependency
-		Target     DeepscanWarningTarget
+		Gate       DeepscanWarningGate       `json:"Gate"`
+		Dependency DeepscanWarningDependency `json:"Dependency"`
+		Target     DeepscanWarningTarget     `json:"Target"`
 	}
 
 	DeepscanWarningGate struct {
-		ComponentName string           // operations
-		MethodName    string           // NewOperation
-		Definition    common.Reference // internal/glue/code/line_count.go:54
-		RelativePath  string           `json:"-"` // internal/glue/code/line_count.go:54
+		ComponentName string           `json:"ComponentName"` // operations
+		MethodName    string           `json:"MethodName"`    // NewOperation
+		Definition    common.Reference `json:"Definition"`    // internal/glue/code/line_count.go:54
+		RelativePath  string           `json:"-"`             // internal/glue/code/line_count.go:54
 	}
 
 	DeepscanWarningDependency struct {
-		ComponentName     string           // repository
-		Name              string           // micro.ViewRepository
-		InjectionAST      string           // c.provideMicroViewRepository()
-		Injection         common.Reference // internal/app/internal/container/cmd_mapping.go:15
-		InjectionPath     string           `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
+		ComponentName     string           `json:"ComponentName"` // repository
+		Name              string           `json:"Name"`          // micro.ViewRepository
+		InjectionAST      string           `json:"InjectionAST"`  // c.provideMicroViewRepository()
+		Injection         common.Reference `json:"Injection"`     // internal/app/internal/container/cmd_mapping.go:15
+		InjectionPath     string           `json:"-"`             // internal/app/internal/container/cmd_mapping.go:15
 		SourceCodePreview []byte           `json:"-"`
 	}
 
 	DeepscanWarningTarget struct {
-		RelativePath string `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
+		Definition   common.Reference `json:"Definition"`
+		RelativePath string           `json:"-"` // internal/app/internal/container/cmd_mapping.go:15
 	}
 
 	CheckResult struct {
