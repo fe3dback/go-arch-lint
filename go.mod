@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/alecthomas/chroma v0.10.0
-	github.com/goccy/go-yaml v1.11.0
+	github.com/fe3dback/go-yaml v1.14.0
 	github.com/google/go-cmdtest v0.2.0
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/spf13/cobra v1.7.0
@@ -15,8 +15,6 @@ require (
 	golang.org/x/tools v0.10.0
 	oss.terrastruct.com/d2 v0.5.1
 )
-
-replace github.com/goccy/go-yaml v1.11.0 => github.com/fe3dback/go-yaml v1.12.0
 
 require (
 	cdr.dev/slog v1.4.2-0.20221206192828-e4803b10ae17 // indirect

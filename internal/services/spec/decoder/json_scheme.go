@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/fe3dback/go-yaml"
 	"github.com/xeipuuv/gojsonschema"
 )
 

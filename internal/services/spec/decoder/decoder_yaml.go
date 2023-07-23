@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/goccy/go-yaml/ast"
+	"github.com/fe3dback/go-yaml/ast"
 )
 
 type ref[T any] common.Referable[T]

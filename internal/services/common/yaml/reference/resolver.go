@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-	"github.com/goccy/go-yaml"
-	"github.com/goccy/go-yaml/parser"
+	"github.com/fe3dback/go-yaml"
+	"github.com/fe3dback/go-yaml/parser"
 )
 
 type Resolver struct {
