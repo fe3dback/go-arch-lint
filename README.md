@@ -47,7 +47,7 @@ For best experience you can add linter into CI workflow
 Imagine some `main.go`, when we provide `repository` into `handler` and get some bad
 flow:
 
-```
+```go
 func main() {
   // ..
   repository := booksRepository.NewRepository()
