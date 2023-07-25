@@ -69,6 +69,26 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.Cm
 		ArchWarningsMatch:      limitedResult.results.MatchWarnings,
 		ArchWarningsDeepScan:   limitedResult.results.DeepscanWarnings,
 		OmittedCount:           limitedResult.omittedCount,
+		Qualities: []models.CheckQuality{
+			{
+				ID:   "component_imports",
+				Name: "Base: component imports",
+				Used: len(spec.Components) > 0,
+				Hint: "always on",
+			},
+			{
+				ID:   "vendor_imports",
+				Name: "Advanced: vendor imports",
+				Used: spec.Allow.DepOnAnyVendor.Value == false,
+				Hint: "switch 'allow.depOnAnyVendor = false' (or delete) to on",
+			},
+			{
+				ID:   "deepscan",
+				Name: "Advanced: method calls and dependency injections",
+				Used: spec.Allow.DeepScan.Value == true,
+				Hint: "switch 'allow.deepScan = true' (or delete) to on",
+			},
+		},
 	}
 
 	if model.ArchHasWarnings || len(model.DocumentNotices) > 0 {

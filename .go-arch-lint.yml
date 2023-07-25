@@ -14,8 +14,13 @@ vendors:
   3rd-color-fmt:       { in: github.com/logrusorgru/aurora/v3 }
   3rd-code-highlight:  { in: github.com/alecthomas/chroma/* }
   3rd-json-scheme:     { in: github.com/xeipuuv/gojsonschema }
-  3rd-yaml:            { in: [ github.com/goccy/go-yaml, github.com/goccy/go-yaml/** ] }
   3rd-graph:           { in: oss.terrastruct.com/d2/** }
+  3rd-yaml:
+    in:
+      - github.com/goccy/go-yaml
+      - github.com/goccy/go-yaml/**
+      - github.com/fe3dback/go-yaml    # custom fork (need propose back PR)
+      - github.com/fe3dback/go-yaml/** # custom fork (need propose back PR)
 
 components:
   main:                { in: app }

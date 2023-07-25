@@ -8,7 +8,11 @@ import (
 	"github.com/fe3dback/go-yaml/ast"
 )
 
-type ref[T any] common.Referable[T]
+type ref[T any] struct {
+	defined bool
+	ref     common.Referable[T]
+}
+
 type stringList []string
 type yamlParentFileCtx struct{}
 
@@ -18,13 +22,14 @@ func (r *ref[T]) UnmarshalYAML(ctx context.Context, node ast.Node, decode func(i
 		filePath = ref
 	}
 
-	r.Reference = common.NewReferenceSingleLine(
+	r.defined = true
+	r.ref.Reference = common.NewReferenceSingleLine(
 		filePath,
 		node.GetToken().Position.Line,
 		node.GetToken().Position.Column,
 	)
 
-	return decode(&r.Value)
+	return decode(&r.ref.Value)
 }
 
 func (s *stringList) UnmarshalYAML(unmarshal func(interface{}) error) error {

@@ -19,7 +19,7 @@ func (c *Container) commandCheck() (*cobra.Command, runner) {
 	in := models.CmdCheckIn{
 		ProjectPath: models.DefaultProjectPath,
 		ArchFile:    models.DefaultArchFileName,
-		MaxWarnings: 512,
+		MaxWarnings: 100,
 	}
 
 	cmd.PersistentFlags().StringVar(&in.ProjectPath, "project-path", in.ProjectPath, "absolute path to project directory")

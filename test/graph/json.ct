@@ -5,6 +5,6 @@ $ go-arch-lint graph --project-path ${PWD} --out ${PWD}/test.svg --json
     "ProjectDirectory": "${ROOTDIR}",
     "ModuleName": "github.com/fe3dback/go-arch-lint",
     "OutFile": "${ROOTDIR}/test.svg",
-    "D2Definitions": "main -\u003e container\noperations -\u003e services\noperations -\u003e view\nservices -\u003e services\n"
+    "D2Definitions": "container -\u003e operations\ncontainer -\u003e services\ncontainer -\u003e view\nmain -\u003e container\noperations -\u003e services\nservices -\u003e services\n"
   }
 }

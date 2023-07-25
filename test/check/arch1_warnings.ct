@@ -1,5 +1,10 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_warnings.yml --output-color=false --> FAIL
 module: github.com/fe3dback/go-arch-lint/test/check/project
+linters:
+   On | Base: component imports # always on
+   On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
+  Off | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+
 Component c shouldn't depend on github.com/fe3dback/go-arch-lint/test/check/project/internal/a in ${ROOTDIR}/test/check/project/internal/c/c1.go:3
 File /internal/c/not_covered/c1nc.go not attached to any component in archfile
 File /internal/d/not_covered.go not attached to any component in archfile

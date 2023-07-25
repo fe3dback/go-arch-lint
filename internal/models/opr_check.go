@@ -17,6 +17,14 @@ type (
 		ArchWarningsDeepScan   []CheckArchWarningDeepscan   `json:"ArchWarningsDeepScan"`
 		OmittedCount           int                          `json:"OmittedCount"`
 		ModuleName             string                       `json:"ModuleName"`
+		Qualities              []CheckQuality               `json:"Qualities"`
+	}
+
+	CheckQuality struct {
+		ID   string `json:"ID"`
+		Used bool   `json:"Used"`
+		Name string `json:"-"`
+		Hint string `json:"-"`
 	}
 
 	CheckNotice struct {

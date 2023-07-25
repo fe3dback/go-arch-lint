@@ -43,6 +43,8 @@ type (
 	}
 )
 
+func (a *ArchV2) postSetup() {}
+
 func (a *ArchV2) Version() common.Referable[int] {
 	return castRef(a.FVersion)
 }
@@ -51,11 +53,11 @@ func (a *ArchV2) WorkingDirectory() common.Referable[string] {
 	// fallback from version 1
 	actualWorkDirectory := "./"
 
-	if a.FWorkDir.Value != "" {
-		actualWorkDirectory = a.FWorkDir.Value
+	if a.FWorkDir.ref.Value != "" {
+		actualWorkDirectory = a.FWorkDir.ref.Value
 	}
 
-	return common.NewReferable(actualWorkDirectory, a.FWorkDir.Reference)
+	return common.NewReferable(actualWorkDirectory, a.FWorkDir.ref.Reference)
 }
 
 func (a *ArchV2) Options() spec.Options {
@@ -73,7 +75,7 @@ func (a *ArchV2) ExcludedFilesRegExp() []common.Referable[string] {
 func (a *ArchV2) Vendors() spec.Vendors {
 	casted := make(spec.Vendors, len(a.FVendors))
 	for name, vendor := range a.FVendors {
-		casted[name] = common.NewReferable(spec.Vendor(vendor.Value), vendor.Reference)
+		casted[name] = common.NewReferable(spec.Vendor(vendor.ref.Value), vendor.ref.Reference)
 	}
 
 	return casted
@@ -86,7 +88,7 @@ func (a *ArchV2) CommonVendors() []common.Referable[string] {
 func (a *ArchV2) Components() spec.Components {
 	casted := make(spec.Components, len(a.FComponents))
 	for name, cmp := range a.FComponents {
-		casted[name] = common.NewReferable(spec.Component(cmp.Value), cmp.Reference)
+		casted[name] = common.NewReferable(spec.Component(cmp.ref.Value), cmp.ref.Reference)
 	}
 
 	return casted
@@ -99,7 +101,7 @@ func (a *ArchV2) CommonComponents() []common.Referable[string] {
 func (a *ArchV2) Dependencies() spec.Dependencies {
 	casted := make(spec.Dependencies, len(a.FDependencies))
 	for name, dep := range a.FDependencies {
-		casted[name] = common.NewReferable(spec.DependencyRule(dep.Value), dep.Reference)
+		casted[name] = common.NewReferable(spec.DependencyRule(dep.ref.Value), dep.ref.Reference)
 	}
 
 	return casted

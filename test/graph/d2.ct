@@ -60,5 +60,4 @@ services <- go-ast {
   }
 }
 operations -> services
-operations -> view
 services -> services

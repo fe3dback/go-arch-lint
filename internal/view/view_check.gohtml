@@ -1,6 +1,16 @@
 {{- /*gotype: github.com/fe3dback/go-arch-lint/internal/models.CmdCheckOut*/ -}}
 
 module: {{.ModuleName | colorize "green"}}
+linters:
+{{ range .Qualities }}
+	{{- if .Used -}}
+		{{"   On" | colorize "green" -}}
+	{{- else -}}
+		{{"  Off" | colorize "yellow" -}}
+	{{- end -}}
+	{{" | " | colorize "gray" -}} {{ .Name -}}
+	{{ concat " # " .Hint | colorize "gray" }}
+{{ end }}
 
 {{ range .DocumentNotices -}}
 	{{.Text}}

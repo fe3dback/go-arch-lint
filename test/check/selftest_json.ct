@@ -8,6 +8,20 @@ $ go-arch-lint check --project-path ${PWD} --json
     "ArchWarningsNotMatched": [],
     "ArchWarningsDeepScan": [],
     "OmittedCount": 0,
-    "ModuleName": "github.com/fe3dback/go-arch-lint"
+    "ModuleName": "github.com/fe3dback/go-arch-lint",
+    "Qualities": [
+      {
+        "ID": "component_imports",
+        "Used": true
+      },
+      {
+        "ID": "vendor_imports",
+        "Used": true
+      },
+      {
+        "ID": "deepscan",
+        "Used": true
+      }
+    ]
   }
 }

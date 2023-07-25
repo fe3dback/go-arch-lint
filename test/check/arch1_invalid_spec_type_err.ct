@@ -1,5 +1,10 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec_type_err.yml --output-color=false --> FAIL
 module: github.com/fe3dback/go-arch-lint/test/check/project
+linters:
+  Off | Base: component imports # always on
+   On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
+  Off | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+
 ($.components) components is required
 ($.allow) Additional property depOnAnyVendore is not allowed
      4 |   # type error

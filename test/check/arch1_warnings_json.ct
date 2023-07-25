@@ -34,6 +34,20 @@ $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file
     ],
     "ArchWarningsDeepScan": [],
     "OmittedCount": 0,
-    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project"
+    "ModuleName": "github.com/fe3dback/go-arch-lint/test/check/project",
+    "Qualities": [
+      {
+        "ID": "component_imports",
+        "Used": true
+      },
+      {
+        "ID": "vendor_imports",
+        "Used": true
+      },
+      {
+        "ID": "deepscan",
+        "Used": false
+      }
+    ]
   }
 }

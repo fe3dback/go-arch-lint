@@ -15,6 +15,7 @@ func newAllowAssembler() *allowAssembler {
 func (efa *allowAssembler) assemble(spec *arch.Spec, document spec.Document) error {
 	spec.Allow = arch.Allow{
 		DepOnAnyVendor: document.Options().IsDependOnAnyVendor(),
+		DeepScan:       document.Options().DeepScan(),
 	}
 
 	return nil

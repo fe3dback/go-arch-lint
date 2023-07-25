@@ -1,5 +1,5 @@
 $ go-arch-lint version
-Linter version: [33mdev[0m
+Linter version: [33m(devel)[0m
 Supported go arch file versions: [33m1 .. 3[0m
 Build time: [33munknown[0m
 Commit hash: [33munknown[0m

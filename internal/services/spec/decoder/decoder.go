@@ -58,7 +58,7 @@ func (sp *Decoder) Decode(archFile string) (spec.Document, []arch.Notice, error)
 	return document, schemeNotices, nil
 }
 
-func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath string) (spec.Document, error) {
+func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath string) (doc, error) {
 	reader := bytes.NewBuffer(sourceCode)
 	decoder := yaml.NewDecoder(
 		reader,
@@ -75,10 +75,11 @@ func (sp *Decoder) decodeDocument(version int, sourceCode []byte, filePath strin
 		return nil, err
 	}
 
+	document.postSetup()
 	return document, nil
 }
 
-func (sp *Decoder) createEmptyDocumentBeVersion(version int) spec.Document {
+func (sp *Decoder) createEmptyDocumentBeVersion(version int) doc {
 	switch version {
 	case 1:
 		return &ArchV1{}

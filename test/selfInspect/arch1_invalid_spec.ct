@@ -25,21 +25,21 @@ $ go-arch-lint self-inspect --project-path ${PWD}/test/check/project --arch-file
         }
       },
       {
-        "Text": "should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']",
-        "Reference": {
-          "Valid": true,
-          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
-          "Line": 39,
-          "Offset": 18
-        }
-      },
-      {
         "Text": "unknown component 'cmd'",
         "Reference": {
           "Valid": true,
           "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
           "Line": 35,
           "Offset": 11
+        }
+      },
+      {
+        "Text": "should have ref in 'mayDependOn'/'canUse' or at least one flag of ['anyProjectDeps', 'anyVendorDeps']",
+        "Reference": {
+          "Valid": true,
+          "File": "${ROOTDIR}/test/check/project/arch1_invalid_spec.yml",
+          "Line": 39,
+          "Offset": 18
         }
       },
       {

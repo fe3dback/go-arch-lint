@@ -1,3 +1,8 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch1_invalid_spec_unsupported_version.yml --output-color=false --> FAIL
 module: github.com/fe3dback/go-arch-lint/test/check/project
+linters:
+   On | Base: component imports # always on
+   On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
+   On | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+
 failed to provide json scheme for validation: unknown version: 999

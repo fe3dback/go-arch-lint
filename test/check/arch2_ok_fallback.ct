@@ -1,3 +1,8 @@
 $ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch2_ok_fallback.yml --output-color=false
 module: github.com/fe3dback/go-arch-lint/test/check/project
+linters:
+   On | Base: component imports # always on
+   On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
+  Off | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+
 OK - No warnings found

@@ -23,8 +23,8 @@ type (
 	}
 
 	ArchV3Allow struct {
-		FDepOnAnyVendor ref[bool]  `json:"depOnAnyVendor"`
-		FDeepScan       ref[*bool] `json:"deepScan"`
+		FDepOnAnyVendor ref[bool] `json:"depOnAnyVendor"`
+		FDeepScan       ref[bool] `json:"deepScan"`
 	}
 
 	ArchV3Vendor struct {
@@ -40,9 +40,26 @@ type (
 		FCanUse         []ref[string] `json:"canUse"`
 		FAnyProjectDeps ref[bool]     `json:"anyProjectDeps"`
 		FAnyVendorDeps  ref[bool]     `json:"anyVendorDeps"`
-		FDeepScan       ref[*bool]    `json:"deepScan"`
+		FDeepScan       ref[bool]     `json:"deepScan"`
 	}
 )
+
+func (a *ArchV3) postSetup() {
+	// deep scan nesting (global settings -> local settings)
+	for depName := range a.FDependencies {
+		localDeepScan := a.FDependencies[depName].ref.Value.FDeepScan
+
+		if !localDeepScan.defined {
+			dep := a.FDependencies[depName]
+			dep.ref.Value.FDeepScan = ref[bool]{
+				defined: true,
+				ref:     a.FAllow.DeepScan(),
+			}
+
+			a.FDependencies[depName] = dep
+		}
+	}
+}
 
 func (a *ArchV3) Version() common.Referable[int] {
 	return castRef(a.FVersion)
@@ -52,11 +69,11 @@ func (a *ArchV3) WorkingDirectory() common.Referable[string] {
 	// fallback from version 1
 	actualWorkDirectory := "./"
 
-	if a.FWorkDir.Value != "" {
-		actualWorkDirectory = a.FWorkDir.Value
+	if a.FWorkDir.ref.Value != "" {
+		actualWorkDirectory = a.FWorkDir.ref.Value
 	}
 
-	return common.NewReferable(actualWorkDirectory, a.FWorkDir.Reference)
+	return common.NewReferable(actualWorkDirectory, a.FWorkDir.ref.Reference)
 }
 
 func (a *ArchV3) Options() spec.Options {
@@ -74,7 +91,7 @@ func (a *ArchV3) ExcludedFilesRegExp() []common.Referable[string] {
 func (a *ArchV3) Vendors() spec.Vendors {
 	casted := make(spec.Vendors, len(a.FVendors))
 	for name, vendor := range a.FVendors {
-		casted[name] = common.NewReferable(spec.Vendor(vendor.Value), vendor.Reference)
+		casted[name] = common.NewReferable(spec.Vendor(vendor.ref.Value), vendor.ref.Reference)
 	}
 
 	return casted
@@ -87,7 +104,7 @@ func (a *ArchV3) CommonVendors() []common.Referable[string] {
 func (a *ArchV3) Components() spec.Components {
 	casted := make(spec.Components, len(a.FComponents))
 	for name, cmp := range a.FComponents {
-		casted[name] = common.NewReferable(spec.Component(cmp.Value), cmp.Reference)
+		casted[name] = common.NewReferable(spec.Component(cmp.ref.Value), cmp.ref.Reference)
 	}
 
 	return casted
@@ -100,7 +117,7 @@ func (a *ArchV3) CommonComponents() []common.Referable[string] {
 func (a *ArchV3) Dependencies() spec.Dependencies {
 	casted := make(spec.Dependencies, len(a.FDependencies))
 	for name, dep := range a.FDependencies {
-		casted[name] = common.NewReferable(spec.DependencyRule(dep.Value), dep.Reference)
+		casted[name] = common.NewReferable(spec.DependencyRule(dep.ref.Value), dep.ref.Reference)
 	}
 
 	return casted
@@ -113,15 +130,12 @@ func (a ArchV3Allow) IsDependOnAnyVendor() common.Referable[bool] {
 }
 
 func (a ArchV3Allow) DeepScan() common.Referable[bool] {
-	deepScan := false
-	if a.FDeepScan.Value == nil {
-		// be default it`s on from V3+
-		deepScan = true
-	} else {
-		deepScan = *a.FDeepScan.Value
+	if a.FDeepScan.defined {
+		return a.FDeepScan.ref
 	}
 
-	return common.NewReferable(deepScan, a.FDeepScan.Reference)
+	// be default it`s on from V3+
+	return common.NewEmptyReferable(true)
 }
 
 // --
@@ -167,13 +181,5 @@ func (a ArchV3Rule) AnyVendorDeps() common.Referable[bool] {
 }
 
 func (a ArchV3Rule) DeepScan() common.Referable[bool] {
-	deepScan := false
-	if a.FDeepScan.Value == nil {
-		// be default it`s on from V3+
-		deepScan = true
-	} else {
-		deepScan = *a.FDeepScan.Value
-	}
-
-	return common.NewReferable(deepScan, a.FDeepScan.Reference)
+	return a.FDeepScan.ref
 }

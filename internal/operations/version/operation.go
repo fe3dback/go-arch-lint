@@ -45,8 +45,8 @@ func (o *Operation) fromCompiledMeta() (models.CmdVersionOut, error) {
 		return models.CmdVersionOut{}, fmt.Errorf("nothing to read")
 	}
 
-	vcsHash := ""
-	vcsTime := ""
+	vcsHash := "unknown"
+	vcsTime := "unknown"
 
 	for _, setting := range bi.Settings {
 		if setting.Key == "vcs.revision" {
