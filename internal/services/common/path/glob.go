@@ -19,7 +19,12 @@ func glob(pattern string) ([]string, error) {
 		// passthru to core package if no double-star
 		return filepath.Glob(pattern)
 	}
-	return globs(strings.Split(pattern, "**")).expand()
+	split := strings.Split(pattern, "**")
+	for i, s := range split {
+		split[i] = strings.TrimRight(s, "/")
+	}
+
+	return globs(split).expand()
 }
 
 // expand finds matches for the provided globs.
