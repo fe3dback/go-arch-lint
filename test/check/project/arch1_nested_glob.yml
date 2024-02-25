@@ -1,0 +1,57 @@
+version: 1
+
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - internal/excluded
+  - vendor
+
+excludeFiles:
+  - "^.*_test\\.go$"
+
+components:
+  main:
+    in: internal
+
+  a:
+    in: internal/a
+
+  allowb:
+    in: internal/a/allowb
+
+  b:
+    in: internal/b
+
+  c:
+    in: internal/c/**
+
+  e:
+    in: internal/e/**
+
+  d:
+    in: internal/d/**
+
+  nc:
+    in: internal/not_covered
+
+  common:
+    in: internal/common/**
+
+  models:
+    in: internal/*/models/**
+
+commonComponents:
+  - common
+  - a
+  - c
+  - models
+  - e
+
+deps:
+  allowb:
+    mayDependOn:
+      - b
+
+  e:
+    anyVendorDeps: true
