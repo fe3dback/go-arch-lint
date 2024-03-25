@@ -28,10 +28,10 @@ commonComponents:
 
 deps:
   handler:
-    canDependOn:
+    mayDependOn:
       - service
   service:
-    canDependOn:
+    mayDependOn:
       - repository
 ```
 
