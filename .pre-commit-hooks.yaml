@@ -1,0 +1,6 @@
+- id: go-arch-lint
+  name: Check Go repo architecture
+  description: Check Go repo architecture using go-arch-lint
+  entry: go-arch-lint check
+  language: golang
+  pass_filenames: false
