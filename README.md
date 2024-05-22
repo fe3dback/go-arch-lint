@@ -162,3 +162,27 @@ go-arch-lint graph
 ```
 
 See full [graph documentation](docs/graph/README.md) for details.
+
+### Pre-Commit
+
+go-arch-lint can also be used as a pre-commit hook, acting before each commit is made.  
+This is useful to always check that your new code still respects your repo architecture, and to always update your graph SVG.
+
+1. Install pre-commit from [https://pre-commit.com/#install](https://pre-commit.com/#install)
+2. Create a `.pre-commit-config.yaml` file at the root of your repository with the following content:
+
+```go
+repos:
+  - repo: https://github.com/fe3dback/go-arch-lint
+    rev: master
+    hooks:
+      - id: go-arch-lint-check
+      - id: go-arch-lint-graph
+        args: ['--include-vendors=true', '--out=go-arch-lint-graph.svg']
+```
+
+3. If needed, add any flags you need in `args`.
+4. Auto-update the config to the latest repos' versions by executing `pre-commit autoupdate`
+5. Install with `pre-commit install`
+6. Now you're all set! Try a commit, and see the logs (passing or failing).
+

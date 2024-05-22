@@ -1,0 +1,13 @@
+- id: go-arch-lint-check
+  name: Check Go repo architecture
+  description: Check Go repo architecture using go-arch-lint
+  entry: go-arch-lint check
+  language: golang
+  pass_filenames: false
+
+- id: go-arch-lint-graph
+  name: Generate graph for Go repo architecture
+  description: Generate graph for Go repo architecture using go-arch-lint
+  entry: go-arch-lint graph
+  language: golang
+  pass_filenames: false
