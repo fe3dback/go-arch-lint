@@ -6,6 +6,7 @@ allow:
 exclude:
   - internal/excluded
   - vendor
+  - variadic
 
 excludeFiles:
   - "^.*_test\\.go$"

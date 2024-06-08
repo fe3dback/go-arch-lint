@@ -19,6 +19,7 @@ type (
 		ArgumentDefinition Source           // where method param type defined (func (a,b,c _int_))
 		Interface          Interface        // used interface for injection
 		Implementations    []Implementation // all code links to this param
+		IsVariadic         bool             // function param is variadic
 	}
 
 	Interface struct {

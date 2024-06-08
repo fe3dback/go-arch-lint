@@ -131,43 +131,53 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 				for gateIndex := range method.Gates {
 					gate := &method.Gates[gateIndex]
 					callMethod := callExpr.Fun
-					callParam := callExpr.Args[gate.Index]
-
-					paramType := astPackage.TypesInfo.TypeOf(callParam)
-					targetName, targetPos, valid := s.extractTargetFromCallParam(paramType)
-					if !valid {
-						// unknown injection type, possible generics or other not known
-						// go features on current moment
-						// we can extend this function later for new cases
+					if gate.IsVariadic && len(callExpr.Args) <= gate.Index {
 						continue
 					}
-
-					targetDefinitions := s.sourceFromToken(targetPos)
-					if targetDefinitions.Import == method.Definition.Import {
-						// injector use our public interface for typing
-						// we exclude this cases from more deep analyse, because of runtime
-						// types injection. (we have not known type on compile time)
-						continue
+					maxIdx := gate.Index
+					if gate.IsVariadic {
+						maxIdx = len(callExpr.Args) - 1
 					}
 
-					if !targetDefinitions.Place.Valid {
-						// invalid target
-						// possible is some not importable std const like `errors`
-						// or not known ast at this moment
-						continue
-					}
+					for idx := gate.Index; idx <= maxIdx; idx++ {
+						callParam := callExpr.Args[gate.Index]
 
-					gate.Implementations = append(gate.Implementations, Implementation{
-						Injector: Injector{
-							CodeName:         s.extractCodeFromASTNode(callParam),
-							ParamDefinition:  s.sourceFromToken(callParam.Pos()),
-							MethodDefinition: s.sourceFromToken(callMethod.Pos()),
-						},
-						Target: Target{
-							StructName: targetName,
-							Definition: targetDefinitions,
-						},
-					})
+						paramType := astPackage.TypesInfo.TypeOf(callParam)
+						targetName, targetPos, valid := s.extractTargetFromCallParam(paramType)
+						if !valid {
+							// unknown injection type, possible generics or other not known
+							// go features on current moment
+							// we can extend this function later for new cases
+							continue
+						}
+
+						targetDefinitions := s.sourceFromToken(targetPos)
+						if targetDefinitions.Import == method.Definition.Import {
+							// injector use our public interface for typing
+							// we exclude this cases from more deep analyse, because of runtime
+							// types injection. (we have not known type on compile time)
+							continue
+						}
+
+						if !targetDefinitions.Place.Valid {
+							// invalid target
+							// possible is some not importable std const like `errors`
+							// or not known ast at this moment
+							continue
+						}
+
+						gate.Implementations = append(gate.Implementations, Implementation{
+							Injector: Injector{
+								CodeName:         s.extractCodeFromASTNode(callParam),
+								ParamDefinition:  s.sourceFromToken(callParam.Pos()),
+								MethodDefinition: s.sourceFromToken(callMethod.Pos()),
+							},
+							Target: Target{
+								StructName: targetName,
+								Definition: targetDefinitions,
+							},
+						})
+					}
 				}
 			})
 		}
