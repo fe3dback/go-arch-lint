@@ -131,11 +131,15 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 				for gateIndex := range method.Gates {
 					gate := &method.Gates[gateIndex]
 					callMethod := callExpr.Fun
+
+					// variadic function arguments may be absent in callExpr.Args
 					if gate.IsVariadic && len(callExpr.Args) <= gate.Index {
 						continue
 					}
 					maxIdx := gate.Index
 					if gate.IsVariadic {
+						// variadic function arguments are passed as individual elements in callExpr.Args
+						// iterate over callExpr.Args to process all variadic arguments
 						maxIdx = len(callExpr.Args) - 1
 					}
 
