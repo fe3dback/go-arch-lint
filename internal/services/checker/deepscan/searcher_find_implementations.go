@@ -140,7 +140,7 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 					}
 
 					for idx := gate.Index; idx <= maxIdx; idx++ {
-						callParam := callExpr.Args[gate.Index]
+						callParam := callExpr.Args[idx]
 
 						paramType := astPackage.TypesInfo.TypeOf(callParam)
 						targetName, targetPos, valid := s.extractTargetFromCallParam(paramType)
