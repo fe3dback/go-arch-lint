@@ -84,6 +84,11 @@ func (s *Searcher) extractMethodGates(astPackage *packages.Package, method *ast.
 				pos = field.Pos()
 			}
 
+			var isVariadic bool
+			if _, ok := field.Type.(*ast.Ellipsis); ok {
+				isVariadic = true
+			}
+
 			params = append(params, Gate{
 				MethodName:         method.Name.Name,
 				ParamName:          fieldIdent.Name,
@@ -95,6 +100,7 @@ func (s *Searcher) extractMethodGates(astPackage *packages.Package, method *ast.
 					Definition: s.sourceFromToken(pos),
 					GoType:     paramType.String(),
 				},
+				IsVariadic: isVariadic,
 			})
 		}
 	}

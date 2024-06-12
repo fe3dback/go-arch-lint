@@ -1,0 +1,19 @@
+version: 3
+
+workdir:
+  variadic
+
+allow:
+  depOnAnyVendor: false
+  deepScan: true
+
+components:
+  foo: { in: foo }
+  use_foo: { in: use_foo }
+
+deps:
+  foo:
+    anyProjectDeps: true
+
+  use_foo:
+    anyProjectDeps: true
