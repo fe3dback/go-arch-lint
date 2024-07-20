@@ -4,6 +4,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/app/internal/build"
+	"github.com/fe3dback/go-arch-lint/v4/internal/app/internal/flags"
 )
 
 func (c *Container) Cli() *cli.App {
@@ -16,7 +17,7 @@ func (c *Container) Cli() *cli.App {
 			Commands: []*cli.Command{
 				c.cliCommandMapping(),
 			},
-			Flags:    nil,
+			Flags:    flags.GlobalFlags,
 			Compiled: build.CompileTime,
 			Authors: []*cli.Author{
 				{
@@ -36,7 +37,7 @@ func (c *Container) cliCommandMapping() *cli.Command {
 			Aliases:     []string{"ps", "ls", "m"},
 			Description: "output mapping table between files and components",
 			Action:      c.makeCliCommand("check", c.commandMapping()),
-			Flags:       c.commandMappingFlags(),
+			Flags:       append(flags.GlobalFlags, c.commandMappingFlags()...),
 		}
 	})
 }

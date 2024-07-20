@@ -13,20 +13,71 @@ type CommandHandler interface {
 }
 
 func (c *Container) makeCliCommand(name string, handler CommandHandler) cli.ActionFunc {
-	return func(context *cli.Context) error {
-		model, err := handler.Execute(context)
+	return func(cCtx *cli.Context) error {
+		model, err := handler.Execute(cCtx)
 		if err != nil {
 			return fmt.Errorf("command '%s' failed: %w", name, err)
 		}
 
-		rnd := c.serviceRenderer()
-		// todo: render mode
-		out, err := rnd.Render(models.OutputTypeDefault, model)
+		outputType, err := extractOutputType(cCtx)
+		if err != nil {
+			return fmt.Errorf("failed extracting output type: %w", err)
+		}
+
+		rnd := c.serviceRenderer(cCtx)
+		out, err := rnd.Render(model, models.RenderOptions{
+			OutputType: outputType,
+			FormatJson: !cCtx.Bool(models.FlagOutputJSONWithoutFormatting),
+		})
 		if err != nil {
 			return fmt.Errorf("command '%s' render failed: %w", name, err)
 		}
 
-		fmt.Println(out)
+		_, err = fmt.Fprintln(cCtx.App.Writer, out)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
+}
+
+func extractOutputType(cCtx *cli.Context) (models.OutputType, error) {
+	forceJSON := cCtx.Bool(models.FlagOutputTypeJSON)
+	outputType := cCtx.String(models.FlagOutputType)
+
+	if outputType == models.OutputTypeDefault {
+		outputType = models.OutputTypeASCII
+	}
+
+	if cCtx.IsSet(models.FlagOutputTypeJSON) && cCtx.IsSet(models.FlagOutputType) {
+		if forceJSON && outputType == models.OutputTypeASCII {
+			return "", fmt.Errorf("flag '--%s' not compatible with '--%s %s'",
+				models.FlagOutputTypeJSON,
+				models.FlagOutputType,
+				models.OutputTypeASCII,
+			)
+		}
+	}
+
+	if forceJSON {
+		outputType = models.OutputTypeJSON
+	}
+
+	if cCtx.IsSet(models.FlagOutputJSONWithoutFormatting) && outputType != models.OutputTypeJSON {
+		return "", fmt.Errorf("flag '--%s' used only with '--%s'",
+			models.FlagOutputJSONWithoutFormatting,
+			models.FlagOutputTypeJSON,
+		)
+	}
+
+	if cCtx.IsSet(models.FlagOutputUseAsciiColors) && outputType != models.OutputTypeASCII {
+		return "", fmt.Errorf("flag '--%s' used only with '--%s %s'",
+			models.FlagOutputUseAsciiColors,
+			models.FlagOutputType,
+			models.OutputTypeASCII,
+		)
+	}
+
+	return outputType, nil
 }

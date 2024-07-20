@@ -11,16 +11,17 @@ import (
 
 const (
 	sourceText     = "hello"
-	sourceTextRed  = "hello"
-	sourceTextBlue = "hello"
+	sourceTextRed  = "\x1b[91mhello\x1b[0m"
+	sourceTextBlue = "\x1b[94mhello\x1b[0m"
 )
 
 type deps struct {
 }
 
 type in struct {
-	color models.ColorName
-	text  string
+	useColors bool
+	color     models.ColorName
+	text      string
 }
 
 func TestASCII_Colorize(t *testing.T) {
@@ -30,6 +31,15 @@ func TestASCII_Colorize(t *testing.T) {
 		in    in
 		out   string
 	}{
+		{
+			name: "happy_no_colors",
+			setup: func(d *deps) {
+			},
+			in: createIn(models.ColorRed, func(in *in) {
+				in.useColors = false
+			}),
+			out: sourceText,
+		},
 		{
 			name: "happy_red",
 			setup: func(d *deps) {
@@ -56,18 +66,19 @@ func TestASCII_Colorize(t *testing.T) {
 			deps := deps{}
 			tt.setup(&deps)
 
-			r := colorizer.New()
+			r := colorizer.New(tt.in.useColors)
 
 			got := r.Colorize(tt.in.color, tt.in.text)
-			require.Equal(t, []byte(tt.out), []byte(got))
+			require.Equal(t, tt.out, got)
 		})
 	}
 }
 
 func createIn(col models.ColorName, mutators ...func(*in)) in {
 	in := in{
-		color: col,
-		text:  sourceText,
+		color:     col,
+		text:      sourceText,
+		useColors: true,
 	}
 
 	for _, mutate := range mutators {

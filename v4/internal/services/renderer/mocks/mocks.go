@@ -15,31 +15,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MocktypeRenderer is a mock of typeRenderer interface.
-type MocktypeRenderer struct {
+// MockasciiRenderer is a mock of asciiRenderer interface.
+type MockasciiRenderer struct {
 	ctrl     *gomock.Controller
-	recorder *MocktypeRendererMockRecorder
+	recorder *MockasciiRendererMockRecorder
 }
 
-// MocktypeRendererMockRecorder is the mock recorder for MocktypeRenderer.
-type MocktypeRendererMockRecorder struct {
-	mock *MocktypeRenderer
+// MockasciiRendererMockRecorder is the mock recorder for MockasciiRenderer.
+type MockasciiRendererMockRecorder struct {
+	mock *MockasciiRenderer
 }
 
-// NewMocktypeRenderer creates a new mock instance.
-func NewMocktypeRenderer(ctrl *gomock.Controller) *MocktypeRenderer {
-	mock := &MocktypeRenderer{ctrl: ctrl}
-	mock.recorder = &MocktypeRendererMockRecorder{mock}
+// NewMockasciiRenderer creates a new mock instance.
+func NewMockasciiRenderer(ctrl *gomock.Controller) *MockasciiRenderer {
+	mock := &MockasciiRenderer{ctrl: ctrl}
+	mock.recorder = &MockasciiRendererMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MocktypeRenderer) EXPECT() *MocktypeRendererMockRecorder {
+func (m *MockasciiRenderer) EXPECT() *MockasciiRendererMockRecorder {
 	return m.recorder
 }
 
 // Render mocks base method.
-func (m *MocktypeRenderer) Render(model any) (string, error) {
+func (m *MockasciiRenderer) Render(model any) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Render", model)
 	ret0, _ := ret[0].(string)
@@ -48,7 +48,45 @@ func (m *MocktypeRenderer) Render(model any) (string, error) {
 }
 
 // Render indicates an expected call of Render.
-func (mr *MocktypeRendererMockRecorder) Render(model any) *gomock.Call {
+func (mr *MockasciiRendererMockRecorder) Render(model any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Render", reflect.TypeOf((*MocktypeRenderer)(nil).Render), model)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Render", reflect.TypeOf((*MockasciiRenderer)(nil).Render), model)
+}
+
+// MockjsonRenderer is a mock of jsonRenderer interface.
+type MockjsonRenderer struct {
+	ctrl     *gomock.Controller
+	recorder *MockjsonRendererMockRecorder
+}
+
+// MockjsonRendererMockRecorder is the mock recorder for MockjsonRenderer.
+type MockjsonRendererMockRecorder struct {
+	mock *MockjsonRenderer
+}
+
+// NewMockjsonRenderer creates a new mock instance.
+func NewMockjsonRenderer(ctrl *gomock.Controller) *MockjsonRenderer {
+	mock := &MockjsonRenderer{ctrl: ctrl}
+	mock.recorder = &MockjsonRendererMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockjsonRenderer) EXPECT() *MockjsonRendererMockRecorder {
+	return m.recorder
+}
+
+// Render mocks base method.
+func (m *MockjsonRenderer) Render(model any, format bool) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Render", model, format)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Render indicates an expected call of Render.
+func (mr *MockjsonRendererMockRecorder) Render(model, format any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Render", reflect.TypeOf((*MockjsonRenderer)(nil).Render), model, format)
 }

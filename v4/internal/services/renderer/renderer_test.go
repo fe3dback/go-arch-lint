@@ -24,8 +24,8 @@ type testModel struct {
 // ---
 
 type deps struct {
-	jsonRenderer  *mocks.MocktypeRenderer
-	asciiRenderer *mocks.MocktypeRenderer
+	jsonRenderer  *mocks.MockjsonRenderer
+	asciiRenderer *mocks.MockasciiRenderer
 }
 
 type in struct {
@@ -68,8 +68,8 @@ func TestRenderer_Render(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			deps := deps{
-				jsonRenderer:  mocks.NewMocktypeRenderer(ctrl),
-				asciiRenderer: mocks.NewMocktypeRenderer(ctrl),
+				jsonRenderer:  mocks.NewMockjsonRenderer(ctrl),
+				asciiRenderer: mocks.NewMockasciiRenderer(ctrl),
 			}
 			tt.setup(&deps)
 
@@ -78,7 +78,10 @@ func TestRenderer_Render(t *testing.T) {
 				deps.asciiRenderer,
 			)
 
-			got, gotErr := r.Render(tt.in.outputType, tt.in.model)
+			got, gotErr := r.Render(tt.in.model, models.RenderOptions{
+				OutputType: tt.in.outputType,
+				FormatJson: true,
+			})
 
 			if tt.wantErr != "" {
 				require.EqualError(t, gotErr, tt.wantErr)
@@ -121,7 +124,7 @@ func (d *deps) expectAsciiRendered() {
 func (d *deps) expectJSONRendered() {
 	d.jsonRenderer.
 		EXPECT().
-		Render(createModel()).
+		Render(createModel(), true).
 		Times(1).
 		Return(jsonResult, nil)
 }

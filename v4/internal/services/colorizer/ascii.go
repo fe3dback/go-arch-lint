@@ -7,13 +7,22 @@ import (
 )
 
 type ASCII struct {
+	useColors bool
 }
 
-func New() *ASCII {
-	return &ASCII{}
+func New(useColors bool) *ASCII {
+	return &ASCII{
+		useColors: useColors,
+	}
 }
 
 func (c *ASCII) Colorize(color models.ColorName, text string) string {
+	if !c.useColors {
+		return text
+	}
+
+	cl.NoColor = false
+
 	switch color {
 	case models.ColorRed:
 		return cl.HiRedString(text)

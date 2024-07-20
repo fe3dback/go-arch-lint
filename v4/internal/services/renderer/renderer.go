@@ -7,13 +7,13 @@ import (
 )
 
 type Renderer struct {
-	jsonRenderer  typeRenderer
-	asciiRenderer typeRenderer
+	jsonRenderer  jsonRenderer
+	asciiRenderer asciiRenderer
 }
 
 func New(
-	jsonRenderer typeRenderer,
-	asciiRenderer typeRenderer,
+	jsonRenderer jsonRenderer,
+	asciiRenderer asciiRenderer,
 ) *Renderer {
 	return &Renderer{
 		jsonRenderer:  jsonRenderer,
@@ -21,17 +21,13 @@ func New(
 	}
 }
 
-func (r *Renderer) Render(outputType models.OutputType, model any) (string, error) {
-	if outputType == models.OutputTypeDefault {
-		outputType = models.OutputTypeASCII
-	}
-
-	switch outputType {
+func (r *Renderer) Render(model any, options models.RenderOptions) (string, error) {
+	switch options.OutputType {
 	case models.OutputTypeJSON:
-		return r.jsonRenderer.Render(model)
+		return r.jsonRenderer.Render(model, options.FormatJson)
 	case models.OutputTypeASCII:
 		return r.asciiRenderer.Render(model)
 	default:
-		return "", fmt.Errorf("unknown renderer type: %s", outputType)
+		return "", fmt.Errorf("unknown renderer type: %s", options.OutputType)
 	}
 }
