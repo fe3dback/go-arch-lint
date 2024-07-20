@@ -1,0 +1,4 @@
+green_A: green<1>
+red_A: red<1>
+super_B: world
+   A is 1
