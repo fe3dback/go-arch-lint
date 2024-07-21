@@ -49,7 +49,7 @@ commonVendors:
 commonComponents:
   - models
 
-deps:
+dependencies:
   main:
     mayDependOn:
       - container
