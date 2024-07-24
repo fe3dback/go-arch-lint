@@ -23,20 +23,23 @@ func (r *Reader) ReadFile(path models.PathAbsolute) (models.Config, error) {
 		return models.Config{}, fmt.Errorf("failed to provide source code of archfile: %w", err)
 	}
 
+	return r.Parse(path, sourceCode)
+}
+
+func (r *Reader) Parse(path models.PathAbsolute, source []byte) (models.Config, error) {
 	tCtx := TransformContext{
 		file:   path,
-		source: sourceCode,
+		source: source,
 	}
 
 	// read only doc Version
-	documentVersion, err := r.readVersion(sourceCode)
+	documentVersion, err := r.readVersion(source)
 	if err != nil {
-		// invalid yaml document
-		return models.Config{}, fmt.Errorf("failed to read 'version' from arch file: %w", err)
+		return transformFromSyntaxError(tCtx, fmt.Errorf("failed to read 'version' from arch file: %w", err)), nil
 	}
 
 	// try to read all document
-	document, err := r.decodeDocument(documentVersion, sourceCode)
+	document, err := r.decodeDocument(documentVersion, source)
 	if err != nil {
 		return transformFromSyntaxError(tCtx, err), nil
 	}
@@ -54,7 +57,7 @@ func (r *Reader) readVersion(sourceCode []byte) (int, error) {
 
 	err := decoder.Decode(&document)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed decode version from yaml doc: %w", err)
 	}
 
 	return document.Version, nil
@@ -73,7 +76,7 @@ func (r *Reader) decodeDocument(version int, sourceCode []byte) (any, error) {
 
 	err := decoder.Decode(document)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed decode yaml: %w", err)
 	}
 
 	return document, nil

@@ -1,0 +1,8 @@
+{{- /* gotype: github.com/fe3dback/go-arch-lint/v4/internal/models.CmdStdoutErrorOut */ -}}
+
+error: {{ .Error | colorize "red" }}
+
+{{ if .Reference.Valid }}
+    todo: print code sample:
+    {{ .Reference.File }}:{{ .Reference.Line }} ({{.Reference.Column}})
+{{ end }}

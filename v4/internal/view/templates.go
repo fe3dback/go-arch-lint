@@ -7,6 +7,9 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
+//go:embed view_error.gohtml
+var viewError []byte
+
 ////go:embed view_check.gohtml
 //var viewCheck []byte
 //
@@ -29,6 +32,7 @@ var viewMapping []byte
 //var viewVersion []byte
 
 var Templates = map[string]string{
+	tpl(models.CmdStdoutErrorOut{}): string(viewError),
 	//tpl(models.CmdCheckOut{}):       string(viewCheck),
 	//tpl(models.CmdErrorOut{}):       string(viewError),
 	//tpl(models.CmdGraphOut{}):       string(viewGraph),

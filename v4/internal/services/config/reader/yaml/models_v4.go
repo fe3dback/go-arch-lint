@@ -15,7 +15,7 @@ type (
 
 	ModelV4Settings struct {
 		Imports ModelV4SettingsImports `json:"imports"`
-		Tags    ModelV4SettingsTags    `json:"tags"`
+		Tags    ModelV4SettingsTags    `json:"structTags"`
 	}
 
 	ModelV4SettingsImports struct {
@@ -24,7 +24,7 @@ type (
 	}
 
 	ModelV4SettingsTags struct {
-		Allowed string `json:"allowed"`
+		Allowed stringList `json:"allowed"`
 	}
 
 	ModelV4Exclude struct {
@@ -33,11 +33,11 @@ type (
 	}
 
 	ModelV4Component struct {
-		In []string `json:"in"`
+		In stringList `json:"in"`
 	}
 
 	ModelV4Vendor struct {
-		In []string `json:"in"`
+		In stringList `json:"in"`
 	}
 
 	ModelV4ComponentDependencies struct {
@@ -45,6 +45,6 @@ type (
 		CanUse         []string `json:"canUse"`
 		AnyVendorDeps  bool     `json:"anyVendorDeps"`
 		AnyProjectDeps bool     `json:"anyProjectDeps"`
-		CanContainTags bool     `json:"canContainTags"`
+		CanContainTags []string `json:"canContainTags"`
 	}
 )

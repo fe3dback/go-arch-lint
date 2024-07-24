@@ -1,6 +1,7 @@
 package container
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
@@ -16,30 +17,55 @@ func (c *Container) makeCliCommand(name string, handler CommandHandler) cli.Acti
 	return func(cCtx *cli.Context) error {
 		model, err := handler.Execute(cCtx)
 		if err != nil {
-			return fmt.Errorf("command '%s' failed: %w", name, err)
+			renderErr := c.render(cCtx, name, c.extractStdoutError(name, err))
+			if renderErr != nil {
+				return renderErr
+			}
+
+			return models.NewUserLandError(err)
 		}
 
-		outputType, err := extractOutputType(cCtx)
-		if err != nil {
-			return fmt.Errorf("failed extracting output type: %w", err)
-		}
-
-		rnd := c.serviceRenderer(cCtx)
-		out, err := rnd.Render(model, models.RenderOptions{
-			OutputType: outputType,
-			FormatJson: !cCtx.Bool(models.FlagOutputJSONWithoutFormatting),
-		})
-		if err != nil {
-			return fmt.Errorf("command '%s' render failed: %w", name, err)
-		}
-
-		_, err = fmt.Fprintln(cCtx.App.Writer, out)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return c.render(cCtx, name, model)
 	}
+}
+
+func (c *Container) extractStdoutError(name string, err error) models.CmdStdoutErrorOut {
+	ref := models.NewInvalidReference()
+
+	refError := models.ReferencedError{}
+	if errors.As(err, &refError) {
+		ref = refError.Reference()
+	}
+
+	return models.CmdStdoutErrorOut{
+		Error:     fmt.Errorf("command '%s' failed: %w", name, err).Error(),
+		Reference: ref,
+	}
+}
+
+func (c *Container) render(cCtx *cli.Context, name string, model any) error {
+	outputType, err := extractOutputType(cCtx)
+	if err != nil {
+		return fmt.Errorf("failed extracting output type: %w", err)
+	}
+
+	renderMode := models.RenderOptions{
+		OutputType: outputType,
+		FormatJson: !cCtx.Bool(models.FlagOutputJSONWithoutFormatting),
+	}
+
+	rnd := c.serviceRenderer(cCtx)
+	out, err := rnd.Render(model, renderMode)
+	if err != nil {
+		return fmt.Errorf("command '%s' render failed: %w", name, err)
+	}
+
+	_, err = fmt.Fprintln(cCtx.App.Writer, out)
+	if err != nil {
+		return fmt.Errorf("print to stdout failed: %w", err)
+	}
+
+	return nil
 }
 
 func extractOutputType(cCtx *cli.Context) (models.OutputType, error) {

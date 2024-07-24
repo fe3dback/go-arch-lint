@@ -1,9 +1,9 @@
 package models
 
 const (
-	TagsAllowedEnumAll  ConfigSettingsTagsEnum = "All"
-	TagsAllowedEnumNone ConfigSettingsTagsEnum = "None"
-	TagsAllowedEnumList ConfigSettingsTagsEnum = "List"
+	ConfigSettingsTagsEnumAll  ConfigSettingsTagsEnum = "All"
+	ConfigSettingsTagsEnumNone ConfigSettingsTagsEnum = "None"
+	ConfigSettingsTagsEnumList ConfigSettingsTagsEnum = "List"
 )
 
 type (
@@ -20,8 +20,8 @@ type (
 		Exclude          ConfigExclude
 		Components       ConfigComponents
 		Vendors          ConfigVendors
-		CommonComponents []ComponentName
-		CommonVendors    []VendorName
+		CommonComponents RefSlice[ComponentName]
+		CommonVendors    RefSlice[VendorName]
 		Dependencies     ConfigDependencies
 	}
 
@@ -70,6 +70,6 @@ type (
 		CanUse         RefSlice[VendorName]
 		AnyVendorDeps  Ref[bool]
 		AnyProjectDeps Ref[bool]
-		CanContainTags Ref[bool]
+		CanContainTags RefSlice[StructTag]
 	}
 )

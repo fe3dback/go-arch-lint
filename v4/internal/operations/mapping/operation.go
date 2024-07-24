@@ -1,7 +1,6 @@
 package mapping
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
@@ -32,15 +31,7 @@ func (o *Operation) Mapping(in models.CmdMappingIn) (models.CmdMappingOut, error
 		return models.CmdMappingOut{}, fmt.Errorf("failed read config: %w", err)
 	}
 
-	if len(conf.SyntaxProblems) > 0 {
-		var err error
-
-		for _, problem := range conf.SyntaxProblems {
-			err = errors.Join(err, models.NewReferencedError(errors.New(problem.Value), problem.Ref))
-		}
-
-		return models.CmdMappingOut{}, fmt.Errorf("invalid config: %w", err)
-	}
+	_ = conf
 
 	// todo:
 	return models.CmdMappingOut{

@@ -15,10 +15,10 @@ func NewRef[T any](value T, ref Reference) Ref[T] {
 type RefSlice[T any] []Ref[T]
 
 type Reference struct {
-	File   PathAbsolute
-	Line   int
-	Column int
-	Valid  bool
+	File   PathAbsolute `json:"File"`
+	Line   int          `json:"Line"`
+	Column int          `json:"Column"`
+	Valid  bool         `json:"Valid"`
 }
 
 func NewReference(File PathAbsolute, Line int, Column int) Reference {
@@ -37,28 +37,25 @@ func NewInvalidReference() Reference {
 }
 
 type RefMap[K comparable, V any] struct {
-	values map[K]V
-	refs   map[K]Reference
+	Values map[K]V
+	Refs   map[K]Reference
 }
 
-func (rf *RefMap[K, V]) Value(key K) (V, bool) {
-	val, exist := rf.values[key]
-	return val, exist
+func NewRefMap[K comparable, V any](size int) RefMap[K, V] {
+	return RefMap[K, V]{
+		Values: make(map[K]V, size),
+		Refs:   make(map[K]Reference, size),
+	}
 }
 
-func (rf *RefMap[K, V]) Reference(key K) (Reference, bool) {
-	reference, exist := rf.refs[key]
-	return reference, exist
+func RefMapFrom[K comparable, V any](values map[K]V, refs map[K]Reference) RefMap[K, V] {
+	return RefMap[K, V]{
+		Values: values,
+		Refs:   refs,
+	}
 }
 
-func (rf *RefMap[K, V]) Data(key K) (V, Reference, bool) {
-	val, existValue := rf.values[key]
-	reference, existRef := rf.refs[key]
-
-	return val, reference, existValue && existRef
-}
-
-func (rf *RefMap[K, V]) Insert(key K, val V, ref Reference) {
-	rf.values[key] = val
-	rf.refs[key] = ref
+func (rf *RefMap[K, V]) Set(key K, val V, ref Reference) {
+	rf.Values[key] = val
+	rf.Refs[key] = ref
 }
