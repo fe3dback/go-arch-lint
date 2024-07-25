@@ -1,0 +1,7 @@
+bigconf.yml
+~~~~~~~~~~~
+   9 |       - github.com/goccy/go-yaml/**
+> 10 |       - github.com/fe3dback/go-yaml    # custom fork (need propose back PR)
+               ^
+  11 |       - github.com/fe3dback/go-yaml/** # custom fork (need propose back PR)
+  12 | 

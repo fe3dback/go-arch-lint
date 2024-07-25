@@ -1,0 +1,98 @@
+{
+  "SyntaxProblems": [
+    {
+      "Value": "config version 2 is deprecated or not implemented. Current linter version support configs range [v3-v4]",
+      "Ref": {
+        "File": "/conf.yml",
+        "Line": 2,
+        "Column": 12,
+        "Valid": true
+      }
+    }
+  ],
+  "Version": {
+    "Value": 0,
+    "Ref": {
+      "File": "",
+      "Line": 0,
+      "Column": 0,
+      "Valid": false
+    }
+  },
+  "WorkingDirectory": {
+    "Value": "",
+    "Ref": {
+      "File": "",
+      "Line": 0,
+      "Column": 0,
+      "Valid": false
+    }
+  },
+  "Settings": {
+    "DeepScan": {
+      "Value": false,
+      "Ref": {
+        "File": "",
+        "Line": 0,
+        "Column": 0,
+        "Valid": false
+      }
+    },
+    "Imports": {
+      "StrictMode": {
+        "Value": false,
+        "Ref": {
+          "File": "",
+          "Line": 0,
+          "Column": 0,
+          "Valid": false
+        }
+      },
+      "AllowAnyVendorImports": {
+        "Value": false,
+        "Ref": {
+          "File": "",
+          "Line": 0,
+          "Column": 0,
+          "Valid": false
+        }
+      }
+    },
+    "Tags": {
+      "Allowed": {
+        "Value": "",
+        "Ref": {
+          "File": "",
+          "Line": 0,
+          "Column": 0,
+          "Valid": false
+        }
+      },
+      "AllowedList": null
+    }
+  },
+  "Exclude": {
+    "RelativeDirectories": null,
+    "RelativeFiles": null
+  },
+  "Components": {
+    "Map": {
+      "Values": null,
+      "Refs": null
+    }
+  },
+  "Vendors": {
+    "Map": {
+      "Values": null,
+      "Refs": null
+    }
+  },
+  "CommonComponents": null,
+  "CommonVendors": null,
+  "Dependencies": {
+    "Map": {
+      "Values": null,
+      "Refs": null
+    }
+  }
+}

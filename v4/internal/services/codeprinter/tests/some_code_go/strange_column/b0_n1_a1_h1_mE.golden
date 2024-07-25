@@ -1,0 +1,5 @@
+  11 | 
+> 12 | var test = [1m[32m"world"[0m
+                                          ^
+  13 | 
+  14 | func newSomeCode() *someCode {

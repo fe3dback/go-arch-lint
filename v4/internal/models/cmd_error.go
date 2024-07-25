@@ -1,8 +1,9 @@
 package models
 
 type CmdStdoutErrorOut struct {
-	Error     string    `json:"Error"`
-	Reference Reference `json:"Reference"`
+	Error            string    `json:"Error"`
+	Reference        Reference `json:"Reference"`
+	ReferencePreview string    `json:"-"`
 }
 
 // UserLandError will be rendered to ascii or json,

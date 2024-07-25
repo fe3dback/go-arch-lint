@@ -11,6 +11,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 		Version:          models.NewRef(models.ConfigVersion(doc.Version), tCtx.createReference("$.version")),
 		WorkingDirectory: models.NewRef(models.PathRelative(doc.WorkingDirectory), tCtx.createReference("$.workingDirectory")),
 		Settings: models.ConfigSettings{
+			DeepScan: models.NewRef(true, models.NewInvalidReference()),
 			Imports: models.ConfigSettingsImports{
 				StrictMode:            models.NewRef(doc.Settings.Imports.StrictMode, tCtx.createReference("$.settings.imports.strictMode")),
 				AllowAnyVendorImports: models.NewRef(doc.Settings.Imports.AllowAnyVendorImports, tCtx.createReference("$.settings.imports.allowAnyVendorImports")),

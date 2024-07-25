@@ -26,8 +26,9 @@ type (
 	}
 
 	ConfigSettings struct {
-		Imports ConfigSettingsImports
-		Tags    ConfigSettingsTags
+		DeepScan Ref[bool]
+		Imports  ConfigSettingsImports
+		Tags     ConfigSettingsTags
 	}
 
 	ConfigSettingsImports struct {

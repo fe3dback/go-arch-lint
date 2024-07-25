@@ -29,6 +29,15 @@
     }
   },
   "Settings": {
+    "DeepScan": {
+      "Value": false,
+      "Ref": {
+        "File": "",
+        "Line": 0,
+        "Column": 0,
+        "Valid": false
+      }
+    },
     "Imports": {
       "StrictMode": {
         "Value": false,

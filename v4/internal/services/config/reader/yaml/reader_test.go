@@ -24,8 +24,13 @@ func TestReader_Parse(t *testing.T) {
 		testConfig string
 		wantError  string
 	}{
+		{testConfig: "version_below_supported"},
+		{testConfig: "version_above_supported"},
 		{testConfig: "syntax_problem_elem"},
 		{testConfig: "syntax_problem_sys"},
+		{testConfig: "3_min"},
+		{testConfig: "3_full"},
+		{testConfig: "3_deepscan"},
 		{testConfig: "4_min"},
 		{testConfig: "4_full"},
 		{testConfig: "4_tags_list"},

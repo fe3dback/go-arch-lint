@@ -1,0 +1,10 @@
+version: 3
+
+components:
+  main:                { in: main }
+  container:           { in: container }
+
+deps:
+  main:
+    mayDependOn:
+      - container

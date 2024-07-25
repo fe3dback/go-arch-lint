@@ -2,7 +2,8 @@
 
 error: {{ .Error | colorize "red" }}
 
-{{ if .Reference.Valid }}
-    todo: print code sample:
-    {{ .Reference.File }}:{{ .Reference.Line }} ({{.Reference.Column}})
-{{ end }}
+{{ " " }}
+
+{{ .ReferencePreview }}
+
+{{ " " }}

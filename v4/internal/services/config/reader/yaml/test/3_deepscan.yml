@@ -1,0 +1,13 @@
+version: 3
+
+allow:
+  deepScan: true
+
+components:
+  main:                { in: main }
+  container:           { in: container }
+
+deps:
+  main:
+    mayDependOn:
+      - container

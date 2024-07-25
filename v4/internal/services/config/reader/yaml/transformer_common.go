@@ -25,10 +25,11 @@ func transformFromSyntaxError(tCtx TransformContext, err error) models.Config {
 
 func transform(tCtx TransformContext, doc any) (models.Config, error) {
 	switch typed := doc.(type) {
+	case *ModelV3:
+		return transformV3(tCtx, *typed), nil
 	case *ModelV4:
 		return transformV4(tCtx, *typed), nil
 	}
 
-	// todo: add all versions
 	return models.Config{}, fmt.Errorf("unknown document type %T", doc)
 }

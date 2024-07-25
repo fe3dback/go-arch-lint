@@ -1,0 +1,11 @@
+
+  version: 5
+
+components:
+  main:                { in: app }
+  models:              { in: models }
+
+dependencies:
+  main:
+    mayDependOn:
+      - models

@@ -10,6 +10,11 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
+const (
+	supportedVersionMin = 3
+	supportedVersionMax = 4
+)
+
 type Reader struct {
 }
 
@@ -36,6 +41,18 @@ func (r *Reader) Parse(path models.PathAbsolute, source []byte) (models.Config, 
 	documentVersion, err := r.readVersion(source)
 	if err != nil {
 		return transformFromSyntaxError(tCtx, fmt.Errorf("failed to read 'version' from arch file: %w", err)), nil
+	}
+
+	if documentVersion < supportedVersionMin || documentVersion > supportedVersionMax {
+		return models.Config{
+			SyntaxProblems: []models.Ref[string]{
+				{
+					Value: fmt.Sprintf("config version %d is deprecated or not implemented. Current linter version support configs range [v%d-v%d]",
+						documentVersion, supportedVersionMin, supportedVersionMax),
+					Ref: tCtx.createReference("$.version"),
+				},
+			},
+		}, nil
 	}
 
 	// try to read all document
@@ -84,15 +101,8 @@ func (r *Reader) decodeDocument(version int, sourceCode []byte) (any, error) {
 
 func (r *Reader) createEmptyDocumentBeVersion(version int) any {
 	switch version {
-	case 1:
-		// todo
-		panic("not implemented v1")
-	case 2:
-		// todo
-		panic("not implemented v2")
 	case 3:
-		// todo
-		panic("not implemented v3")
+		return &ModelV3{}
 	}
 
 	// latest be default (it will be rejected next in spec validator, if version is not v4)

@@ -1,0 +1,5 @@
+some_code.go
+~~~~~~~~~~~~
+  1 | //go:build none
+  2 | 
+  3 | package tests

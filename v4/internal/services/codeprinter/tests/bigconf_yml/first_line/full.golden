@@ -1,0 +1,6 @@
+bigconf.yml
+~~~~~~~~~~~
+> 1 | version: 4
+      ^
+  2 | workingDirectory: internal
+  3 | 

@@ -8,7 +8,7 @@ import (
 
 // todo: remove
 type ConfRndTmp interface {
-	Read(path models.PathAbsolute) (models.Config, error)
+	FetchSpec(path models.PathAbsolute) (models.Config, error)
 }
 
 type Operation struct {
@@ -26,7 +26,7 @@ func (o *Operation) Mapping(in models.CmdMappingIn) (models.CmdMappingOut, error
 	//  - this will found dir/conf file/module name and other base info
 
 	// todo: remove
-	conf, err := o.ConfRndTmp.Read("/home/neo/code/fe3dback/go-arch-lint/v4/.go-arch-lint.yml")
+	conf, err := o.ConfRndTmp.FetchSpec("/home/neo/code/fe3dback/go-arch-lint/v4/.go-arch-lint.yml")
 	if err != nil {
 		return models.CmdMappingOut{}, fmt.Errorf("failed read config: %w", err)
 	}
