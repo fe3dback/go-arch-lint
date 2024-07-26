@@ -5,6 +5,8 @@ const (
 	FlagOutputUseAsciiColors        = "output-color"
 	FlagOutputTypeJSON              = "json"
 	FlagOutputJSONWithoutFormatting = "output-json-one-line"
+	FlagProjectPath                 = "project-path"
+	FlagArchConfigRelativePath      = "arch-file"
 )
 
 const (

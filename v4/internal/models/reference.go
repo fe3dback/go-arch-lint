@@ -37,25 +37,45 @@ func NewInvalidReference() Reference {
 }
 
 type RefMap[K comparable, V any] struct {
-	Values map[K]V
-	Refs   map[K]Reference
+	values map[K]V
+	refs   map[K]Reference
 }
 
 func NewRefMap[K comparable, V any](size int) RefMap[K, V] {
 	return RefMap[K, V]{
-		Values: make(map[K]V, size),
-		Refs:   make(map[K]Reference, size),
+		values: make(map[K]V, size),
+		refs:   make(map[K]Reference, size),
 	}
 }
 
-func RefMapFrom[K comparable, V any](values map[K]V, refs map[K]Reference) RefMap[K, V] {
-	return RefMap[K, V]{
-		Values: values,
-		Refs:   refs,
-	}
+func (rf *RefMap[K, V]) Len() int {
+	return len(rf.values)
 }
 
 func (rf *RefMap[K, V]) Set(key K, val V, ref Reference) {
-	rf.Values[key] = val
-	rf.Refs[key] = ref
+	rf.values[key] = val
+	rf.refs[key] = ref
+}
+
+func (rf *RefMap[K, V]) Get(key K) (V, Reference, bool) {
+	value, hasValue := rf.values[key]
+	ref, hasRef := rf.refs[key]
+
+	return value, ref, hasValue && hasRef
+}
+
+func (rf *RefMap[K, V]) Has(key K) bool {
+	_, hasValue := rf.values[key]
+	return hasValue
+}
+
+func (rf *RefMap[K, V]) Each(fn func(K, V, Reference)) {
+	for k, v := range rf.values {
+		ref, exist := rf.refs[k]
+		if !exist {
+			continue
+		}
+
+		fn(k, v, ref)
+	}
 }

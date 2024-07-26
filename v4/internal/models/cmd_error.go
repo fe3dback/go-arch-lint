@@ -1,10 +1,16 @@
 package models
 
-type CmdStdoutErrorOut struct {
-	Error            string    `json:"Error"`
-	Reference        Reference `json:"Reference"`
-	ReferencePreview string    `json:"-"`
-}
+type (
+	CmdStdoutErrorOut struct {
+		OverallNote string         `json:"OverallNote"`
+		Errors      []StdoutNotice `json:"Errors"`
+	}
+
+	StdoutNotice struct {
+		Notice
+		Preview string `json:"-"`
+	}
+)
 
 // UserLandError will be rendered to ascii or json,
 // so it will not be printed again as simple stdout fmt.Println

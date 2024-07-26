@@ -50,8 +50,11 @@ func (c *Container) cliCommandMapping() *cli.Command {
 			Name:        name,
 			Aliases:     []string{"ps", "ls", "m"},
 			Description: "output mapping table between files and components",
-			Action:      c.makeCliCommand(name, c.commandMapping()),
-			Flags:       append(flags.GlobalFlags, c.commandMappingFlags()...),
+			Before:      c.makeBeforeCode(),
+			Action: c.makeCliCommand(name, func() CommandHandler {
+				return c.commandMapping()
+			}),
+			Flags: append(flags.GlobalFlags, c.commandMappingFlags()...),
 		}
 	})
 }

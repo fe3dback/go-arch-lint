@@ -14,9 +14,7 @@ type (
 	CmdMappingScheme = string
 
 	CmdMappingIn struct {
-		ProjectPath string
-		ArchFile    string
-		Scheme      CmdMappingScheme
+		Scheme CmdMappingScheme
 	}
 
 	CmdMappingOut struct {

@@ -1,7 +1,6 @@
 package container
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
@@ -13,11 +12,19 @@ type CommandHandler interface {
 	Execute(ctx *cli.Context) (any, error)
 }
 
-func (c *Container) makeCliCommand(name string, handler CommandHandler) cli.ActionFunc {
+func (c *Container) makeBeforeCode() cli.BeforeFunc {
+	return func(context *cli.Context) error {
+		c.cCtx = context
+		return nil
+	}
+}
+
+func (c *Container) makeCliCommand(name string, factory func() CommandHandler) cli.ActionFunc {
 	return func(cCtx *cli.Context) error {
+		handler := factory()
 		model, err := handler.Execute(cCtx)
 		if err != nil {
-			renderErr := c.render(cCtx, name, c.extractStdoutError(cCtx, name, err))
+			renderErr := c.render(cCtx, name, c.serviceErrorBuilder().BuildError(err))
 			if renderErr != nil {
 				return renderErr
 			}
@@ -26,31 +33,6 @@ func (c *Container) makeCliCommand(name string, handler CommandHandler) cli.Acti
 		}
 
 		return c.render(cCtx, name, model)
-	}
-}
-
-func (c *Container) extractStdoutError(cCtx *cli.Context, name string, err error) models.CmdStdoutErrorOut {
-	ref := models.NewInvalidReference()
-
-	refError := models.ReferencedError{}
-	if errors.As(err, &refError) {
-		ref = refError.Reference()
-	}
-
-	preview := ""
-	if ref.Valid {
-		preview, _ = c.servicePrinter().Print(ref, models.CodePrintOpts{
-			LineNumbers: true,
-			Arrows:      true,
-			Highlight:   cCtx.Bool(models.FlagOutputUseAsciiColors),
-			Mode:        models.CodePrintModeExtend,
-		})
-	}
-
-	return models.CmdStdoutErrorOut{
-		Error:            fmt.Errorf("command '%s' failed: %w", name, err).Error(),
-		Reference:        ref,
-		ReferencePreview: preview,
 	}
 }
 
@@ -65,7 +47,7 @@ func (c *Container) render(cCtx *cli.Context, name string, model any) error {
 		FormatJson: !cCtx.Bool(models.FlagOutputJSONWithoutFormatting),
 	}
 
-	rnd := c.serviceRenderer(cCtx)
+	rnd := c.serviceRenderer()
 	out, err := rnd.Render(model, renderMode)
 	if err != nil {
 		return fmt.Errorf("command '%s' render failed: %w", name, err)

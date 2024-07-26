@@ -1,9 +1,15 @@
 {{- /* gotype: github.com/fe3dback/go-arch-lint/v4/internal/models.CmdStdoutErrorOut */ -}}
 
-error: {{ .Error | colorize "red" }}
+{{- if .OverallNote -}}
+	{{ .OverallNote -}}:
+{{ end -}}
 
-{{ " " }}
+{{ $count := (.Errors | len) -}}
+{{ $space := "" -}}
 
-{{ .ReferencePreview }}
-
-{{ " " }}
+{{ range .Errors -}}
+	{{ if gt $count 1 -}} #] {{ $space = "    "}}{{ end -}}
+	{{ concat .Notice.Message ":" | colorize "red" }}
+	{{ concat $space .Notice.Reference.File ":" .Notice.Reference.Line }}
+	{{ .Preview | linePrefix $space }}
+{{ end -}}

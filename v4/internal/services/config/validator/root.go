@@ -1,8 +1,6 @@
 package validator
 
 import (
-	"errors"
-
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
@@ -17,11 +15,21 @@ func NewRoot(validators ...internalValidator) *Root {
 }
 
 func (v *Root) Validate(config models.Config) error {
-	var resultErr error
-
-	for _, validator := range v.validators {
-		resultErr = errors.Join(resultErr, validator.Validate(config))
+	ctx := &validationContext{
+		conf:    config,
+		notices: make([]models.Notice, 0, 16),
 	}
 
-	return resultErr
+	for _, validator := range v.validators {
+		validator.Validate(ctx)
+	}
+
+	if len(ctx.notices) > 0 {
+		return models.NewErrorWithNotices(
+			"Config validation found some notices",
+			ctx.notices,
+		)
+	}
+
+	return nil
 }

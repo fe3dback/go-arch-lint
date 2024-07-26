@@ -33,8 +33,6 @@ func (c *Command) Execute(cCtx *cli.Context) (any, error) {
 
 func (c *Command) parseIn(cCtx *cli.Context) models.CmdMappingIn {
 	in := models.CmdMappingIn{}
-	in.ProjectPath = cCtx.Path(flagProjectPath)
-	in.ArchFile = cCtx.Path(flagArchConfigRelativePath)
 	in.Scheme = cCtx.String(flagScheme)
 
 	return in

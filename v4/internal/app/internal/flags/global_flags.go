@@ -36,4 +36,16 @@ var GlobalFlags = []cli.Flag{
 		Usage:    "use ANSI colors in terminal output",
 		Value:    true,
 	},
+	&cli.PathFlag{ // todo: add helper method with validation
+		Name:     models.FlagProjectPath,
+		Category: models.FlagCategoryCommand,
+		Usage:    "absolute path to project directory",
+		Value:    models.DefaultProjectPath,
+	},
+	&cli.PathFlag{
+		Name:     models.FlagArchConfigRelativePath,
+		Category: models.FlagCategoryCommand,
+		Usage:    "relative path to linter config",
+		Value:    models.DefaultArchFileName,
+	},
 }

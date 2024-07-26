@@ -8,24 +8,10 @@ import (
 )
 
 const (
-	flagProjectPath            = "project-path"
-	flagArchConfigRelativePath = "arch-file"
-	flagScheme                 = "scheme"
+	flagScheme = "scheme"
 )
 
 var Flags = []cli.Flag{
-	&cli.PathFlag{ // todo: add helper method with validation
-		Name:     flagProjectPath,
-		Category: models.FlagCategoryCommand,
-		Usage:    "absolute path to project directory",
-		Value:    models.DefaultProjectPath,
-	},
-	&cli.PathFlag{
-		Name:     flagArchConfigRelativePath,
-		Category: models.FlagCategoryCommand,
-		Usage:    "relative path to linter config",
-		Value:    models.DefaultArchFileName,
-	},
 	xflags.CreateEnumFlag(
 		flagScheme,
 		[]string{"s"},
