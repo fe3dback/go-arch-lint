@@ -32,7 +32,7 @@ func (c *ComponentsValidator) Validate(ctx *validationContext) {
 	ctx.conf.Components.Map.Each(func(name models.ComponentName, component models.ConfigComponent, reference models.Reference) {
 		for _, pathGlob := range component.In {
 			relPath := models.PathRelativeGlob(path.Join(string(ctx.conf.WorkingDirectory.Value), string(pathGlob.Value)))
-			matched, err := c.pathHelper.MatchProjectFiles(relPath)
+			matched, err := c.pathHelper.MatchProjectFiles(relPath, true)
 			if err != nil {
 				ctx.AddNotice(
 					fmt.Sprintf("failed find files: %v", err),
@@ -43,7 +43,7 @@ func (c *ComponentsValidator) Validate(ctx *validationContext) {
 
 			if len(matched) == 0 {
 				ctx.AddNotice(
-					fmt.Sprintf("not found any files by glob '%s'", pathGlob.Value),
+					fmt.Sprintf("not found any directories by glob '%s'", pathGlob.Value),
 					pathGlob.Ref,
 				)
 				return

@@ -36,6 +36,12 @@ var GlobalFlags = []cli.Flag{
 		Usage:    "use ANSI colors in terminal output",
 		Value:    true,
 	},
+	&cli.BoolFlag{
+		Name:     models.FlagSkipMissUsages,
+		Category: models.FlagCategoryGlobal,
+		Usage:    "will skip not critical notices in config validation",
+		Value:    false,
+	},
 	&cli.PathFlag{ // todo: add helper method with validation
 		Name:     models.FlagProjectPath,
 		Category: models.FlagCategoryCommand,

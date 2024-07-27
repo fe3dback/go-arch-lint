@@ -7,5 +7,5 @@ type internalValidator interface {
 }
 
 type pathHelper interface {
-	MatchProjectFiles(somePath any) ([]models.FileRef, error)
+	MatchProjectFiles(somePath any, onlyDirectories bool) ([]models.FileRef, error)
 }

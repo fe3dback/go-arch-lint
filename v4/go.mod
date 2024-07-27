@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/fatih/color v1.17.0
+	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.12.0
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2

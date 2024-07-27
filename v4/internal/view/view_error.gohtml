@@ -10,6 +10,8 @@
 {{ range .Errors -}}
 	{{ if gt $count 1 -}} #] {{ $space = "    "}}{{ end -}}
 	{{ concat .Notice.Message ":" | colorize "red" }}
-	{{ concat $space .Notice.Reference.File ":" .Notice.Reference.Line }}
-	{{ .Preview | linePrefix $space }}
+	{{ if .Notice.Reference.Valid -}}
+		{{ concat $space .Notice.Reference.File ":" .Notice.Reference.Line }}
+		{{ .Preview | linePrefix $space }}
+	{{ end -}}
 {{ end -}}

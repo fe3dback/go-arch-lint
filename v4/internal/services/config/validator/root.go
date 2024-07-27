@@ -5,12 +5,14 @@ import (
 )
 
 type Root struct {
-	validators []internalValidator
+	skipMissuse bool
+	validators  []internalValidator
 }
 
-func NewRoot(validators ...internalValidator) *Root {
+func NewRoot(skipMissuse bool, validators ...internalValidator) *Root {
 	return &Root{
-		validators: validators,
+		skipMissuse: skipMissuse,
+		validators:  validators,
 	}
 }
 
@@ -22,14 +24,30 @@ func (v *Root) Validate(config models.Config) error {
 
 	for _, validator := range v.validators {
 		validator.Validate(ctx)
+
+		if ctx.critical {
+			break
+		}
 	}
 
 	if len(ctx.notices) > 0 {
 		return models.NewErrorWithNotices(
-			"Config validation found some notices",
+			"Config validator find some notices",
 			ctx.notices,
 		)
 	}
+
+	if !v.skipMissuse && len(ctx.missUsage) > 0 {
+		return models.NewErrorWithNotices(
+			"Config validator find miss usages. You can hide this message by adding '--skip-missuse' flag",
+			ctx.missUsage,
+		)
+	}
+
+	// todo missuse:
+	// - allowAnyVendorImports with not empty vendors anywhere
+	// - structTags with deps (collision)
+	// - deps contain cmp/vendor that defined in common section
 
 	return nil
 }

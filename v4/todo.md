@@ -5,3 +5,17 @@
 
 ### tools
 - fmt?
+
+## documentation
+
+### glob
+
+- used https://github.com/gobwas/glob
+- examples: path "operations/mapping" matched by:
+  - `operations`:
+    - operations
+  - `operations/*`
+    - operations/mapping
+  - `operations/**`
+    - operations
+    - operations/mapping

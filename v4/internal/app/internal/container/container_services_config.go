@@ -1,6 +1,7 @@
 package container
 
 import (
+	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml"
@@ -34,11 +35,29 @@ func (c *Container) serviceConfigReaderYAML() *yaml.Reader {
 func (c *Container) serviceConfigValidator() *validator.Root {
 	return once(func() *validator.Root {
 		return validator.NewRoot(
+			c.cCtx.Bool(models.FlagSkipMissUsages),
+			c.serviceConfigValidatorWorkdir(),
+			c.serviceConfigValidatorExcludedFiles(),
 			c.serviceConfigValidatorCmnComponents(),
 			c.serviceConfigValidatorCmnVendors(),
 			c.serviceConfigValidatorComponents(),
+			c.serviceConfigValidatorDeps(),
+			c.serviceConfigValidatorDepsComponents(),
+			c.serviceConfigValidatorDepsVendors(),
 		)
 	})
+}
+
+func (c *Container) serviceConfigValidatorWorkdir() *validator.WorkdirValidator {
+	return once(func() *validator.WorkdirValidator {
+		return validator.NewWorkdirValidator(
+			c.serviceProjectPathHelper(),
+		)
+	})
+}
+
+func (c *Container) serviceConfigValidatorExcludedFiles() *validator.ExcludedFilesValidator {
+	return once(validator.NewExcludedFilesValidator)
 }
 
 func (c *Container) serviceConfigValidatorCmnComponents() *validator.CommonComponentsValidator {
@@ -52,6 +71,30 @@ func (c *Container) serviceConfigValidatorCmnVendors() *validator.CommonVendorsV
 func (c *Container) serviceConfigValidatorComponents() *validator.ComponentsValidator {
 	return once(func() *validator.ComponentsValidator {
 		return validator.NewComponentsValidator(
+			c.serviceProjectPathHelper(),
+		)
+	})
+}
+
+func (c *Container) serviceConfigValidatorDeps() *validator.DepsValidator {
+	return once(func() *validator.DepsValidator {
+		return validator.NewDepsValidator(
+			c.serviceProjectPathHelper(),
+		)
+	})
+}
+
+func (c *Container) serviceConfigValidatorDepsComponents() *validator.DepsComponentsValidator {
+	return once(func() *validator.DepsComponentsValidator {
+		return validator.NewDepsComponentsValidator(
+			c.serviceProjectPathHelper(),
+		)
+	})
+}
+
+func (c *Container) serviceConfigValidatorDepsVendors() *validator.DepsVendorsValidator {
+	return once(func() *validator.DepsVendorsValidator {
+		return validator.NewDepsVendorsValidator(
 			c.serviceProjectPathHelper(),
 		)
 	})
