@@ -31,6 +31,17 @@ func (o *Operation) Mapping(in models.CmdMappingIn) (models.CmdMappingOut, error
 		return models.CmdMappingOut{}, fmt.Errorf("failed read config: %w", err)
 	}
 
+	fmt.Printf("DS global: value=%v at ref=[valid=%v]\n", conf.Settings.DeepScan.Value, conf.Settings.DeepScan.Ref.Valid)
+
+	conf.Dependencies.Map.Each(func(name models.ComponentName, rules models.ConfigComponentDependencies, _ models.Reference) {
+		fmt.Printf("- DS '%s': defined=%v, value=%v at ref=[valid=%v]\n",
+			name,
+			rules.DeepScan.Defined,
+			rules.DeepScan.Value.Value,
+			rules.DeepScan.Value.Ref.Valid,
+		)
+	})
+
 	_ = conf
 
 	// todo:

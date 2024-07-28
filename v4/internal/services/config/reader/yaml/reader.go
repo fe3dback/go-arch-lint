@@ -106,11 +106,5 @@ func (r *Reader) createEmptyDocumentBeVersion(version int) any {
 	}
 
 	// latest be default (it will be rejected next in spec validator, if version is not v4)
-	return &ModelV4{
-		Settings: ModelV4Settings{
-			Tags: ModelV4SettingsTags{
-				Allowed: []string{"true"},
-			},
-		},
-	}
+	return &ModelV4{}
 }

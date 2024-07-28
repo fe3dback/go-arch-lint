@@ -30,3 +30,21 @@ func (s *stringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	return fmt.Errorf("failed decode yaml stringsList: %w", lastErr)
 }
+
+type optional[T any] struct {
+	value   T
+	defined bool
+}
+
+func (s *optional[T]) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	s.defined = true
+
+	var value T
+	err := unmarshal(&value)
+	if err != nil {
+		return err
+	}
+
+	s.value = value
+	return nil
+}

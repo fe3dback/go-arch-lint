@@ -24,7 +24,7 @@ type (
 	}
 
 	ModelV4SettingsTags struct {
-		Allowed stringList `json:"allowed"`
+		Allowed optional[stringList] `json:"allowed"`
 	}
 
 	ModelV4Exclude struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
+//nolint:funlen
 func transformV3(tCtx TransformContext, doc ModelV3) models.Config {
 	return models.Config{
 		Version:          models.NewRef(models.ConfigVersion(doc.Version), tCtx.createReference("$.version")),
@@ -71,6 +72,10 @@ func transformV3(tCtx TransformContext, doc ModelV3) models.Config {
 						AnyVendorDeps:  models.NewRef(deps.AnyVendorDeps, tCtx.createReference(fmt.Sprintf("%s.anyVendorDeps", refBasePath))),
 						AnyProjectDeps: models.NewRef(deps.AnyProjectDeps, tCtx.createReference(fmt.Sprintf("%s.anyProjectDeps", refBasePath))),
 						CanContainTags: []models.Ref[models.StructTag]{},
+						DeepScan: models.ConfigOptional[models.Ref[bool]]{
+							Value:   models.NewRef(deps.DeepScan.value, tCtx.createReference(fmt.Sprintf("%s.deepScan", refBasePath))),
+							Defined: deps.DeepScan.defined,
+						},
 					}
 				}),
 		},

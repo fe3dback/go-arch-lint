@@ -73,6 +73,10 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 							func(tag string) models.StructTag {
 								return models.StructTag(tag)
 							}),
+						DeepScan: models.ConfigOptional[models.Ref[bool]]{
+							Value:   models.NewRef(false, models.NewInvalidReference()),
+							Defined: false,
+						},
 					}
 				}),
 		},
@@ -83,19 +87,25 @@ func transformV4SettingsTags(tCtx TransformContext, tags ModelV4SettingsTags) mo
 	refBasePath := "$.settings.structTags.allowed"
 	ref := tCtx.createReference(refBasePath)
 
-	if len(tags.Allowed) == 0 {
-		return models.ConfigSettingsTags{
-			Allowed: models.NewRef(models.ConfigSettingsTagsEnumNone, ref),
-		}
-	}
-
-	if tags.Allowed[0] == "true" {
+	if !tags.Allowed.defined {
 		return models.ConfigSettingsTags{
 			Allowed: models.NewRef(models.ConfigSettingsTagsEnumAll, ref),
 		}
 	}
 
-	if tags.Allowed[0] == "false" {
+	if len(tags.Allowed.value) == 0 {
+		return models.ConfigSettingsTags{
+			Allowed: models.NewRef(models.ConfigSettingsTagsEnumNone, ref),
+		}
+	}
+
+	if tags.Allowed.value[0] == "true" {
+		return models.ConfigSettingsTags{
+			Allowed: models.NewRef(models.ConfigSettingsTagsEnumAll, ref),
+		}
+	}
+
+	if tags.Allowed.value[0] == "false" {
 		return models.ConfigSettingsTags{
 			Allowed: models.NewRef(models.ConfigSettingsTagsEnumNone, ref),
 		}
@@ -103,7 +113,7 @@ func transformV4SettingsTags(tCtx TransformContext, tags ModelV4SettingsTags) mo
 
 	return models.ConfigSettingsTags{
 		Allowed: models.NewRef(models.ConfigSettingsTagsEnumList, ref),
-		AllowedList: sliceValuesAutoRef(tCtx, tags.Allowed, refBasePath,
+		AllowedList: sliceValuesAutoRef(tCtx, tags.Allowed.value, refBasePath,
 			func(value string) models.StructTag {
 				return models.StructTag(value)
 			}),

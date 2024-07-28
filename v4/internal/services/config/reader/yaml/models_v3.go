@@ -28,9 +28,10 @@ type (
 	}
 
 	ModelV3ComponentDependencies struct {
-		MayDependOn    []string `json:"mayDependOn"`
-		CanUse         []string `json:"canUse"`
-		AnyVendorDeps  bool     `json:"anyVendorDeps"`
-		AnyProjectDeps bool     `json:"anyProjectDeps"`
+		MayDependOn    []string       `json:"mayDependOn"`
+		CanUse         []string       `json:"canUse"`
+		AnyVendorDeps  bool           `json:"anyVendorDeps"`
+		AnyProjectDeps bool           `json:"anyProjectDeps"`
+		DeepScan       optional[bool] `json:"deepScan"`
 	}
 )

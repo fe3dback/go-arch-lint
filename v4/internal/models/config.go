@@ -72,5 +72,11 @@ type (
 		AnyVendorDeps  Ref[bool]
 		AnyProjectDeps Ref[bool]
 		CanContainTags RefSlice[StructTag]
+		DeepScan       ConfigOptional[Ref[bool]]
+	}
+
+	ConfigOptional[T any] struct {
+		Value   T
+		Defined bool
 	}
 )
