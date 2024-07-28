@@ -29,5 +29,6 @@ func (tc *TransformContext) createReference(documentAstPath string) models.Refer
 		tc.file,
 		tok.Position.Line,
 		tok.Position.Column,
+		documentAstPath,
 	)
 }

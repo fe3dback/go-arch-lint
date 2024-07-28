@@ -6,16 +6,10 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
-type DepsComponentsValidator struct {
-	pathHelper pathHelper
-}
+type DepsComponentsValidator struct{}
 
-func NewDepsComponentsValidator(
-	pathHelper pathHelper,
-) *DepsComponentsValidator {
-	return &DepsComponentsValidator{
-		pathHelper: pathHelper,
-	}
+func NewDepsComponentsValidator() *DepsComponentsValidator {
+	return &DepsComponentsValidator{}
 }
 
 func (c *DepsComponentsValidator) Validate(ctx *validationContext) {

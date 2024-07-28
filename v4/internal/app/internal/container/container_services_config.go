@@ -27,9 +27,7 @@ func (c *Container) serviceConfigReader() *reader.Reader {
 }
 
 func (c *Container) serviceConfigReaderYAML() *yaml.Reader {
-	return once(func() *yaml.Reader {
-		return yaml.NewReader()
-	})
+	return once(yaml.NewReader)
 }
 
 func (c *Container) serviceConfigValidator() *validator.Root {
@@ -44,6 +42,9 @@ func (c *Container) serviceConfigValidator() *validator.Root {
 			c.serviceConfigValidatorDeps(),
 			c.serviceConfigValidatorDepsComponents(),
 			c.serviceConfigValidatorDepsVendors(),
+			c.serviceConfigValidatorCommonCollisionMissuse(),
+			c.serviceConfigValidatorVendorsMissuse(),
+			c.serviceConfigValidatorTagsMissuse(),
 		)
 	})
 }
@@ -77,25 +78,25 @@ func (c *Container) serviceConfigValidatorComponents() *validator.ComponentsVali
 }
 
 func (c *Container) serviceConfigValidatorDeps() *validator.DepsValidator {
-	return once(func() *validator.DepsValidator {
-		return validator.NewDepsValidator(
-			c.serviceProjectPathHelper(),
-		)
-	})
+	return once(validator.NewDepsValidator)
 }
 
 func (c *Container) serviceConfigValidatorDepsComponents() *validator.DepsComponentsValidator {
-	return once(func() *validator.DepsComponentsValidator {
-		return validator.NewDepsComponentsValidator(
-			c.serviceProjectPathHelper(),
-		)
-	})
+	return once(validator.NewDepsComponentsValidator)
 }
 
 func (c *Container) serviceConfigValidatorDepsVendors() *validator.DepsVendorsValidator {
-	return once(func() *validator.DepsVendorsValidator {
-		return validator.NewDepsVendorsValidator(
-			c.serviceProjectPathHelper(),
-		)
-	})
+	return once(validator.NewDepsVendorsValidator)
+}
+
+func (c *Container) serviceConfigValidatorVendorsMissuse() *validator.VendorsMissUseValidator {
+	return once(validator.NewVendorsMissUseValidator)
+}
+
+func (c *Container) serviceConfigValidatorCommonCollisionMissuse() *validator.VendorsCommonCollisionMissUseValidator {
+	return once(validator.NewCommonCollisionMissUseValidator)
+}
+
+func (c *Container) serviceConfigValidatorTagsMissuse() *validator.TagsMissUseValidator {
+	return once(validator.NewTagsMissUseValidator)
 }

@@ -54,19 +54,26 @@ func (e *ExtractorHL) ExtractLines(file models.PathAbsolute, from int, to int) (
 		return nil, fmt.Errorf("could not read file: %w", err)
 	}
 
+	content := getContents(data, lexer, style, formatter)
+	lines := strings.Split(content, "\n")
+
+	return safeTakeLines(lines, from, to), nil
+}
+
+func getContents(data []byte, lexer chroma.Lexer, style *chroma.Style, formatter chroma.Formatter) string {
 	content := string(data)
 	iterator, err := lexer.Tokenise(nil, content)
+	if err != nil {
+		// fallback to raw output
+		return content
+	}
 
 	var buff bytes.Buffer
-	var lines []string
-
 	err = formatter.Format(&buff, style, iterator)
 	if err != nil {
 		// fallback to raw output
-		lines = strings.Split(content, "\n")
-	} else {
-		lines = strings.Split(buff.String(), "\n")
+		return content
 	}
 
-	return safeTakeLines(lines, from, to), nil
+	return buff.String()
 }

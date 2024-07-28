@@ -3,7 +3,6 @@ package xpath
 import (
 	"fmt"
 	"io/fs"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -75,10 +74,6 @@ func (h *Helper) MatchProjectFiles(somePath any, onlyDirectories bool) ([]models
 	}
 
 	return []models.FileRef{}, fmt.Errorf("failed match files by pattern, unknown type %T", somePath)
-}
-
-func (h *Helper) prependWorkdir(relPath models.PathRelative) models.PathAbsolute {
-	return models.PathAbsolute(path.Join(string(h.workingDirectory), string(relPath)))
 }
 
 func (h *Helper) matchFileExact(path models.PathRelative, onlyDirectories bool) []models.FileRef {

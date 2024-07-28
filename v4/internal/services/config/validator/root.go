@@ -44,10 +44,5 @@ func (v *Root) Validate(config models.Config) error {
 		)
 	}
 
-	// todo missuse:
-	// - allowAnyVendorImports with not empty vendors anywhere
-	// - structTags with deps (collision)
-	// - deps contain cmp/vendor that defined in common section
-
 	return nil
 }

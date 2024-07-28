@@ -6,11 +6,11 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
-func sliceValuesAutoRef[V any, T any](tCtx TransformContext, in []V, baseRef string, fn func(V) T) models.RefSlice[T] {
+func sliceValuesAutoRef[V any, T comparable](tCtx TransformContext, in []V, baseRef string, fn func(V) T) models.RefSlice[T] {
 	result := make(models.RefSlice[T], 0, len(in))
 
 	if len(in) == 1 {
-		ref := tCtx.createReference(fmt.Sprintf("%s", baseRef))
+		ref := tCtx.createReference(baseRef)
 		result = append(result, models.NewRef(fn(in[0]), ref))
 
 		return result

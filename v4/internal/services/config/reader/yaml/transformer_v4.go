@@ -6,6 +6,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
+//nolint:funlen
 func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 	return models.Config{
 		Version:          models.NewRef(models.ConfigVersion(doc.Version), tCtx.createReference("$.version")),
@@ -28,7 +29,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 		},
 		Components: models.ConfigComponents{
 			Map: mapValuesAutoRef(tCtx, doc.Components, "$.components",
-				func(cCtx TransformContext, name string, component ModelV4Component, refBasePath string) (models.ComponentName, models.ConfigComponent) {
+				func(tCtx TransformContext, name string, component ModelV4Component, refBasePath string) (models.ComponentName, models.ConfigComponent) {
 					return models.ComponentName(name), models.ConfigComponent{
 						In: sliceValuesAutoRef(tCtx, component.In, fmt.Sprintf("%s.in", refBasePath),
 							func(value string) models.PathRelativeGlob {
@@ -39,7 +40,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 		},
 		Vendors: models.ConfigVendors{
 			Map: mapValuesAutoRef(tCtx, doc.Vendors, "$.vendors",
-				func(context TransformContext, name string, vendor ModelV4Vendor, refBasePath string) (models.VendorName, models.ConfigVendor) {
+				func(tCtx TransformContext, name string, vendor ModelV4Vendor, refBasePath string) (models.VendorName, models.ConfigVendor) {
 					return models.VendorName(name), models.ConfigVendor{
 						In: sliceValuesAutoRef(tCtx, vendor.In, fmt.Sprintf("%s.in", refBasePath),
 							func(value string) models.PathImportGlob {
@@ -56,7 +57,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 		}),
 		Dependencies: models.ConfigDependencies{
 			Map: mapValuesAutoRef(tCtx, doc.Dependencies, "$.dependencies",
-				func(context TransformContext, cmpName string, deps ModelV4ComponentDependencies, refBasePath string) (models.ComponentName, models.ConfigComponentDependencies) {
+				func(tCtx TransformContext, cmpName string, deps ModelV4ComponentDependencies, refBasePath string) (models.ComponentName, models.ConfigComponentDependencies) {
 					return models.ComponentName(cmpName), models.ConfigComponentDependencies{
 						MayDependOn: sliceValuesAutoRef(tCtx, deps.MayDependOn, fmt.Sprintf("%s.mayDependOn", refBasePath),
 							func(anotherCmpName string) models.ComponentName {
@@ -84,7 +85,7 @@ func transformV4SettingsTags(tCtx TransformContext, tags ModelV4SettingsTags) mo
 
 	if len(tags.Allowed) == 0 {
 		return models.ConfigSettingsTags{
-			Allowed: models.NewRef(models.ConfigSettingsTagsEnumAll, ref),
+			Allowed: models.NewRef(models.ConfigSettingsTagsEnumNone, ref),
 		}
 	}
 

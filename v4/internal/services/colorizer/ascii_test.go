@@ -15,9 +15,6 @@ const (
 	sourceTextBlue = "\x1b[94mhello\x1b[0m"
 )
 
-type deps struct {
-}
-
 type in struct {
 	useColors bool
 	color     models.ColorName
@@ -26,15 +23,12 @@ type in struct {
 
 func TestASCII_Colorize(t *testing.T) {
 	tests := []struct {
-		name  string
-		setup func(*deps)
-		in    in
-		out   string
+		name string
+		in   in
+		out  string
 	}{
 		{
 			name: "happy_no_colors",
-			setup: func(d *deps) {
-			},
 			in: createIn(models.ColorRed, func(in *in) {
 				in.useColors = false
 			}),
@@ -42,30 +36,22 @@ func TestASCII_Colorize(t *testing.T) {
 		},
 		{
 			name: "happy_red",
-			setup: func(d *deps) {
-			},
-			in:  createIn(models.ColorRed),
-			out: sourceTextRed,
+			in:   createIn(models.ColorRed),
+			out:  sourceTextRed,
 		},
 		{
 			name: "happy_blue",
-			setup: func(d *deps) {
-			},
-			in:  createIn(models.ColorBlue),
-			out: sourceTextBlue,
+			in:   createIn(models.ColorBlue),
+			out:  sourceTextBlue,
 		},
 		{
-			name:  "unknown_color",
-			setup: func(d *deps) {},
-			in:    createIn("not-exist-color"),
-			out:   sourceText,
+			name: "unknown_color",
+			in:   createIn("not-exist-color"),
+			out:  sourceText,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			deps := deps{}
-			tt.setup(&deps)
-
 			r := colorizer.New(tt.in.useColors)
 
 			got := r.Colorize(tt.in.color, tt.in.text)

@@ -29,7 +29,7 @@ func (c *ComponentsValidator) Validate(ctx *validationContext) {
 		return
 	}
 
-	ctx.conf.Components.Map.Each(func(name models.ComponentName, component models.ConfigComponent, reference models.Reference) {
+	ctx.conf.Components.Map.Each(func(_ models.ComponentName, component models.ConfigComponent, reference models.Reference) {
 		for _, pathGlob := range component.In {
 			relPath := models.PathRelativeGlob(path.Join(string(ctx.conf.WorkingDirectory.Value), string(pathGlob.Value)))
 			matched, err := c.pathHelper.MatchProjectFiles(relPath, true)

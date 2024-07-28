@@ -6,16 +6,10 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
-type DepsValidator struct {
-	pathHelper pathHelper
-}
+type DepsValidator struct{}
 
-func NewDepsValidator(
-	pathHelper pathHelper,
-) *DepsValidator {
-	return &DepsValidator{
-		pathHelper: pathHelper,
-	}
+func NewDepsValidator() *DepsValidator {
+	return &DepsValidator{}
 }
 
 func (c *DepsValidator) Validate(ctx *validationContext) {
@@ -30,7 +24,11 @@ func (c *DepsValidator) Validate(ctx *validationContext) {
 
 		if rules.AnyProjectDeps.Value && len(rules.MayDependOn) > 0 {
 			ctx.AddMissUse(
-				fmt.Sprintf("In component '%s': rule 'anyProjectDeps' used with not empty 'MayDependOn' list", name),
+				fmt.Sprintf("redundant: in component '%s': rule '%s' used with not empty '%s' list",
+					name,
+					xpathOr(rules.AnyProjectDeps.Ref.XPath, "anyProjectDeps"),
+					xpathOr(rules.MayDependOn[0].Ref.XPath, "mayDependOn"),
+				),
 				rules.AnyProjectDeps.Ref,
 			)
 			return
@@ -38,7 +36,11 @@ func (c *DepsValidator) Validate(ctx *validationContext) {
 
 		if rules.AnyVendorDeps.Value && len(rules.CanUse) > 0 {
 			ctx.AddMissUse(
-				fmt.Sprintf("In component '%s': rule 'anyVendorDeps' used with not empty 'CanUse' list", name),
+				fmt.Sprintf("redundant: in component '%s': rule '%s' used with not empty '%s' list",
+					name,
+					xpathOr(rules.AnyVendorDeps.Ref.XPath, "anyVendorDeps"),
+					xpathOr(rules.CanUse[0].Ref.XPath, "canUse"),
+				),
 				rules.AnyVendorDeps.Ref,
 			)
 			return

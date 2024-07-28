@@ -1,0 +1,23 @@
+v4:
+- linter rewritten from scratch for better extensibility and support for several new features
+- config:
+  - new config version: **v4**
+    - major changes:
+      - **deepscan** is **ON** by default
+      - added new **strictMode** in `settings.imports.strictMode`
+      - added new struct tags checker in `settings.structTags.allowed`
+        - you can set it to 4 different modes:
+          - `not set` = by default, if not set - will allow **ALL** tags
+          - `true` = all struct tags is allowed (linter will not check tags)
+          - `false` = no tags is allowed. Components can allow specific tags
+          - `[db, bd, etc]` = list of allowed tags
+        - added component override in `dependencies.{name}.canContainTags`
+          - allow use specified tags in this component
+    - minor changes:
+      - `workdir` renamed to `workingDirectory`
+      - `allow.depOnAnyVendor` moved into `settings.imports.allowAnyVendorImports`
+      - `exclude` moved into `exclude.directories`
+      - `excludeFiles` moved into `exclude.files`
+      - `deps` renamed to `dependencies`
+  - added miss-use config validation
+    - added flag `--skip-missuse` for skip this validation

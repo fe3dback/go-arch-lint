@@ -30,6 +30,7 @@ func extractReferenceFromError(tCtx TransformContext, errLines []string) models.
 		tCtx.file,
 		findLineNumber(errLines),
 		findOffset(errLines),
+		"",
 	)
 }
 func findLineNumber(errLines []string) int {

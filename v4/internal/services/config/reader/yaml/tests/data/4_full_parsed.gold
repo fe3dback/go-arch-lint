@@ -1,0 +1,484 @@
+models.Config{
+ SyntaxProblems: models.RefSlice[string](nil),
+ Version: models.Ref[internal/models.ConfigVersion]{
+  Value: 4,
+  Ref: models.Reference{
+   File: "/conf.yml",
+   Line: 1,
+   Column: 10,
+   XPath: "$.version",
+   Valid: true,
+  },
+ },
+ WorkingDirectory: models.Ref[internal/models.PathRelative]{
+  Value: "internal",
+  Ref: models.Reference{
+   File: "/conf.yml",
+   Line: 3,
+   Column: 19,
+   XPath: "$.workingDirectory",
+   Valid: true,
+  },
+ },
+ Settings: models.ConfigSettings{
+  DeepScan: models.Ref[bool]{
+   Value: true,
+   Ref: models.Reference{
+    File: "",
+    Line: 0,
+    Column: 0,
+    XPath: "",
+    Valid: false,
+   },
+  },
+  Imports: models.ConfigSettingsImports{
+   StrictMode: models.Ref[bool]{
+    Value: false,
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 7,
+     Column: 17,
+     XPath: "$.settings.imports.strictMode",
+     Valid: true,
+    },
+   },
+   AllowAnyVendorImports: models.Ref[bool]{
+    Value: true,
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 8,
+     Column: 28,
+     XPath: "$.settings.imports.allowAnyVendorImports",
+     Valid: true,
+    },
+   },
+  },
+  Tags: models.ConfigSettingsTags{
+   Allowed: models.Ref[internal/models.ConfigSettingsTagsEnum]{
+    Value: "All",
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 10,
+     Column: 14,
+     XPath: "$.settings.structTags.allowed",
+     Valid: true,
+    },
+   },
+   AllowedList: models.RefSlice[internal/models.StructTag](nil),
+  },
+ },
+ Exclude: models.ConfigExclude{
+  RelativeDirectories: models.RefSlice[internal/models.PathRelative]{
+   {
+    Value: "view/testcases",
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 14,
+     Column: 5,
+     XPath: "$.exclude.directories",
+     Valid: true,
+    },
+   },
+  },
+  RelativeFiles: models.RefSlice[internal/models.PathRelativeRegExp]{
+   {
+    Value: "^.*_test\\.go$",
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 17,
+     Column: 7,
+     XPath: "$.exclude.files[0]",
+     Valid: true,
+    },
+   },
+   {
+    Value: "^.*\\/test\\/.*$",
+    Ref: models.Reference{
+     File: "/conf.yml",
+     Line: 18,
+     Column: 7,
+     XPath: "$.exclude.files[1]",
+     Valid: true,
+    },
+   },
+  },
+ },
+ Components: models.ConfigComponents{
+  Map: models.RefMap[internal/models.ComponentName,internal/models.ConfigComponent]{
+   values: map[models.ComponentName]models.ConfigComponent{
+    "main": {
+     In: models.RefSlice[internal/models.PathRelativeGlob]{
+      {
+       Value: "app",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 29,
+        Column: 30,
+        XPath: "$.components.main.in",
+        Valid: true,
+       },
+      },
+     },
+    },
+    "models": {
+     In: models.RefSlice[internal/models.PathRelativeGlob]{
+      {
+       Value: "dto/*",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 30,
+        Column: 32,
+        XPath: "$.components.models.in[0]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "models/**",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 30,
+        Column: 39,
+        XPath: "$.components.models.in[1]",
+        Valid: true,
+       },
+      },
+     },
+    },
+   },
+   refs: map[models.ComponentName]models.Reference{
+    "main": {
+     File: "/conf.yml",
+     Line: 29,
+     Column: 24,
+     XPath: "$.components.main",
+     Valid: true,
+    },
+    "models": {
+     File: "/conf.yml",
+     Line: 30,
+     Column: 24,
+     XPath: "$.components.models",
+     Valid: true,
+    },
+   },
+  },
+ },
+ Vendors: models.ConfigVendors{
+  Map: models.RefMap[internal/models.VendorName,internal/models.ConfigVendor]{
+   values: map[models.VendorName]models.ConfigVendor{
+    "3rd-graph": {
+     In: models.RefSlice[internal/models.PathImportGlob]{
+      {
+       Value: "oss.terrastruct.com/d2/**",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 22,
+        Column: 30,
+        XPath: "$.vendors.3rd-graph.in",
+        Valid: true,
+       },
+      },
+     },
+    },
+    "3rd-yaml": {
+     In: models.RefSlice[internal/models.PathImportGlob]{
+      {
+       Value: "github.com/goccy/go-yaml",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 25,
+        Column: 9,
+        XPath: "$.vendors.3rd-yaml.in[0]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "github.com/fe3dback/go-yaml",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 26,
+        Column: 9,
+        XPath: "$.vendors.3rd-yaml.in[1]",
+        Valid: true,
+       },
+      },
+     },
+    },
+    "go-ast": {
+     In: models.RefSlice[internal/models.PathImportGlob]{
+      {
+       Value: "golang.org/x/mod/modfile",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 21,
+        Column: 32,
+        XPath: "$.vendors.go-ast.in[0]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "golang.org/x/tools/go/packages",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 21,
+        Column: 58,
+        XPath: "$.vendors.go-ast.in[1]",
+        Valid: true,
+       },
+      },
+     },
+    },
+   },
+   refs: map[models.VendorName]models.Reference{
+    "3rd-graph": {
+     File: "/conf.yml",
+     Line: 22,
+     Column: 24,
+     XPath: "$.vendors.3rd-graph",
+     Valid: true,
+    },
+    "3rd-yaml": {
+     File: "/conf.yml",
+     Line: 24,
+     Column: 7,
+     XPath: "$.vendors.3rd-yaml",
+     Valid: true,
+    },
+    "go-ast": {
+     File: "/conf.yml",
+     Line: 21,
+     Column: 24,
+     XPath: "$.vendors.go-ast",
+     Valid: true,
+    },
+   },
+  },
+ },
+ CommonComponents: models.RefSlice[internal/models.ComponentName]{
+  {
+   Value: "models",
+   Ref: models.Reference{
+    File: "/conf.yml",
+    Line: 37,
+    Column: 3,
+    XPath: "$.commonComponents",
+    Valid: true,
+   },
+  },
+ },
+ CommonVendors: models.RefSlice[internal/models.VendorName]{
+  {
+   Value: "go-common",
+   Ref: models.Reference{
+    File: "/conf.yml",
+    Line: 33,
+    Column: 5,
+    XPath: "$.commonVendors[0]",
+    Valid: true,
+   },
+  },
+  {
+   Value: "3rd-graph",
+   Ref: models.Reference{
+    File: "/conf.yml",
+    Line: 34,
+    Column: 5,
+    XPath: "$.commonVendors[1]",
+    Valid: true,
+   },
+  },
+ },
+ Dependencies: models.ConfigDependencies{
+  Map: models.RefMap[internal/models.ComponentName,internal/models.ConfigComponentDependencies]{
+   values: map[models.ComponentName]models.ConfigComponentDependencies{
+    "container": {
+     MayDependOn: models.RefSlice[internal/models.ComponentName]{
+      {
+       Value: "operations",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 48,
+        Column: 9,
+        XPath: "$.dependencies.container.mayDependOn[0]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "services",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 49,
+        Column: 9,
+        XPath: "$.dependencies.container.mayDependOn[1]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "view",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 50,
+        Column: 9,
+        XPath: "$.dependencies.container.mayDependOn[2]",
+        Valid: true,
+       },
+      },
+     },
+     CanUse: models.RefSlice[internal/models.VendorName]{
+     },
+     AnyVendorDeps: models.Ref[bool]{
+      Value: true,
+      Ref: models.Reference{
+       File: "/conf.yml",
+       Line: 45,
+       Column: 20,
+       XPath: "$.dependencies.container.anyVendorDeps",
+       Valid: true,
+      },
+     },
+     AnyProjectDeps: models.Ref[bool]{
+      Value: false,
+      Ref: models.Reference{
+       File: "/conf.yml",
+       Line: 46,
+       Column: 21,
+       XPath: "$.dependencies.container.anyProjectDeps",
+       Valid: true,
+      },
+     },
+     CanContainTags: models.RefSlice[internal/models.StructTag]{
+     },
+    },
+    "main": {
+     MayDependOn: models.RefSlice[internal/models.ComponentName]{
+      {
+       Value: "container",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 42,
+        Column: 7,
+        XPath: "$.dependencies.main.mayDependOn",
+        Valid: true,
+       },
+      },
+     },
+     CanUse: models.RefSlice[internal/models.VendorName]{
+     },
+     AnyVendorDeps: models.Ref[bool]{
+      Value: false,
+      Ref: models.Reference{
+       File: "",
+       Line: 0,
+       Column: 0,
+       XPath: "",
+       Valid: false,
+      },
+     },
+     AnyProjectDeps: models.Ref[bool]{
+      Value: false,
+      Ref: models.Reference{
+       File: "",
+       Line: 0,
+       Column: 0,
+       XPath: "",
+       Valid: false,
+      },
+     },
+     CanContainTags: models.RefSlice[internal/models.StructTag]{
+     },
+    },
+    "operations": {
+     MayDependOn: models.RefSlice[internal/models.ComponentName]{
+      {
+       Value: "services",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 54,
+        Column: 7,
+        XPath: "$.dependencies.operations.mayDependOn",
+        Valid: true,
+       },
+      },
+     },
+     CanUse: models.RefSlice[internal/models.VendorName]{
+      {
+       Value: "3rd-graph",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 56,
+        Column: 7,
+        XPath: "$.dependencies.operations.canUse",
+        Valid: true,
+       },
+      },
+     },
+     AnyVendorDeps: models.Ref[bool]{
+      Value: false,
+      Ref: models.Reference{
+       File: "",
+       Line: 0,
+       Column: 0,
+       XPath: "",
+       Valid: false,
+      },
+     },
+     AnyProjectDeps: models.Ref[bool]{
+      Value: false,
+      Ref: models.Reference{
+       File: "",
+       Line: 0,
+       Column: 0,
+       XPath: "",
+       Valid: false,
+      },
+     },
+     CanContainTags: models.RefSlice[internal/models.StructTag]{
+      {
+       Value: "db",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 58,
+        Column: 9,
+        XPath: "$.dependencies.operations.canContainTags[0]",
+        Valid: true,
+       },
+      },
+      {
+       Value: "bd",
+       Ref: models.Reference{
+        File: "/conf.yml",
+        Line: 59,
+        Column: 9,
+        XPath: "$.dependencies.operations.canContainTags[1]",
+        Valid: true,
+       },
+      },
+     },
+    },
+   },
+   refs: map[models.ComponentName]models.Reference{
+    "container": {
+     File: "/conf.yml",
+     Line: 45,
+     Column: 18,
+     XPath: "$.dependencies.container",
+     Valid: true,
+    },
+    "main": {
+     File: "/conf.yml",
+     Line: 41,
+     Column: 16,
+     XPath: "$.dependencies.main",
+     Valid: true,
+    },
+    "operations": {
+     File: "/conf.yml",
+     Line: 53,
+     Column: 16,
+     XPath: "$.dependencies.operations",
+     Valid: true,
+    },
+   },
+  },
+ },
+}

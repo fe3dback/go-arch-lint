@@ -1,7 +1,6 @@
 package yaml_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -9,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml"
+	testUtils "github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml/tests"
 )
 
 //go:generate go run ./test_gen/gen_stub.go
@@ -39,7 +39,7 @@ func TestReader_Parse(t *testing.T) {
 		reader := yaml.NewReader()
 
 		t.Run(tt.testConfig, func(t *testing.T) {
-			sourceCode, err := os.ReadFile(fmt.Sprintf("./test/%s.yml", tt.testConfig))
+			sourceCode, err := os.ReadFile(fmt.Sprintf("./tests/data/%s.yml", tt.testConfig))
 			require.NoError(t, err)
 
 			conf, err := reader.Parse("/conf.yml", sourceCode)
@@ -50,13 +50,11 @@ func TestReader_Parse(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			encoded, err := json.MarshalIndent(conf, "", "  ")
+			got := testUtils.Dump(conf)
+			want, err := os.ReadFile(fmt.Sprintf("./tests/data/%s_parsed.gold", tt.testConfig))
 			require.NoError(t, err)
 
-			savedStub, err := os.ReadFile(fmt.Sprintf("./test/%s_parsed.json", tt.testConfig))
-			require.NoError(t, err)
-
-			require.Equal(t, savedStub, encoded)
+			require.Equal(t, string(want), got)
 		})
 	}
 }

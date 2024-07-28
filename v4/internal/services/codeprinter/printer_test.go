@@ -139,6 +139,7 @@ func TestPrinter_Print(t *testing.T) {
 				pathSrc,
 				tt.ref.line,
 				tt.ref.column,
+				"",
 			)
 
 			for variantName, opts := range matrix {
@@ -153,14 +154,14 @@ func TestPrinter_Print(t *testing.T) {
 					err = os.MkdirAll(filepath.Dir(string(pathDst)), os.ModePerm)
 					require.NoError(t, err)
 
-					err = os.WriteFile(string(pathDst), []byte(got), os.ModePerm)
+					err = os.WriteFile(string(pathDst), []byte(got), 0600)
 					require.NoError(t, err)
 				case modeVerify:
 					want, err := os.ReadFile(string(pathDst))
 					require.NoError(t, err)
 					require.Equal(t, string(want), got)
 
-					t.Log(fmt.Sprintf("\nout:\n--\n%s\n--\n", got))
+					t.Logf("\nout:\n--\n%s\n--\n", got)
 				}
 			}
 		})

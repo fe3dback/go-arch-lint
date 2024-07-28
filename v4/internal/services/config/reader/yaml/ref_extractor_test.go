@@ -31,7 +31,7 @@ func Test_extractReferenceFromError(t *testing.T) {
 			want: models.Reference{
 				File:   confFile,
 				Line:   24,
-				Column: 27,
+				Column: 26,
 				Valid:  true,
 			},
 		},
@@ -47,7 +47,7 @@ func Test_extractReferenceFromError(t *testing.T) {
 			want: models.Reference{
 				File:   confFile,
 				Line:   22,
-				Column: 2,
+				Column: 1,
 				Valid:  true,
 			},
 		},

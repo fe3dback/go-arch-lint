@@ -1,9 +1,19 @@
 package models
 
-type Ref[T any] struct {
-	Value T
-	Ref   Reference
-}
+type (
+	Ref[T any] struct {
+		Value T
+		Ref   Reference
+	}
+
+	Reference struct {
+		File   PathAbsolute `json:"File"`
+		Line   int          `json:"Line"`
+		Column int          `json:"Column"`
+		XPath  string       `json:"-"`
+		Valid  bool         `json:"Valid"`
+	}
+)
 
 func NewRef[T any](value T, ref Reference) Ref[T] {
 	return Ref[T]{
@@ -12,20 +22,12 @@ func NewRef[T any](value T, ref Reference) Ref[T] {
 	}
 }
 
-type RefSlice[T any] []Ref[T]
-
-type Reference struct {
-	File   PathAbsolute `json:"File"`
-	Line   int          `json:"Line"`
-	Column int          `json:"Column"`
-	Valid  bool         `json:"Valid"`
-}
-
-func NewReference(File PathAbsolute, Line int, Column int) Reference {
+func NewReference(file PathAbsolute, line int, column int, xpath string) Reference {
 	return Reference{
-		File:   File,
-		Line:   Line,
-		Column: Column,
+		File:   file,
+		Line:   line,
+		Column: column,
+		XPath:  xpath,
 		Valid:  true,
 	}
 }
@@ -34,6 +36,28 @@ func NewInvalidReference() Reference {
 	return Reference{
 		Valid: false,
 	}
+}
+
+type RefSlice[T comparable] []Ref[T]
+
+func (rs RefSlice[T]) Values() []T {
+	list := make([]T, 0, len(rs))
+
+	for _, refValue := range rs {
+		list = append(list, refValue.Value)
+	}
+
+	return list
+}
+
+func (rs RefSlice[T]) Contains(ref Ref[T]) bool {
+	for _, refValue := range rs {
+		if refValue.Value == ref.Value {
+			return true
+		}
+	}
+
+	return false
 }
 
 type RefMap[K comparable, V any] struct {

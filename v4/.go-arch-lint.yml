@@ -4,9 +4,9 @@ workingDirectory: internal
 settings:
   imports:
     strictMode: false
-    allowAnyVendorImports: true
+    allowAnyVendorImports: false
   structTags:
-    allowed: true
+    allowed: [json]
 
 exclude:
   directories:

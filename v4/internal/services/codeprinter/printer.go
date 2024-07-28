@@ -136,10 +136,7 @@ func addBorders(lines []string, region area) []string {
 
 	result = append(result, name)
 	result = append(result, strings.Repeat("~", width))
-
-	for _, line := range lines {
-		result = append(result, line)
-	}
+	result = append(result, lines...)
 
 	return result
 }

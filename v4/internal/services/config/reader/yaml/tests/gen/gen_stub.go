@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml"
+	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml/tests"
 )
 
 func main() {
@@ -18,7 +18,7 @@ func main() {
 	}
 
 	currentDir := filepath.Dir(filename)
-	stubDir := filepath.Clean(fmt.Sprintf("%s/../test", currentDir))
+	stubDir := filepath.Clean(fmt.Sprintf("%s/../data", currentDir))
 
 	fmt.Printf("working at %s\n", stubDir)
 
@@ -48,14 +48,9 @@ func main() {
 			panic(fmt.Sprintf("failed read YML config %s: %v", entry.Name(), err))
 		}
 
-		encoded, err := json.MarshalIndent(conf, "", "  ")
-		if err != nil {
-			panic(fmt.Sprintf("failed marshal config %s: %v", entry.Name(), err))
-		}
-
 		nameParts := strings.Split(entry.Name(), ".")
-		stubFilePath := fmt.Sprintf("%s/%s_parsed.json", stubDir, nameParts[0])
-		err = os.WriteFile(stubFilePath, encoded, os.ModePerm)
+		stubFilePath := fmt.Sprintf("%s/%s_parsed.gold", stubDir, nameParts[0])
+		err = os.WriteFile(stubFilePath, []byte(tests.Dump(conf)), 0600)
 		if err != nil {
 			panic(fmt.Sprintf("failed write JSON config %s: %v", entry.Name(), err))
 		}
