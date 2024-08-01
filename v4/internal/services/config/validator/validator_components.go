@@ -29,13 +29,13 @@ func (c *ComponentsValidator) Validate(ctx *validationContext) {
 		return
 	}
 
-	ctx.conf.Components.Map.Each(func(_ models.ComponentName, component models.ConfigComponent, reference models.Reference) {
+	ctx.conf.Components.Map.Each(func(_ models.ComponentName, component models.ConfigComponent, _ models.Reference) {
 		for _, pathGlob := range component.In {
 			relPath := models.PathRelativeGlob(path.Join(string(ctx.conf.WorkingDirectory.Value), string(pathGlob.Value)))
-			matched, err := c.pathHelper.MatchProjectFiles(relPath, true)
+			matched, err := c.pathHelper.MatchProjectFiles(relPath, models.FileMatchQueryTypeOnlyDirectories)
 			if err != nil {
 				ctx.AddNotice(
-					fmt.Sprintf("failed find files: %v", err),
+					fmt.Sprintf("failed find directories: %v", err),
 					pathGlob.Ref,
 				)
 				return

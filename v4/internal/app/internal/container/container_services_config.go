@@ -1,8 +1,10 @@
 package container
 
+import "C"
 import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config"
+	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/assembler"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/reader/yaml"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/config/validator"
@@ -13,7 +15,7 @@ func (c *Container) serviceConfigFetcher() *config.Fetcher {
 		return config.NewFetcher(
 			c.serviceConfigReader(),
 			c.serviceConfigValidator(),
-			nil, // todo: assembler
+			c.serviceConfigAssembler(),
 		)
 	})
 }
@@ -99,4 +101,13 @@ func (c *Container) serviceConfigValidatorCommonCollisionMissuse() *validator.Ve
 
 func (c *Container) serviceConfigValidatorTagsMissuse() *validator.TagsMissUseValidator {
 	return once(validator.NewTagsMissUseValidator)
+}
+
+func (c *Container) serviceConfigAssembler() *assembler.Assembler {
+	return once(func() *assembler.Assembler {
+		return assembler.NewAssembler(
+			c.serviceProjectFetcher(),
+			c.serviceProjectPathHelper(),
+		)
+	})
 }

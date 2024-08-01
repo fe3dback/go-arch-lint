@@ -1,6 +1,10 @@
 package models
 
 type (
+	GoModule string
+
+	// ----------------------
+
 	// ConfigVersion primary arch-lint config version
 	ConfigVersion int
 

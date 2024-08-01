@@ -19,10 +19,7 @@ exclude:
 vendors:
   go-common:           { in: golang.org/x/sync/errgroup }
   go-ast:              { in: [ golang.org/x/mod/modfile, golang.org/x/tools/go/packages ] }
-  3rd-cobra:           { in: github.com/spf13/cobra }
-  3rd-color-fmt:       { in: github.com/logrusorgru/aurora/v3 }
   3rd-code-highlight:  { in: github.com/alecthomas/chroma/* }
-  3rd-json-scheme:     { in: github.com/xeipuuv/gojsonschema }
   3rd-graph:           { in: oss.terrastruct.com/d2/** }
   3rd-yaml:
     in:
@@ -71,6 +68,4 @@ dependencies:
     canUse:
       - go-ast
       - 3rd-yaml
-      - 3rd-color-fmt
       - 3rd-code-highlight
-      - 3rd-json-scheme

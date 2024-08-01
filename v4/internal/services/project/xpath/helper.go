@@ -12,22 +12,29 @@ import (
 )
 
 type Helper struct {
-	workingDirectory models.PathAbsolute
-	index            map[models.PathRelative]models.FileRef
+	projectDirectory models.PathAbsolute
+	indexFiles       map[models.PathRelative]models.FileRef
+	indexDirectories map[models.PathRelative][]models.FileRef
 }
 
 func NewHelper(workingDirectory string) *Helper {
+	// todo: refactor for composite + functions
+	// todo: exclude files/directories by input context
+	// todo: input context(ext filter, type filter, excludes, etc..)
+	// todo: tests
+
 	workDir, err := filepath.Abs(workingDirectory)
 	if err != nil {
 		panic(fmt.Errorf("failed get working directory: %w", err))
 	}
 
 	h := &Helper{
-		workingDirectory: models.PathAbsolute(workDir),
-		index:            make(map[models.PathRelative]models.FileRef, 255),
+		projectDirectory: models.PathAbsolute(workDir),
+		indexFiles:       make(map[models.PathRelative]models.FileRef, 255),
+		indexDirectories: make(map[models.PathRelative][]models.FileRef, 64),
 	}
 
-	err = h.indexFiles()
+	err = h.scanProjectFilesToIndex()
 	if err != nil {
 		panic(fmt.Errorf("failed build project files index from workDir '%s': %w", workingDirectory, err))
 	}
@@ -35,21 +42,46 @@ func NewHelper(workingDirectory string) *Helper {
 	return h
 }
 
-func (h *Helper) indexFiles() error {
-	return filepath.Walk(string(h.workingDirectory), func(path string, info fs.FileInfo, err error) error {
+func (h *Helper) scanProjectFilesToIndex() error {
+	return filepath.Walk(string(h.projectDirectory), func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("failed walking %q: %w", path, err)
 		}
 
-		absPath := models.PathAbsolute(path)
-		relPath, err := filepath.Rel(string(h.workingDirectory), path)
-		if err != nil {
-			return fmt.Errorf("failed getting relative path '%q' from '%q': %w", path, h.workingDirectory, err)
+		isInteresting := info.IsDir() || strings.ToLower(filepath.Ext(info.Name())) == ".go"
+		if !isInteresting {
+			return nil
 		}
 
-		h.index[models.PathRelative(relPath)] = models.FileRef{
+		relPathStr, err := filepath.Rel(string(h.projectDirectory), path)
+		if err != nil {
+			return fmt.Errorf("failed getting relative path '%q' from '%q': %w", path, h.projectDirectory, err)
+		}
+
+		relPath := models.PathRelative(relPathStr)
+
+		// add to files index
+		h.indexFiles[relPath] = models.FileRef{
 			IsDir: info.IsDir(),
-			Path:  absPath,
+			Path:  models.PathAbsolute(path),
+		}
+
+		// add to directories index
+		if _, exists := h.indexDirectories[relPath]; !exists && info.IsDir() {
+			h.indexDirectories[relPath] = make([]models.FileRef, 0, 8)
+		}
+
+		if !info.IsDir() {
+			dirRelPathStr, err := filepath.Rel(string(h.projectDirectory), filepath.Dir(path))
+			if err != nil {
+				return fmt.Errorf("failed getting relative path '%q' from '%q': %w", path, h.projectDirectory, err)
+			}
+
+			dirRelPath := models.PathRelative(dirRelPathStr)
+			h.indexDirectories[dirRelPath] = append(h.indexDirectories[dirRelPath], models.FileRef{
+				IsDir: info.IsDir(),
+				Path:  models.PathAbsolute(path),
+			})
 		}
 
 		return nil
@@ -58,31 +90,38 @@ func (h *Helper) indexFiles() error {
 
 // MatchProjectFiles will find all exist files in project by provided path or glob
 // with any type. But this will try to found files only inside project directory
-func (h *Helper) MatchProjectFiles(somePath any, onlyDirectories bool) ([]models.FileRef, error) {
+func (h *Helper) MatchProjectFiles(somePath any, queryType models.FileMatchQueryType) ([]models.FileRef, error) {
 	switch actual := somePath.(type) {
 	case models.PathRelative:
-		return h.matchFileExact(actual, onlyDirectories), nil
+		return h.matchFileExact(actual, queryType), nil
 	case models.PathAbsolute:
-		rel, err := filepath.Rel(string(h.workingDirectory), string(actual))
+		rel, err := filepath.Rel(string(h.projectDirectory), string(actual))
 		if err != nil {
 			return nil, fmt.Errorf("failed getting relative path from '%q': %w", string(actual), err)
 		}
 
-		return h.matchFileExact(models.PathRelative(rel), onlyDirectories), nil
+		return h.matchFileExact(models.PathRelative(rel), queryType), nil
 	case models.PathRelativeGlob:
-		return h.matchFileGlob(actual, onlyDirectories)
+		return h.matchFileGlob(actual, queryType)
+	case models.PathAbsoluteGlob:
+		relGlob, err := filepath.Rel(string(h.projectDirectory), string(actual))
+		if err != nil {
+			return nil, fmt.Errorf("failed getting relative path from '%q': %w", string(actual), err)
+		}
+
+		return h.matchFileGlob(models.PathRelativeGlob(relGlob), queryType)
 	}
 
 	return []models.FileRef{}, fmt.Errorf("failed match files by pattern, unknown type %T", somePath)
 }
 
-func (h *Helper) matchFileExact(path models.PathRelative, onlyDirectories bool) []models.FileRef {
-	found, exist := h.index[path]
+func (h *Helper) matchFileExact(path models.PathRelative, queryType models.FileMatchQueryType) []models.FileRef {
+	found, exist := h.indexFiles[path]
 	if !exist {
 		return nil
 	}
 
-	if onlyDirectories && !found.IsDir {
+	if !isMatchedByQueryType(found, queryType) {
 		return nil
 	}
 
@@ -91,41 +130,58 @@ func (h *Helper) matchFileExact(path models.PathRelative, onlyDirectories bool) 
 	}
 }
 
-func (h *Helper) matchFileGlob(path models.PathRelativeGlob, onlyDirectories bool) ([]models.FileRef, error) {
+func (h *Helper) matchFileGlob(path models.PathRelativeGlob, queryType models.FileMatchQueryType) ([]models.FileRef, error) {
 	patternNormal, err := glob.Compile(string(path), '/')
 	if err != nil {
 		return nil, fmt.Errorf("failed compile glob matcher '%s': %w", path, err)
 	}
 
-	var patternSelf glob.Glob
+	var patternLast glob.Glob
 
 	if strings.HasSuffix(string(path), "/**") {
-		pathSelf := strings.TrimSuffix(string(path), "/**")
-		patternSelf, err = glob.Compile(pathSelf, '/')
+		pathLast := strings.TrimSuffix(string(path), "/**")
+		patternLast, err = glob.Compile(pathLast, '/')
 		if err != nil {
-			return nil, fmt.Errorf("failed compile glob matcher '%s': %w", pathSelf, err)
+			return nil, fmt.Errorf("failed compile glob matcher '%s': %w", pathLast, err)
 		}
 	}
 
 	results := make([]models.FileRef, 0, 16)
 
-	for relative, ref := range h.index {
-		matchSelf := false
+	// glob working only with directories right now
+	for relative, refs := range h.indexDirectories {
+		matchedNormal := patternNormal.Match(string(relative))
+		matchedLast := false
 
-		if patternSelf != nil {
-			matchSelf = patternSelf.Match(string(relative))
+		if patternLast != nil {
+			matchedLast = patternLast.Match(string(relative))
 		}
 
-		if !(patternNormal.Match(string(relative)) || matchSelf) {
+		if !(matchedNormal || matchedLast) {
 			continue
 		}
 
-		if onlyDirectories && !ref.IsDir {
-			continue
+		if queryType == models.FileMatchQueryTypeAll || queryType == models.FileMatchQueryTypeOnlyDirectories {
+			results = append(results, h.indexFiles[relative])
 		}
 
-		results = append(results, ref)
+		if queryType == models.FileMatchQueryTypeAll || queryType == models.FileMatchQueryTypeOnlyFiles {
+			results = append(results, refs...)
+		}
 	}
 
 	return results, nil
+}
+
+func isMatchedByQueryType(ref models.FileRef, queryType models.FileMatchQueryType) bool {
+	switch queryType {
+	case models.FileMatchQueryTypeAll:
+		return true
+	case models.FileMatchQueryTypeOnlyFiles:
+		return !ref.IsDir
+	case models.FileMatchQueryTypeOnlyDirectories:
+		return ref.IsDir
+	default:
+		panic(fmt.Sprintf("unexpected query type '%v'", queryType))
+	}
 }

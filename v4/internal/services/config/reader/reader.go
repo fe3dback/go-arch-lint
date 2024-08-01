@@ -36,6 +36,8 @@ func (r *Reader) Read(path models.PathAbsolute) (models.Config, error) {
 		return models.Config{}, fmt.Errorf("found problems in config: %w", err)
 	}
 
+	// todo: clean config (trim path slashes, etc..)
+
 	return conf, nil
 }
 

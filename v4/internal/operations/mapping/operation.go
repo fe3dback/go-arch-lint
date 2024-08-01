@@ -8,7 +8,7 @@ import (
 
 // todo: remove
 type ConfRndTmp interface {
-	FetchSpec(path models.PathAbsolute) (models.Config, error)
+	FetchSpec(path models.PathAbsolute) (models.Spec, error)
 }
 
 type Operation struct {
@@ -26,23 +26,12 @@ func (o *Operation) Mapping(in models.CmdMappingIn) (models.CmdMappingOut, error
 	//  - this will found dir/conf file/module name and other base info
 
 	// todo: remove
-	conf, err := o.ConfRndTmp.FetchSpec("/home/neo/code/fe3dback/go-arch-lint/v4/.go-arch-lint.yml")
+	spec, err := o.ConfRndTmp.FetchSpec("/home/neo/code/fe3dback/go-arch-lint/v4/.go-arch-lint.yml")
 	if err != nil {
 		return models.CmdMappingOut{}, fmt.Errorf("failed read config: %w", err)
 	}
 
-	fmt.Printf("DS global: value=%v at ref=[valid=%v]\n", conf.Settings.DeepScan.Value, conf.Settings.DeepScan.Ref.Valid)
-
-	conf.Dependencies.Map.Each(func(name models.ComponentName, rules models.ConfigComponentDependencies, _ models.Reference) {
-		fmt.Printf("- DS '%s': defined=%v, value=%v at ref=[valid=%v]\n",
-			name,
-			rules.DeepScan.Defined,
-			rules.DeepScan.Value.Value,
-			rules.DeepScan.Value.Ref.Valid,
-		)
-	})
-
-	_ = conf
+	_ = spec
 
 	// todo:
 	return models.CmdMappingOut{

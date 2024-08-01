@@ -14,11 +14,11 @@ func transformV3(tCtx TransformContext, doc ModelV3) models.Config {
 		Settings: models.ConfigSettings{
 			DeepScan: models.NewRef(doc.Allow.DeepScan, tCtx.createReference("$.allow.deepScan")),
 			Imports: models.ConfigSettingsImports{
-				StrictMode:            models.NewRef(false, models.NewInvalidReference()),
+				StrictMode:            models.NewInvalidRef(false),
 				AllowAnyVendorImports: models.NewRef(doc.Allow.DepOnAnyVendor, tCtx.createReference("$.allow.depOnAnyVendor")),
 			},
 			Tags: models.ConfigSettingsTags{
-				Allowed: models.NewRef(models.ConfigSettingsTagsEnumAll, models.NewInvalidReference()),
+				Allowed: models.NewInvalidRef(models.ConfigSettingsTagsEnumAll),
 			},
 		},
 		Exclude: models.ConfigExclude{

@@ -12,7 +12,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 		Version:          models.NewRef(models.ConfigVersion(doc.Version), tCtx.createReference("$.version")),
 		WorkingDirectory: models.NewRef(models.PathRelative(doc.WorkingDirectory), tCtx.createReference("$.workingDirectory")),
 		Settings: models.ConfigSettings{
-			DeepScan: models.NewRef(true, models.NewInvalidReference()),
+			DeepScan: models.NewInvalidRef(true),
 			Imports: models.ConfigSettingsImports{
 				StrictMode:            models.NewRef(doc.Settings.Imports.StrictMode, tCtx.createReference("$.settings.imports.strictMode")),
 				AllowAnyVendorImports: models.NewRef(doc.Settings.Imports.AllowAnyVendorImports, tCtx.createReference("$.settings.imports.allowAnyVendorImports")),
@@ -74,7 +74,7 @@ func transformV4(tCtx TransformContext, doc ModelV4) models.Config {
 								return models.StructTag(tag)
 							}),
 						DeepScan: models.ConfigOptional[models.Ref[bool]]{
-							Value:   models.NewRef(false, models.NewInvalidReference()),
+							Value:   models.NewInvalidRef(false),
 							Defined: false,
 						},
 					}

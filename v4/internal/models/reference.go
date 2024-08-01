@@ -22,6 +22,13 @@ func NewRef[T any](value T, ref Reference) Ref[T] {
 	}
 }
 
+func NewInvalidRef[T any](value T) Ref[T] {
+	return Ref[T]{
+		Value: value,
+		Ref:   NewInvalidReference(),
+	}
+}
+
 func NewReference(file PathAbsolute, line int, column int, xpath string) Reference {
 	return Reference{
 		File:   file,
@@ -70,6 +77,16 @@ func NewRefMap[K comparable, V any](size int) RefMap[K, V] {
 		values: make(map[K]V, size),
 		refs:   make(map[K]Reference, size),
 	}
+}
+
+func NewRefMapFrom[K comparable, V any](in map[K]Ref[V]) RefMap[K, V] {
+	refMap := NewRefMap[K, V](len(in))
+
+	for k, refValue := range in {
+		refMap.Set(k, refValue.Value, refValue.Ref)
+	}
+
+	return refMap
 }
 
 func (rf *RefMap[K, V]) Len() int {

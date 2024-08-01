@@ -2,6 +2,8 @@ package validator
 
 import (
 	"fmt"
+
+	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
 type WorkdirValidator struct {
@@ -18,7 +20,7 @@ func NewWorkdirValidator(
 
 func (c *WorkdirValidator) Validate(ctx *validationContext) {
 	workDir := ctx.conf.WorkingDirectory.Value
-	matched, err := c.pathHelper.MatchProjectFiles(workDir, true)
+	matched, err := c.pathHelper.MatchProjectFiles(workDir, models.FileMatchQueryTypeOnlyDirectories)
 	if err != nil {
 		ctx.AddNotice(
 			fmt.Sprintf("failed find directory '%s': %v", workDir, err),

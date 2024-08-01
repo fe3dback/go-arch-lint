@@ -3,17 +3,15 @@ package config
 import "github.com/fe3dback/go-arch-lint/v4/internal/models"
 
 type (
-	Reader interface {
+	reader interface {
 		Read(path models.PathAbsolute) (models.Config, error)
 	}
 
-	Validator interface {
+	validator interface {
 		Validate(config models.Config) error
 	}
 
-	Assembler interface {
-		// todo: add spec assembler
+	assembler interface {
+		Assemble(conf models.Config) (models.Spec, error)
 	}
-
-	// todo: maybe another business validator here?
 )
