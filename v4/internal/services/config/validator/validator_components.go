@@ -2,7 +2,6 @@ package validator
 
 import (
 	"fmt"
-	"path"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
@@ -31,8 +30,11 @@ func (c *ComponentsValidator) Validate(ctx *validationContext) {
 
 	ctx.conf.Components.Map.Each(func(_ models.ComponentName, component models.ConfigComponent, _ models.Reference) {
 		for _, pathGlob := range component.In {
-			relPath := models.PathRelativeGlob(path.Join(string(ctx.conf.WorkingDirectory.Value), string(pathGlob.Value)))
-			matched, err := c.pathHelper.MatchProjectFiles(relPath, models.FileMatchQueryTypeOnlyDirectories)
+			matched, err := c.pathHelper.FindProjectFiles(models.FileQuery{
+				Path:             pathGlob.Value,
+				WorkingDirectory: ctx.conf.WorkingDirectory.Value,
+				Type:             models.FileMatchQueryTypeOnlyDirectories,
+			})
 			if err != nil {
 				ctx.AddNotice(
 					fmt.Sprintf("failed find directories: %v", err),

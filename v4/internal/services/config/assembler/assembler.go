@@ -2,9 +2,7 @@ package assembler
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
@@ -33,8 +31,6 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 		return models.Spec{}, fmt.Errorf("failed fetch project info: %w", err)
 	}
 
-	absWorkingDirectory := models.PathAbsolute(path.Join(string(projectInfo.Directory), string(conf.WorkingDirectory.Value)))
-
 	components := make([]models.SpecComponent, 0, conf.Dependencies.Map.Len())
 	conf.Dependencies.Map.Each(func(name models.ComponentName, rules models.ConfigComponentDependencies, reference models.Reference) {
 		definition, definitionRef, exist := conf.Components.Map.Get(name)
@@ -51,7 +47,7 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 
 		tagsAllowedAll, tagsAllowedWhiteList := a.figureOutAllowedStructTags(&conf, &rules)
 
-		matchedFiles, err := a.findOwnedFiles(absWorkingDirectory, definition)
+		matchedFiles, err := a.findOwnedFiles(conf.WorkingDirectory.Value, definition)
 		if err != nil {
 			panic(fmt.Errorf("failed finding owned files by component '%s': %w", name, err))
 		}
@@ -99,28 +95,30 @@ func (a *Assembler) figureOutAllowedStructTags(conf *models.Config, rules *model
 	return models.NewRef(false, conf.Settings.Tags.Allowed.Ref), allowedList
 }
 
-func (a *Assembler) findOwnedFiles(absWorkingDirectory models.PathAbsolute, component models.ConfigComponent) ([]models.PathRelative, error) {
-	filePaths := make([]models.PathAbsolute, 0, 32)
+func (a *Assembler) findOwnedFiles(workingDirectory models.PathRelative, component models.ConfigComponent) ([]models.PathRelative, error) {
+	filePaths := make([]models.PathRelative, 0, 32)
 
 	for _, globPath := range component.In {
-		absGlob := models.PathAbsoluteGlob(path.Join(string(absWorkingDirectory), string(globPath.Value)))
-		files, err := a.pathHelper.MatchProjectFiles(absGlob, models.FileMatchQueryTypeOnlyFiles)
+		files, err := a.pathHelper.FindProjectFiles(models.FileQuery{
+			Path:               globPath.Value,
+			WorkingDirectory:   workingDirectory,
+			Type:               models.FileMatchQueryTypeOnlyFiles,
+			ExcludeDirectories: nil, // todo
+			ExcludeFiles:       nil, // todo
+			ExcludeRegexp:      nil, // todo
+			Extensions:         []string{"go"},
+		})
+
 		if err != nil {
 			return nil, fmt.Errorf("matching glob path failed '%v': %w", globPath.Value, err)
 		}
 
 		for _, file := range files {
-			filePaths = append(filePaths, file.Path)
+			filePaths = append(filePaths, file.PathRel)
 		}
 	}
 
-	relativePaths := make([]models.PathRelative, 0, len(filePaths))
-	for _, absPath := range filePaths {
-		relativePath := models.PathRelative(strings.TrimPrefix(string(absPath), string(absWorkingDirectory)))
-		relativePaths = append(relativePaths, relativePath)
-	}
-
-	return relativePaths, nil
+	return filePaths, nil
 }
 
 func (a *Assembler) extractUniquePackages(files []models.PathRelative) []models.PathRelative {

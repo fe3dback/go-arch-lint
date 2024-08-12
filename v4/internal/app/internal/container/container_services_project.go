@@ -10,6 +10,26 @@ func (c *Container) serviceProjectPathHelper() *xpath.Helper {
 	return once(func() *xpath.Helper {
 		return xpath.NewHelper(
 			c.cCtx.String(models.FlagProjectPath),
+			c.serviceProjectPathMatcherRelative(),
+			c.serviceProjectPathMatcherAbsolute(),
+			c.serviceProjectPathMatcherRelativeGlob(),
+			nil, // todo
+		)
+	})
+}
+
+func (c *Container) serviceProjectPathMatcherRelative() *xpath.MatcherRelative {
+	return once(xpath.NewMatcherRelative)
+}
+
+func (c *Container) serviceProjectPathMatcherRelativeGlob() *xpath.MatcherRelativeGlob {
+	return once(xpath.NewMatcherRelativeGlob)
+}
+
+func (c *Container) serviceProjectPathMatcherAbsolute() *xpath.MatcherAbsolute {
+	return once(func() *xpath.MatcherAbsolute {
+		return xpath.NewMatcherAbsolute(
+			c.serviceProjectPathMatcherRelative(),
 		)
 	})
 }

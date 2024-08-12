@@ -8,6 +8,6 @@ type (
 	}
 
 	pathHelper interface {
-		MatchProjectFiles(somePath any, queryType models.FileMatchQueryType) ([]models.FileRef, error)
+		FindProjectFiles(query models.FileQuery) ([]models.FileDescriptor, error)
 	}
 )

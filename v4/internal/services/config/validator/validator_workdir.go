@@ -20,7 +20,11 @@ func NewWorkdirValidator(
 
 func (c *WorkdirValidator) Validate(ctx *validationContext) {
 	workDir := ctx.conf.WorkingDirectory.Value
-	matched, err := c.pathHelper.MatchProjectFiles(workDir, models.FileMatchQueryTypeOnlyDirectories)
+	matched, err := c.pathHelper.FindProjectFiles(models.FileQuery{
+		Path: workDir,
+		Type: models.FileMatchQueryTypeOnlyDirectories,
+	})
+
 	if err != nil {
 		ctx.AddNotice(
 			fmt.Sprintf("failed find directory '%s': %v", workDir, err),
