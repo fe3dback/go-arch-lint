@@ -2,7 +2,6 @@ package xpath
 
 import (
 	"fmt"
-	"io/fs"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -12,16 +11,15 @@ import (
 )
 
 type Helper struct {
+	fileScanner   fileScanner
 	matchers      map[string]typeMatcher
 	queryCtx      queryContext
 	cachedRegExps map[string]*regexp.Regexp
 }
 
-// todo: fix glob matcher
-// todo: tests table (lookup)
-
 func NewHelper(
 	projectDirectory string,
+	fileScanner fileScanner,
 	matcherRelative typeMatcher,
 	matcherAbsolute typeMatcher,
 	matcherGlobRelative typeMatcher,
@@ -33,13 +31,15 @@ func NewHelper(
 	}
 
 	srv := &Helper{
-		queryCtx: newQueryContext(models.PathAbsolute(rootDirectory)),
+		fileScanner: fileScanner,
+		queryCtx:    newQueryContext(models.PathAbsolute(rootDirectory)),
 		matchers: map[string]typeMatcher{
 			getType(models.PathRelative("/")):     matcherRelative,
 			getType(models.PathAbsolute("/")):     matcherAbsolute,
 			getType(models.PathRelativeGlob("/")): matcherGlobRelative,
 			getType(models.PathAbsoluteGlob("/")): matcherGlobAbsolute,
 		},
+		cachedRegExps: make(map[string]*regexp.Regexp, 4),
 	}
 
 	err = srv.indexProjectFiles()
@@ -51,11 +51,7 @@ func NewHelper(
 }
 
 func (h *Helper) indexProjectFiles() error {
-	return filepath.Walk(string(h.queryCtx.projectDirectory), func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
-			return fmt.Errorf("failed walking %q: %w", path, err)
-		}
-
+	return h.fileScanner.Scan(string(h.queryCtx.projectDirectory), func(path string, isDir bool) error {
 		relativePathStr, err := filepath.Rel(string(h.queryCtx.projectDirectory), path)
 		if err != nil {
 			return fmt.Errorf("failed getting relative path '%q' from '%q': %w", path, h.queryCtx.projectDirectory, err)
@@ -68,7 +64,7 @@ func (h *Helper) indexProjectFiles() error {
 		h.queryCtx.index.appendToIndex(relativePath, models.FileDescriptor{
 			PathRel:   relativePath,
 			PathAbs:   models.PathAbsolute(path),
-			IsDir:     info.IsDir(),
+			IsDir:     isDir,
 			Extension: extLower,
 		})
 
@@ -111,6 +107,7 @@ func (h *Helper) FindProjectFiles(query models.FileQuery) ([]models.FileDescript
 	return result, nil
 }
 
+//nolint:funlen
 func (h *Helper) isSuitable(dst models.FileDescriptor, query *models.FileQuery) (bool, error) {
 	// only directories
 	if dst.IsDir && !(query.Type == models.FileMatchQueryTypeAll || query.Type == models.FileMatchQueryTypeOnlyDirectories) {
@@ -130,14 +127,24 @@ func (h *Helper) isSuitable(dst models.FileDescriptor, query *models.FileQuery) 
 
 	// exclude by directory
 	if len(query.ExcludeDirectories) > 0 {
-		if slices.Contains(query.ExcludeDirectories, dstDirectory) {
+		excludedDirs := make([]models.PathRelative, 0, len(query.ExcludeDirectories))
+		for _, excDirectory := range query.ExcludeDirectories {
+			excludedDirs = append(excludedDirs, models.PathRelative(filepath.Join(string(query.WorkingDirectory), string(excDirectory))))
+		}
+
+		if slices.Contains(excludedDirs, dstDirectory) {
 			return false, nil
 		}
 	}
 
 	// exclude by file path
 	if len(query.ExcludeFiles) > 0 {
-		if !dst.IsDir && slices.Contains(query.ExcludeFiles, dst.PathRel) {
+		excludedFiles := make([]models.PathRelative, 0, len(query.ExcludeFiles))
+		for _, excFile := range query.ExcludeFiles {
+			excludedFiles = append(excludedFiles, models.PathRelative(filepath.Join(string(query.WorkingDirectory), string(excFile))))
+		}
+
+		if !dst.IsDir && slices.Contains(excludedFiles, dst.PathRel) {
 			return false, nil
 		}
 	}

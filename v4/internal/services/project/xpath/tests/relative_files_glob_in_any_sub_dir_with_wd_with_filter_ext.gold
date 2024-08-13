@@ -1,0 +1,29 @@
+query: renderer/*/rend*
+workdir: internal
+type: files
+ext: [go]
+
+#### #### #### #### #### #### #### ####
+  /home/u/project/
+  /home/u/project/go.mod
+  /home/u/project/main.go
+  /home/u/project/internal
+  /home/u/project/internal/app
+  /home/u/project/internal/app/cli.go
+  /home/u/project/internal/app/internal/build/go.mod
+  /home/u/project/internal/app/internal/container
+  /home/u/project/internal/renderer                                              // not file
+  /home/u/project/internal/renderer/ascii                                        // not file
+  /home/u/project/internal/renderer/ascii/interfaces.go                          // not match "rend*" pattern in name
+> /home/u/project/internal/renderer/ascii/renderer.go
+> /home/u/project/internal/renderer/ascii/renderer_ascii_functions.go
+  /home/u/project/internal/renderer/interfaces.go                                // not in sub-dir
+  /home/u/project/internal/renderer/json                                         // not file
+> /home/u/project/internal/renderer/json/renderer.go
+> /home/u/project/internal/renderer/json/renderer_test.go
+  /home/u/project/internal/renderer/mocks                                        // not file
+  /home/u/project/internal/renderer/mocks/mocks.go                               // not match "rend*" pattern in name
+> /home/u/project/internal/renderer/sub/renderer.go
+  /home/u/project/internal/renderer/sub/renderer.md                              // filtered by ext
+  /home/u/project/internal/renderer/sub/renderer.txt                             // filtered by ext
+> /home/u/project/internal/renderer/sub/renderer_test.go

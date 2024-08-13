@@ -10,12 +10,17 @@ func (c *Container) serviceProjectPathHelper() *xpath.Helper {
 	return once(func() *xpath.Helper {
 		return xpath.NewHelper(
 			c.cCtx.String(models.FlagProjectPath),
+			c.serviceProjectPathFileScanner(),
 			c.serviceProjectPathMatcherRelative(),
 			c.serviceProjectPathMatcherAbsolute(),
 			c.serviceProjectPathMatcherRelativeGlob(),
 			nil, // todo
 		)
 	})
+}
+
+func (c *Container) serviceProjectPathFileScanner() *xpath.FileScanner {
+	return once(xpath.NewFileScanner)
 }
 
 func (c *Container) serviceProjectPathMatcherRelative() *xpath.MatcherRelative {

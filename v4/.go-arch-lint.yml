@@ -15,6 +15,7 @@ exclude:
   files:
     - "^.*_test\\.go$"
     - "^.*\/test\/.*$"
+    - "^.*\/tests\/.*$"
 
 vendors:
   go-common:           { in: golang.org/x/sync/errgroup }
@@ -31,16 +32,19 @@ vendors:
 components:
   main:                { in: app }
   container:           { in: app/internal/container/** }
+  commands:            { in: commands/* }
   operations:          { in: operations/* }
   services:            { in: services/** }
   view:                { in: view }
   models:              { in: models/** }
+  libs:                { in: pkg/** }
 
 commonVendors:
   - go-common
 
 commonComponents:
   - models
+  - libs
 
 dependencies:
   main:
@@ -49,10 +53,11 @@ dependencies:
 
   container:
     anyVendorDeps: true
+    anyProjectDeps: true
+
+  commands:
     mayDependOn:
       - operations
-      - services
-      - view
 
   operations:
     mayDependOn:

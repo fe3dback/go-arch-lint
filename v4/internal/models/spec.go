@@ -30,9 +30,10 @@ type (
 		AllowedTags         RefSlice[StructTag]
 		MayDependOn         RefSlice[ComponentName]
 		CanUse              RefSlice[VendorName]
-		MatchedFiles        []PathRelative // all files matched by component "in" query
-		MatchedPackages     []PathRelative // all packages matched by component "in" query
-		OwnedFiles          []PathRelative // unique subset of MatchedFiles, belongs to this component (every file will belong only to single component)
-		OwnedPackages       []PathRelative // unique subset of MatchedPackages, belongs to this component (every package will belong only to single component)
+		MatchPatterns       RefSlice[PathRelativeGlob] // $.components.X.in
+		MatchedFiles        []PathRelative             // all files matched by component "in" query
+		MatchedPackages     []PathRelative             // all packages matched by component "in" query
+		OwnedFiles          []PathRelative             // unique subset of MatchedFiles, belongs to this component (every file will belong only to single component)
+		OwnedPackages       []PathRelative             // unique subset of MatchedPackages, belongs to this component (every package will belong only to single component)
 	}
 )

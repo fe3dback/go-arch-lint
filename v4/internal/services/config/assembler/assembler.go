@@ -3,6 +3,8 @@ package assembler
 import (
 	"fmt"
 	"path/filepath"
+	"runtime/debug"
+	"strings"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
@@ -19,10 +21,11 @@ func NewAssembler(projectInfoFetcher projectInfoFetcher, pathHelper pathHelper) 
 	}
 }
 
+// nolint
 func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("failed assemble: %v", r)
+			err = fmt.Errorf("failed assemble: %v\n%s", r, debug.Stack())
 		}
 	}()
 
@@ -31,11 +34,15 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 		return models.Spec{}, fmt.Errorf("failed fetch project info: %w", err)
 	}
 
-	components := make([]models.SpecComponent, 0, conf.Dependencies.Map.Len())
-	conf.Dependencies.Map.Each(func(name models.ComponentName, rules models.ConfigComponentDependencies, reference models.Reference) {
-		definition, definitionRef, exist := conf.Components.Map.Get(name)
+	components := make([]*models.SpecComponent, 0, conf.Dependencies.Map.Len())
+
+	conf.Components.Map.Each(func(name models.ComponentName, definition models.ConfigComponent, definitionRef models.Reference) {
+
+		rules, rulesRef, exist := conf.Dependencies.Map.Get(name)
 		if !exist {
-			panic(fmt.Errorf("component '%s' not found", name))
+			// defaults for rules
+			rules = models.ConfigComponentDependencies{}
+			rulesRef = models.NewInvalidReference()
 		}
 
 		var deepScan models.Ref[bool]
@@ -52,12 +59,10 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 			panic(fmt.Errorf("failed finding owned files by component '%s': %w", name, err))
 		}
 
-		matchedPackages := a.extractUniquePackages(matchedFiles)
-
-		component := models.SpecComponent{
+		components = append(components, &models.SpecComponent{
 			Name:                models.NewRef(name, definitionRef),
 			DefinitionComponent: definitionRef,
-			DefinitionDeps:      reference,
+			DefinitionDeps:      rulesRef,
 			DeepScan:            deepScan,
 			StrictMode:          conf.Settings.Imports.StrictMode,
 			AllowAllProjectDeps: rules.AnyProjectDeps,
@@ -66,17 +71,30 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 			AllowedTags:         tagsAllowedWhiteList,
 			MayDependOn:         rules.MayDependOn,
 			CanUse:              rules.CanUse,
+			MatchPatterns:       definition.In,
 			MatchedFiles:        matchedFiles,
-			MatchedPackages:     matchedPackages,
-		}
-
-		components = append(components, component)
+		})
 	})
+
+	// copy matched files to owned files (but each file owned only by one component)
+	a.calculateFilesOwnage(components)
+
+	// find matched/owned packages from files
+	for _, component := range components {
+		component.MatchedPackages = a.extractUniquePackages(component.MatchedFiles)
+		component.OwnedPackages = a.extractUniquePackages(component.OwnedFiles)
+	}
+
+	// finalize
+	resultComponents := make([]models.SpecComponent, 0, len(components))
+	for _, component := range components {
+		resultComponents = append(resultComponents, *component)
+	}
 
 	return models.Spec{
 		Project:          projectInfo,
 		WorkingDirectory: conf.WorkingDirectory,
-		Components:       components,
+		Components:       resultComponents,
 	}, nil
 }
 
@@ -99,8 +117,21 @@ func (a *Assembler) findOwnedFiles(workingDirectory models.PathRelative, compone
 	filePaths := make([]models.PathRelative, 0, 32)
 
 	for _, globPath := range component.In {
+		// convert directory glob to file scope glob
+		fileGlob := globPath.Value
+
+		if !strings.HasSuffix(string(fileGlob), "/**") {
+			// rules:
+			// "app"            | match only app itself (directory), but no files inside
+			// "app/*"          | match all files inside app itself, but no directory and subdirs (and subdirs files)
+			// "app/**"         | match all files inside app and all subdirs (will recursive files on any level)
+
+			// convert "app" -> "app/*", because we want to find files inside this directory
+			fileGlob = models.PathRelativeGlob(fmt.Sprintf("%s/*", fileGlob))
+		}
+
 		files, err := a.pathHelper.FindProjectFiles(models.FileQuery{
-			Path:               globPath.Value,
+			Path:               fileGlob,
 			WorkingDirectory:   workingDirectory,
 			Type:               models.FileMatchQueryTypeOnlyFiles,
 			ExcludeDirectories: nil, // todo

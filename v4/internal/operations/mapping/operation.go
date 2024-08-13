@@ -33,6 +33,16 @@ func (o *Operation) Mapping(in models.CmdMappingIn) (models.CmdMappingOut, error
 
 	_ = spec
 
+	for _, component := range spec.Components {
+		fmt.Printf("CMP: %s\n", component.Name.Value)
+
+		for _, ownedPackage := range component.OwnedPackages {
+			fmt.Printf(" - %s\n", ownedPackage)
+		}
+	}
+
+	fmt.Printf("\n\n")
+
 	// todo:
 	return models.CmdMappingOut{
 		ProjectDirectory: "todo-ProjectDirectory",
