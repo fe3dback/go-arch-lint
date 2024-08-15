@@ -31,9 +31,9 @@ type (
 		MayDependOn         RefSlice[ComponentName]
 		CanUse              RefSlice[VendorName]
 		MatchPatterns       RefSlice[PathRelativeGlob] // $.components.X.in
-		MatchedFiles        []PathRelative             // all files matched by component "in" query
-		MatchedPackages     []PathRelative             // all packages matched by component "in" query
-		OwnedFiles          []PathRelative             // unique subset of MatchedFiles, belongs to this component (every file will belong only to single component)
-		OwnedPackages       []PathRelative             // unique subset of MatchedPackages, belongs to this component (every package will belong only to single component)
+		MatchedFiles        []FileDescriptor           // all files matched by component "in" query
+		MatchedPackages     []FileDescriptor           // all packages matched by component "in" query
+		OwnedFiles          []FileDescriptor           // unique subset of MatchedFiles, belongs to this component (every file will belong only to single component)
+		OwnedPackages       []FileDescriptor           // unique subset of MatchedPackages, belongs to this component (every package will belong only to single component)
 	}
 )

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
+	"github.com/fe3dback/go-arch-lint/v4/internal/pkg/pathsort"
 )
 
 type Assembler struct {
@@ -85,6 +86,14 @@ func (a *Assembler) Assemble(conf models.Config) (spec models.Spec, err error) {
 		component.OwnedPackages = a.extractUniquePackages(component.OwnedFiles)
 	}
 
+	// sort paths
+	for _, component := range components {
+		pathsort.SortDescriptors(component.MatchedFiles)
+		pathsort.SortDescriptors(component.MatchedPackages)
+		pathsort.SortDescriptors(component.OwnedFiles)
+		pathsort.SortDescriptors(component.OwnedPackages)
+	}
+
 	// finalize
 	resultComponents := make([]models.SpecComponent, 0, len(components))
 	for _, component := range components {
@@ -113,8 +122,8 @@ func (a *Assembler) figureOutAllowedStructTags(conf *models.Config, rules *model
 	return models.NewRef(false, conf.Settings.Tags.Allowed.Ref), allowedList
 }
 
-func (a *Assembler) findOwnedFiles(workingDirectory models.PathRelative, component models.ConfigComponent) ([]models.PathRelative, error) {
-	filePaths := make([]models.PathRelative, 0, 32)
+func (a *Assembler) findOwnedFiles(workingDirectory models.PathRelative, component models.ConfigComponent) ([]models.FileDescriptor, error) {
+	list := make([]models.FileDescriptor, 0, 32)
 
 	for _, globPath := range component.In {
 		// convert directory glob to file scope glob
@@ -144,27 +153,30 @@ func (a *Assembler) findOwnedFiles(workingDirectory models.PathRelative, compone
 			return nil, fmt.Errorf("matching glob path failed '%v': %w", globPath.Value, err)
 		}
 
-		for _, file := range files {
-			filePaths = append(filePaths, file.PathRel)
-		}
+		list = append(list, files...)
 	}
 
-	return filePaths, nil
+	return list, nil
 }
 
-func (a *Assembler) extractUniquePackages(files []models.PathRelative) []models.PathRelative {
-	packages := make([]models.PathRelative, 0, len(files))
+func (a *Assembler) extractUniquePackages(files []models.FileDescriptor) []models.FileDescriptor {
+	packages := make([]models.FileDescriptor, 0, len(files))
 	unique := make(map[models.PathRelative]any)
 
 	for _, file := range files {
-		packagePath := models.PathRelative(filepath.Dir(string(file)))
+		packagePathRelative := models.PathRelative(filepath.Dir(string(file.PathRel)))
+		packagePathAbsolute := models.PathAbsolute(filepath.Dir(string(file.PathAbs)))
 
-		if _, ok := unique[packagePath]; ok {
+		if _, ok := unique[packagePathRelative]; ok {
 			continue
 		}
 
-		unique[packagePath] = struct{}{}
-		packages = append(packages, packagePath)
+		unique[packagePathRelative] = struct{}{}
+		packages = append(packages, models.FileDescriptor{
+			PathRel: packagePathRelative,
+			PathAbs: packagePathAbsolute,
+			IsDir:   true,
+		})
 	}
 
 	return packages

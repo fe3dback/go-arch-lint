@@ -20,26 +20,30 @@ func (a *Assembler) calculateFilesOwnage(components []*models.SpecComponent) {
 
 	// Just map from input components array
 	componentsMap := make(map[models.ComponentName]*models.SpecComponent)
+	descriptorsMap := make(map[models.PathRelative]*models.FileDescriptor)
 
 	// populate utils maps
 	for _, component := range components {
 		componentsMap[component.Name.Value] = component
 
 		for _, file := range component.MatchedFiles {
-			if _, exist := filePotentialOwners[file]; !exist {
-				filePotentialOwners[file] = make([]models.ComponentName, 0, 3)
+			descriptorsMap[file.PathRel] = &file
+
+			if _, exist := filePotentialOwners[file.PathRel]; !exist {
+				filePotentialOwners[file.PathRel] = make([]models.ComponentName, 0, 3)
 			}
 
-			filePotentialOwners[file] = append(filePotentialOwners[file], component.Name.Value)
+			filePotentialOwners[file.PathRel] = append(filePotentialOwners[file.PathRel], component.Name.Value)
 		}
 	}
 
 	for file, potentialOwners := range filePotentialOwners {
 		// find best owner
 		owner := a.calculateFileOwner(potentialOwners, componentsMap)
+		fileDsc := descriptorsMap[file]
 
 		// add this file to owner
-		componentsMap[owner].OwnedFiles = append(componentsMap[owner].OwnedFiles, file)
+		componentsMap[owner].OwnedFiles = append(componentsMap[owner].OwnedFiles, *fileDsc)
 	}
 }
 

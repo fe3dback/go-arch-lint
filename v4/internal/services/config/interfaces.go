@@ -14,4 +14,8 @@ type (
 	assembler interface {
 		Assemble(conf models.Config) (models.Spec, error)
 	}
+
+	moduleFetcher interface {
+		Fetch() (models.ProjectInfo, error)
+	}
 )

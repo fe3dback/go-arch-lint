@@ -26,12 +26,12 @@ type (
 	}
 
 	CmdMappingOutGrouped struct {
-		ComponentName string
-		FileNames     []string
+		ComponentName string   `json:"ComponentName"`
+		Packages      []string `json:"Packages"`
 	}
 
 	CmdMappingOutList struct {
-		FileName      string
-		ComponentName string
+		Package       string `json:"Package"`
+		ComponentName string `json:"ComponentName"`
 	}
 )

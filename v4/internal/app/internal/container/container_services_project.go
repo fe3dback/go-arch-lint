@@ -40,5 +40,10 @@ func (c *Container) serviceProjectPathMatcherAbsolute() *xpath.MatcherAbsolute {
 }
 
 func (c *Container) serviceProjectFetcher() *module.Fetcher {
-	return once(module.NewFetcher)
+	return once(func() *module.Fetcher {
+		return module.NewFetcher(
+			models.PathAbsolute(c.cCtx.String(models.FlagProjectPath)),
+			models.PathRelative(c.cCtx.String(models.FlagArchConfigRelativePath)),
+		)
+	})
 }

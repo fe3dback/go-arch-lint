@@ -5,12 +5,14 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
 type Helper struct {
+	indexActual   bool
 	fileScanner   fileScanner
 	matchers      map[string]typeMatcher
 	queryCtx      queryContext
@@ -31,6 +33,7 @@ func NewHelper(
 	}
 
 	srv := &Helper{
+		indexActual: false,
 		fileScanner: fileScanner,
 		queryCtx:    newQueryContext(models.PathAbsolute(rootDirectory)),
 		matchers: map[string]typeMatcher{
@@ -42,15 +45,15 @@ func NewHelper(
 		cachedRegExps: make(map[string]*regexp.Regexp, 4),
 	}
 
-	err = srv.indexProjectFiles()
-	if err != nil {
-		panic(fmt.Errorf("failed build project files index from rootDirectory '%s': %w", rootDirectory, err))
-	}
-
 	return srv
 }
 
-func (h *Helper) indexProjectFiles() error {
+func (h *Helper) reindexProjectFilesIfNecessary() error {
+	if h.indexActual {
+		return nil
+	}
+	h.indexActual = true
+
 	return h.fileScanner.Scan(string(h.queryCtx.projectDirectory), func(path string, isDir bool) error {
 		relativePathStr, err := filepath.Rel(string(h.queryCtx.projectDirectory), path)
 		if err != nil {
@@ -73,6 +76,11 @@ func (h *Helper) indexProjectFiles() error {
 }
 
 func (h *Helper) FindProjectFiles(query models.FileQuery) ([]models.FileDescriptor, error) {
+	err := h.reindexProjectFilesIfNecessary()
+	if err != nil {
+		return nil, fmt.Errorf("failed build files index from project directory '%s': %w", h.queryCtx.projectDirectory, err)
+	}
+
 	pathType := getType(query.Path)
 	matcher, exist := h.matchers[pathType]
 	if !exist {
@@ -103,6 +111,11 @@ func (h *Helper) FindProjectFiles(query models.FileQuery) ([]models.FileDescript
 
 		result = append(result, dst)
 	}
+
+	// sort
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].PathRel < result[j].PathRel
+	})
 
 	return result, nil
 }

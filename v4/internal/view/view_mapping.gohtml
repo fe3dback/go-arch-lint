@@ -6,7 +6,7 @@ Project Packages:
 {{ if eq .Scheme "list" -}}
 	{{ $prev := "" -}}
 	{{ range .MappingList -}}
-		{{ $packageName := (.FileName | trimPrefix $root | dir | def "/") -}}
+		{{ $packageName := (.Package | trimPrefix $root | def "/") -}}
 
 		{{ if ne $prev $packageName -}}
 			{{ "  " }} {{ .ComponentName | padRight 20 " " -}}
@@ -19,8 +19,8 @@ Project Packages:
 	{{ range .MappingGrouped -}}
 		{{ "  " }} {{ .ComponentName }}:
 		{{ $prev := "" -}}
-		{{ range .FileNames -}}
-			{{ $packageName := (. | trimPrefix $root | dir | def "/") -}}
+		{{ range .Packages -}}
+			{{ $packageName := (. | trimPrefix $root | def "/") -}}
 
 			{{ if ne $prev $packageName -}}
 				{{ "    " }} {{ $packageName | colorize "cyan" }}

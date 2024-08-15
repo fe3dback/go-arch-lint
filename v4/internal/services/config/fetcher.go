@@ -7,27 +7,33 @@ import (
 )
 
 type Fetcher struct {
-	Reader    reader
-	Validator validator
-	Assembler assembler
+	reader        reader
+	validator     validator
+	assembler     assembler
+	moduleFetcher moduleFetcher
 }
 
-func NewFetcher(reader reader, validator validator, assembler assembler) *Fetcher {
-	return &Fetcher{Reader: reader, Validator: validator, Assembler: assembler}
+func NewFetcher(reader reader, validator validator, assembler assembler, moduleFetcher moduleFetcher) *Fetcher {
+	return &Fetcher{reader: reader, validator: validator, assembler: assembler, moduleFetcher: moduleFetcher}
 }
 
-func (f *Fetcher) FetchSpec(path models.PathAbsolute) (models.Spec, error) {
-	conf, err := f.Reader.Read(path)
+func (f *Fetcher) FetchSpec() (models.Spec, error) {
+	project, err := f.moduleFetcher.Fetch()
 	if err != nil {
-		return models.Spec{}, fmt.Errorf("failed read config at '%s': %w", path, err)
+		return models.Spec{}, fmt.Errorf("failed fetch module info: %w", err)
 	}
 
-	err = f.Validator.Validate(conf)
+	conf, err := f.reader.Read(project.ConfigPath)
+	if err != nil {
+		return models.Spec{}, fmt.Errorf("failed read config at '%s': %w", project.ConfigPath, err)
+	}
+
+	err = f.validator.Validate(conf)
 	if err != nil {
 		return models.Spec{}, fmt.Errorf("invalid config: %w", err)
 	}
 
-	spec, err := f.Assembler.Assemble(conf)
+	spec, err := f.assembler.Assemble(conf)
 	if err != nil {
 		return models.Spec{}, fmt.Errorf("failed assemble spec: %w", err)
 	}

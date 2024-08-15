@@ -16,6 +16,7 @@ func (c *Container) serviceConfigFetcher() *config.Fetcher {
 			c.serviceConfigReader(),
 			c.serviceConfigValidator(),
 			c.serviceConfigAssembler(),
+			c.serviceProjectFetcher(),
 		)
 	})
 }

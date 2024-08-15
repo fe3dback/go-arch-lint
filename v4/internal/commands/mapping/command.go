@@ -19,14 +19,10 @@ func NewCommand(operation operation) *Command {
 func (c *Command) Execute(cCtx *cli.Context) (any, error) {
 	in := c.parseIn(cCtx)
 
-	// todo: validation
-
 	out, err := c.operation.Mapping(in)
 	if err != nil {
 		return "", err
 	}
-
-	// todo: map errors (?)
 
 	return out, nil
 }
