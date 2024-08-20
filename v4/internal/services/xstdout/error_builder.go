@@ -3,6 +3,7 @@ package xstdout
 import (
 	"errors"
 
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
@@ -19,12 +20,12 @@ func NewErrorBuilder(codePrinter codePrinter, useColors bool) *ErrorBuilder {
 }
 
 func (eb *ErrorBuilder) BuildError(err error) models.CmdStdoutErrorOut {
-	noticeErr := &models.ErrorWithNotices{}
+	noticeErr := &arch.ErrorWithNotices{}
 	if errors.As(err, &noticeErr) {
 		return eb.buildNoticesError(noticeErr)
 	}
 
-	refError := models.ReferencedError{}
+	refError := arch.ReferencedError{}
 	if errors.As(err, &refError) {
 		return eb.buildSingleError(refError)
 	}
@@ -32,16 +33,16 @@ func (eb *ErrorBuilder) BuildError(err error) models.CmdStdoutErrorOut {
 	return models.CmdStdoutErrorOut{
 		Errors: []models.StdoutNotice{
 			{
-				Notice: models.Notice{
+				Notice: arch.Notice{
 					Message:   err.Error(),
-					Reference: models.NewInvalidReference(),
+					Reference: arch.NewInvalidReference(),
 				},
 			},
 		},
 	}
 }
 
-func (eb *ErrorBuilder) buildNoticesError(err *models.ErrorWithNotices) models.CmdStdoutErrorOut {
+func (eb *ErrorBuilder) buildNoticesError(err *arch.ErrorWithNotices) models.CmdStdoutErrorOut {
 	outNotices := make([]models.StdoutNotice, 0, len(err.Notices))
 
 	mode := models.CodePrintModeExtend
@@ -72,7 +73,7 @@ func (eb *ErrorBuilder) buildNoticesError(err *models.ErrorWithNotices) models.C
 	}
 }
 
-func (eb *ErrorBuilder) buildSingleError(refError models.ReferencedError) models.CmdStdoutErrorOut {
+func (eb *ErrorBuilder) buildSingleError(refError arch.ReferencedError) models.CmdStdoutErrorOut {
 	ref := refError.Reference()
 
 	preview := ""
@@ -88,7 +89,7 @@ func (eb *ErrorBuilder) buildSingleError(refError models.ReferencedError) models
 	return models.CmdStdoutErrorOut{
 		Errors: []models.StdoutNotice{
 			{
-				Notice: models.Notice{
+				Notice: arch.Notice{
 					Message:   refError.Error(),
 					Reference: ref,
 				},

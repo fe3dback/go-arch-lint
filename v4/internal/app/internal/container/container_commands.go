@@ -9,7 +9,8 @@ import (
 func (c *Container) commandMapping() *mapping.Command {
 	return once(func() *mapping.Command {
 		return mapping.NewCommand(
-			c.operationMapping(),
+			c.sdk(),
+			c.serviceSpecFetcher(),
 		)
 	})
 }

@@ -1,0 +1,62 @@
+version: 2
+
+workdir: internal
+
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - excluded
+
+excludeFiles:
+  - "^.*_test\\.go$"
+
+vendors:
+  3rd-example:
+    in:
+      - github.com/example/a
+      - github.com/example/b
+
+components:
+  main:
+    in: .
+
+  a:
+    in: a
+
+  allowb:
+    in: a/allowb
+
+  b:
+    in: b
+
+  c:
+    in: c/**
+
+  d:
+    in: d/**
+
+  e:
+    in: e/**
+
+  nc:
+    in: not_covered
+
+  common:
+    in: common/**
+
+commonComponents:
+  - common
+  - a
+  - c
+  - d
+  - e
+
+deps:
+  allowb:
+    mayDependOn:
+      - b
+
+  e:
+    canUse:
+      - 3rd-example

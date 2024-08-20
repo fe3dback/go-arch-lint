@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/fe3dback/go-arch-lint/v4/internal/pkg/safemap"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/safemap"
 )
 
 var instancesCache = safemap.New[string, any]()

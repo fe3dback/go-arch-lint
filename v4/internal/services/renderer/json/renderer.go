@@ -43,8 +43,10 @@ func (r *JSON) Render(model any, formatJSON bool) (string, error) {
 	return string(jsonBuffer), nil
 }
 
-// Rename "anypackage.CmdXXXXOut" to "models.XXXX"
-// for back compatible with previous response version
+// Rename
+// - "anypackage.CmdXXXXOut" to "models.XXXX"
+// - "anypackage.Out" to "models.Anypackage"
+// used for back compatible with previous response version (json field value)
 func (r *JSON) extractModelType(model any) (string, error) {
 	const expectedPrefix = "Cmd"
 	const expectedSuffix = "Out"
@@ -57,6 +59,12 @@ func (r *JSON) extractModelType(model any) (string, error) {
 	}
 
 	dtoName := alias[dotIndex+1:]
+	if dtoName == "Out" {
+		// model from SDK
+		// we need capitalized package name instead of DTO name
+		packageName := alias[:dotIndex]
+		return fmt.Sprintf("models.%s%s", strings.ToUpper(packageName[:1]), packageName[1:]), nil
+	}
 
 	if !strings.HasPrefix(dtoName, expectedPrefix) {
 		return "", fmt.Errorf("DTO name '%s' alias '%s' should has prefix '%s'", dtoName, alias, expectedPrefix)

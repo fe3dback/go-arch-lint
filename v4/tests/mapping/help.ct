@@ -1,0 +1,24 @@
+$ go-arch-lint ps --help
+NAME:
+   go-arch-lint mapping
+
+USAGE:
+   go-arch-lint mapping [command options]
+
+DESCRIPTION:
+   output mapping table between go packages and components
+
+OPTIONS:
+   global:
+
+   --json                  (alias for --output-type json) (default: false)
+   --output-color          use ANSI colors in terminal output (default: true)
+   --output-json-one-line  output JSON in single line (without formatting). Only for '--json' (default: false)
+   --output-type value     linter output type. Enum:[ascii, json] (default: "ascii")
+   --skip-missuse          will skip not critical notices in config validation (default: false)
+
+   this command:
+
+   --arch-file value         relative path to linter config (default: ".go-arch-lint.yml")
+   --project-path value      absolute path to project directory (default: "./")
+   --scheme value, -s value  display scheme. Enum:[list, grouped] (default: "list")

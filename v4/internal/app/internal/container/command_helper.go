@@ -24,7 +24,7 @@ func (c *Container) makeCliCommand(name string, factory func() CommandHandler) c
 		handler := factory()
 		model, err := handler.Execute(cCtx)
 		if err != nil {
-			renderErr := c.render(cCtx, name, c.serviceErrorBuilder().BuildError(err))
+			renderErr := c.render(cCtx, name, true, c.serviceErrorBuilder().BuildError(err))
 			if renderErr != nil {
 				return renderErr
 			}
@@ -32,11 +32,11 @@ func (c *Container) makeCliCommand(name string, factory func() CommandHandler) c
 			return models.NewUserLandError(err)
 		}
 
-		return c.render(cCtx, name, model)
+		return c.render(cCtx, name, false, model)
 	}
 }
 
-func (c *Container) render(cCtx *cli.Context, name string, model any) error {
+func (c *Container) render(cCtx *cli.Context, name string, isErr bool, model any) error {
 	outputType, err := extractOutputType(cCtx)
 	if err != nil {
 		return fmt.Errorf("failed extracting output type: %w", err)
@@ -53,7 +53,12 @@ func (c *Container) render(cCtx *cli.Context, name string, model any) error {
 		return fmt.Errorf("command '%s' render failed: %w", name, err)
 	}
 
-	_, err = fmt.Fprintln(cCtx.App.Writer, out)
+	if isErr {
+		_, err = fmt.Fprintln(cCtx.App.Writer, out)
+	} else {
+		_, err = fmt.Fprintln(cCtx.App.ErrWriter, out)
+	}
+
 	if err != nil {
 		return fmt.Errorf("print to stdout failed: %w", err)
 	}

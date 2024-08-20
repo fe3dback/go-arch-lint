@@ -1,5 +1,7 @@
 package models
 
+import "github.com/fe3dback/go-arch-lint-sdk/arch"
+
 type (
 	CmdStdoutErrorOut struct {
 		OverallNote string         `json:"OverallNote"`
@@ -7,7 +9,7 @@ type (
 	}
 
 	StdoutNotice struct {
-		Notice
+		arch.Notice
 		Preview string `json:"-"`
 	}
 )

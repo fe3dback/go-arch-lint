@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/codeprinter"
 )
@@ -134,8 +135,8 @@ func TestPrinter_Print(t *testing.T) {
 				codeprinter.NewExtractorHL(),
 			)
 
-			pathSrc := models.PathAbsolute(filepath.Clean(fmt.Sprintf("./tests/%s", tt.ref.testFile)))
-			srcReference := models.NewReference(
+			pathSrc := arch.PathAbsolute(filepath.Clean(fmt.Sprintf("./tests/%s", tt.ref.testFile)))
+			srcReference := arch.NewReference(
 				pathSrc,
 				tt.ref.line,
 				tt.ref.column,
@@ -144,7 +145,7 @@ func TestPrinter_Print(t *testing.T) {
 
 			for variantName, opts := range matrix {
 				dirName := strings.ReplaceAll(tt.ref.testFile, ".", "_")
-				pathDst := models.PathAbsolute(filepath.Clean(fmt.Sprintf("./tests/%s/%s/%s.golden", dirName, tt.name, variantName)))
+				pathDst := arch.PathAbsolute(filepath.Clean(fmt.Sprintf("./tests/%s/%s/%s.golden", dirName, tt.name, variantName)))
 
 				got, err := p.Print(srcReference, opts)
 				require.NoError(t, err)

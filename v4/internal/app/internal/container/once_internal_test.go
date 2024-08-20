@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/fe3dback/go-arch-lint/v4/internal/pkg/ptr"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/ptr"
 )
 
 func getPointerToOne() *int {

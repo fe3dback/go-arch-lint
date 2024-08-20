@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
+	"github.com/fe3dback/go-arch-lint-sdk/mapping"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
@@ -36,7 +37,7 @@ var Templates = map[string]string{
 	//tpl(models.CmdCheckOut{}):       string(viewCheck),
 	//tpl(models.CmdErrorOut{}):       string(viewError),
 	//tpl(models.CmdGraphOut{}):       string(viewGraph),
-	tpl(models.CmdMappingOut{}): string(viewMapping),
+	tpl(mapping.Out{}): string(viewMapping),
 	//tpl(models.CmdSchemaOut{}):      string(viewSchema),
 	//tpl(models.CmdSelfInspectOut{}): string(viewSelfInspect),
 	//tpl(models.CmdVersionOut{}):     string(viewVersion),

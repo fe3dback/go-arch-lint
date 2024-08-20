@@ -1,15 +1,26 @@
 package container
 
 import (
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/colorizer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/ascii"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/json"
+	"github.com/fe3dback/go-arch-lint/v4/internal/services/spec"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/xstdout"
 	"github.com/fe3dback/go-arch-lint/v4/internal/view"
 )
+
+func (c *Container) serviceSpecFetcher() *spec.Fetcher {
+	return once(func() *spec.Fetcher {
+		return spec.NewFetcher(
+			c.sdk(),
+			arch.PathRelative(c.cCtx.String(models.FlagArchConfigRelativePath)),
+		)
+	})
+}
 
 func (c *Container) serviceErrorBuilder() *xstdout.ErrorBuilder {
 	return once(func() *xstdout.ErrorBuilder {

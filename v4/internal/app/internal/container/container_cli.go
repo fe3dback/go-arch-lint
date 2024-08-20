@@ -1,14 +1,12 @@
 package container
 
 import (
-	"errors"
 	"os"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/app/internal/build"
 	"github.com/fe3dback/go-arch-lint/v4/internal/app/internal/flags"
-	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
 func (c *Container) Cli() *cli.App {
@@ -21,6 +19,7 @@ func (c *Container) Cli() *cli.App {
 			Commands: []*cli.Command{
 				c.cliCommandMapping(),
 			},
+
 			Flags:    flags.GlobalFlags,
 			Compiled: build.CompileTime,
 			Authors: []*cli.Author{
@@ -30,15 +29,7 @@ func (c *Container) Cli() *cli.App {
 				},
 			},
 			Copyright: "MIT",
-			ExitErrHandler: func(cCtx *cli.Context, err error) {
-				userError := &models.UserLandError{}
-				if errors.As(err, &userError) {
-					os.Exit(1)
-					return
-				}
-
-				cli.HandleExitCoder(err)
-			},
+			ErrWriter: os.Stderr,
 		}
 	})
 }
@@ -49,7 +40,7 @@ func (c *Container) cliCommandMapping() *cli.Command {
 		return &cli.Command{
 			Name:        name,
 			Aliases:     []string{"ps", "ls", "m"},
-			Description: "output mapping table between files and components",
+			Description: "output mapping table between go packages and components",
 			Before:      c.makeBeforeCode(),
 			Action: c.makeCliCommand(name, func() CommandHandler {
 				return c.commandMapping()

@@ -11,7 +11,7 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
 
-	"github.com/fe3dback/go-arch-lint/v4/internal/models"
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func NewExtractorHL() *ExtractorHL {
 	return &ExtractorHL{}
 }
 
-func (e *ExtractorHL) ExtractLines(file models.PathAbsolute, from int, to int) ([]string, error) {
+func (e *ExtractorHL) ExtractLines(file arch.PathAbsolute, from int, to int) ([]string, error) {
 	lexer := lexers.Match(string(file))
 
 	if lexer == nil {

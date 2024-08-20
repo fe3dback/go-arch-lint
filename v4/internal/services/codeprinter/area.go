@@ -1,9 +1,11 @@
 package codeprinter
 
-import "github.com/fe3dback/go-arch-lint/v4/internal/models"
+import (
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
+)
 
 type area struct {
-	ref  models.Reference
+	ref  arch.Reference
 	from int // inclusive
 	to   int // inclusive
 }

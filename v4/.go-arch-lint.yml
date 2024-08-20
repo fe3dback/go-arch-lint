@@ -33,7 +33,6 @@ components:
   main:                { in: app }
   container:           { in: app/internal/container/** }
   commands:            { in: commands/* }
-  operations:          { in: operations/* }
   services:            { in: services/** }
   view:                { in: view }
   models:              { in: models/** }
@@ -55,18 +54,6 @@ dependencies:
     anyVendorDeps: true
     anyProjectDeps: true
 
-  commands:
-    mayDependOn:
-      - operations
-
-  operations:
-    mayDependOn:
-      - services
-    canUse:
-      - 3rd-graph
-    canContainTags:
-      - db
-
   services:
     mayDependOn:
       - services
@@ -74,3 +61,4 @@ dependencies:
       - go-ast
       - 3rd-yaml
       - 3rd-code-highlight
+      - 3rd-graph

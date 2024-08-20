@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fe3dback/go-arch-lint/v4/internal/models"
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 )
 
 type ExtractorRaw struct{}
@@ -14,7 +14,7 @@ func NewExtractorRaw() *ExtractorRaw {
 	return &ExtractorRaw{}
 }
 
-func (e *ExtractorRaw) ExtractLines(file models.PathAbsolute, from int, to int) ([]string, error) {
+func (e *ExtractorRaw) ExtractLines(file arch.PathAbsolute, from int, to int) ([]string, error) {
 	data, err := os.ReadFile(string(file))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)

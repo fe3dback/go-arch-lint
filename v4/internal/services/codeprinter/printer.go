@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
@@ -25,7 +26,7 @@ func NewPrinter(
 	}
 }
 
-func (p *Printer) Print(ref models.Reference, opts models.CodePrintOpts) (string, error) {
+func (p *Printer) Print(ref arch.Reference, opts models.CodePrintOpts) (string, error) {
 	if !ref.Valid {
 		return "", nil
 	}
@@ -64,7 +65,7 @@ func (p *Printer) extractLines(opts models.CodePrintOpts, region area) ([]string
 	return p.rawExtractor.ExtractLines(region.ref.File, region.from, region.to)
 }
 
-func fileLinesCount(path models.PathAbsolute) (int, error) {
+func fileLinesCount(path arch.PathAbsolute) (int, error) {
 	data, err := os.ReadFile(string(path))
 	if err != nil {
 		return 0, fmt.Errorf("failed to read file '%s': %w", path, err)
@@ -73,7 +74,7 @@ func fileLinesCount(path models.PathAbsolute) (int, error) {
 	return len(strings.Split(string(data), "\n")), nil
 }
 
-func calculateRegion(ref models.Reference, opts models.CodePrintOpts, maxLines int) area {
+func calculateRegion(ref arch.Reference, opts models.CodePrintOpts, maxLines int) area {
 	line := clamp(ref.Line, 1, maxLines)
 	from, to := line, line
 

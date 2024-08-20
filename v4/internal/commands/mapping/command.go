@@ -1,25 +1,35 @@
 package mapping
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v2"
 
-	"github.com/fe3dback/go-arch-lint/v4/internal/models"
+	sdk "github.com/fe3dback/go-arch-lint-sdk"
+	"github.com/fe3dback/go-arch-lint-sdk/mapping"
 )
 
 type Command struct {
-	operation operation
+	sdk         *sdk.SDK
+	specFetcher specFetcher
 }
 
-func NewCommand(operation operation) *Command {
+func NewCommand(sdk *sdk.SDK, specFetcher specFetcher) *Command {
 	return &Command{
-		operation: operation,
+		sdk:         sdk,
+		specFetcher: specFetcher,
 	}
 }
 
 func (c *Command) Execute(cCtx *cli.Context) (any, error) {
 	in := c.parseIn(cCtx)
 
-	out, err := c.operation.Mapping(in)
+	spec, err := c.specFetcher.Fetch()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch spec: %w", err)
+	}
+
+	out, err := c.sdk.Mapping(spec, in)
 	if err != nil {
 		return "", err
 	}
@@ -27,8 +37,8 @@ func (c *Command) Execute(cCtx *cli.Context) (any, error) {
 	return out, nil
 }
 
-func (c *Command) parseIn(cCtx *cli.Context) models.CmdMappingIn {
-	in := models.CmdMappingIn{}
+func (c *Command) parseIn(cCtx *cli.Context) mapping.In {
+	in := mapping.In{}
 	in.Scheme = cCtx.String(flagScheme)
 
 	return in
