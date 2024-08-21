@@ -10,6 +10,7 @@ func (c *Container) sdk() *sdk.SDK {
 	return once(func() *sdk.SDK {
 		return sdk.NewSDK(
 			arch.PathAbsolute(c.cCtx.String(models.FlagProjectPath)),
+			sdk.WithUsedContext(arch.UsedContextCLI),
 			sdk.WithSkipMissUse(c.cCtx.Bool(models.FlagSkipMissUsages)),
 		)
 	})
