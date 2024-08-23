@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint-sdk/mapping"
+	"github.com/fe3dback/go-arch-lint-sdk/commands/mapping"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 

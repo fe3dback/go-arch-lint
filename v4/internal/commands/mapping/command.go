@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	sdk "github.com/fe3dback/go-arch-lint-sdk"
-	"github.com/fe3dback/go-arch-lint-sdk/mapping"
+	"github.com/fe3dback/go-arch-lint-sdk/commands/mapping"
 )
 
 type Command struct {

@@ -9,9 +9,6 @@ settings:
     allowed: [json]
 
 exclude:
-  directories:
-    - view/testcases
-
   files:
     - "^.*_test\\.go$"
     - "^.*\/test\/.*$"
@@ -30,7 +27,7 @@ vendors:
       - github.com/fe3dback/go-yaml/** # custom fork (need propose back PR)
 
 components:
-  main:                { in: app }
+  main:                { in: app/** }
   container:           { in: app/internal/container/** }
   commands:            { in: commands/* }
   services:            { in: services/** }

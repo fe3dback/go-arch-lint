@@ -35,9 +35,18 @@ Linter rewritten from scratch for better extensibility and support for several n
 
 #### Command changes
 
+##### Check
+
+> [!WARNING]
+> Breaking changes
+
+- when using command with json flag (ex `go-arch-lint check --json`)
+  - output DTO has completely different format
+
 ##### Mapping
 
 > [!WARNING]
 > Breaking changes
 
-- when using command with json flag (ex `go-arch-lint mapping --json`), output DTO now contains list of go packages paths instead of individual go files paths.
+- when using command with json flag (ex `go-arch-lint check --json`)
+  - output DTO now contains list of go packages paths instead of individual go files paths.
