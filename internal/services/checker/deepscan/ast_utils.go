@@ -97,8 +97,8 @@ func parseRecursive(
 			return nil, fmt.Errorf("failed parse '%s': %w", analysePackage, err)
 		}
 
-		for packageID, astPackage := range found {
-			pkgs[packageID] = astPackage
+		for _, astPackage := range found {
+			pkgs[analysePackage] = astPackage
 		}
 	}
 
