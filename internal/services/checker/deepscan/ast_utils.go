@@ -98,7 +98,7 @@ func parseRecursive(
 		}
 
 		for packageID, astPackage := range found {
-			pkgs[packageID] = astPackage
+			pkgs[fmt.Sprintf("%s_%s", analysePackage, packageID)] = astPackage
 		}
 	}
 
