@@ -17,10 +17,10 @@ func NewValidator(
 	}
 }
 
-func (v *Validator) Validate(doc spec.Document) []arch.Notice {
+func (v *Validator) Validate(doc spec.Document, projectDir string) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	utils := newUtils(v.pathResolver, doc)
+	utils := newUtils(v.pathResolver, doc, projectDir)
 	validators := []validator{
 		newValidatorCommonComponents(utils),
 		newValidatorCommonVendors(utils),

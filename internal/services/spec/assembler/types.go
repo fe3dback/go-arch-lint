@@ -11,7 +11,7 @@ type (
 	}
 
 	archValidator interface {
-		Validate(doc spec.Document) []arch.Notice
+		Validate(doc spec.Document, projectDir string) []arch.Notice
 	}
 
 	pathResolver interface {

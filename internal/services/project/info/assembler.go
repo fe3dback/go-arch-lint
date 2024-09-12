@@ -25,10 +25,9 @@ func (a *Assembler) ProjectInfo(rootDirectory string, archFilePath string) (comm
 	}
 
 	// check arch file
-	goArchFilePath := filepath.Clean(fmt.Sprintf("%s/%s", projectPath, archFilePath))
-	_, err = os.Stat(goArchFilePath)
-	if os.IsNotExist(err) {
-		return common.Project{}, fmt.Errorf("not found archfile in '%s'", goArchFilePath)
+	goArchFilePath, err := resolveArchPath(projectPath, archFilePath)
+	if err != nil {
+		return common.Project{}, err
 	}
 
 	// check go.mod
@@ -81,4 +80,21 @@ func checkCmdParseGoModFile(path string) (*modfile.File, error) {
 	}
 
 	return mod, nil
+}
+
+func resolveArchPath(projectPath, archFilePath string) (string, error) {
+	if filepath.IsAbs(archFilePath) {
+		return checkArchFile(archFilePath)
+	}
+
+	return checkArchFile(filepath.Join(projectPath, archFilePath))
+}
+
+func checkArchFile(archFilePath string) (string, error) {
+	_, err := os.Stat(archFilePath)
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("not found archfile in '%s'", archFilePath)
+	}
+
+	return archFilePath, nil
 }

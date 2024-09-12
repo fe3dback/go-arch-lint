@@ -12,22 +12,24 @@ type (
 	utils struct {
 		pathResolver pathResolver
 		document     spec.Document
+		projectDir   string
 	}
 )
 
 func newUtils(
 	pathResolver pathResolver,
 	document spec.Document,
+	projectDir string,
 ) *utils {
 	return &utils{
+		projectDir:   projectDir,
 		pathResolver: pathResolver,
 		document:     document,
 	}
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	rootDir := filepath.Dir(u.document.Version().Reference.File)
-	absPath := filepath.Clean(fmt.Sprintf("%s/%s", rootDir, localGlobPath))
+	absPath := filepath.Join(u.projectDir, localGlobPath)
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %w", err)
