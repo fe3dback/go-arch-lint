@@ -87,7 +87,7 @@ func resolveArchPath(projectPath, archFilePath string) (string, error) {
 		return checkArchFile(archFilePath)
 	}
 
-	goArchFilePath, err := checkArchFile(filepath.Clean(fmt.Sprintf("%s/%s", projectPath, archFilePath)))
+	goArchFilePath, err := checkArchFile(filepath.Join(projectPath, archFilePath))
 	if err == nil {
 		return goArchFilePath, nil
 	}
