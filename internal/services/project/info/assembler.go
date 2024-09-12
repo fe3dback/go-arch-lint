@@ -87,17 +87,7 @@ func resolveArchPath(projectPath, archFilePath string) (string, error) {
 		return checkArchFile(archFilePath)
 	}
 
-	goArchFilePath, err := checkArchFile(filepath.Join(projectPath, archFilePath))
-	if err == nil {
-		return goArchFilePath, nil
-	}
-
-	goArchFilePath, err = filepath.Abs(archFilePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to get an absolute path of the arch file '%s', err: %w", archFilePath, err)
-	}
-
-	return checkArchFile(goArchFilePath)
+	return checkArchFile(filepath.Join(projectPath, archFilePath))
 }
 
 func checkArchFile(archFilePath string) (string, error) {

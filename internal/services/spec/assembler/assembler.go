@@ -47,7 +47,7 @@ func (sa *Assembler) Assemble(prj common.Project) (arch.Spec, error) {
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, schemeNotices...)
 	} else {
 		// if scheme is ok, need check arch errors
-		advancedErrors := sa.validator.Validate(document)
+		advancedErrors := sa.validator.Validate(document, prj.Directory)
 		spec.Integrity.DocumentNotices = append(spec.Integrity.DocumentNotices, advancedErrors...)
 	}
 
