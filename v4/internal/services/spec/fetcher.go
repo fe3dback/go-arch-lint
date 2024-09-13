@@ -21,5 +21,5 @@ func NewFetcher(
 }
 
 func (f *Fetcher) Fetch() (arch.Spec, error) {
-	return f.sdk.Spec().FromFile(f.configPath)
+	return f.sdk.Spec().FromRelativeFile(f.configPath)
 }

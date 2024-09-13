@@ -39,6 +39,6 @@ func TestCLI(t *testing.T) {
 		return nil
 	}
 
-	ts.Commands[binaryName] = cmdtest.InProcessProgram(binaryName, run)
+	ts.Commands[binaryName] = cmdtest.InProcessProgram(binaryName, runWithinTests)
 	ts.Run(t, *update)
 }

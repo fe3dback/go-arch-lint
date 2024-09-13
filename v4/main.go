@@ -11,5 +11,9 @@ func main() {
 }
 
 func run() int {
-	return app.Execute()
+	return app.Execute(app.EnvTypeMain)
+}
+
+func runWithinTests() int {
+	return app.Execute(app.EnvTypeTests)
 }

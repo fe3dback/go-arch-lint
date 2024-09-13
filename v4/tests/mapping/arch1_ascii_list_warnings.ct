@@ -1,15 +1,15 @@
-$ go-arch-lint mapping --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_ok.yml --output-color=false
+$ go-arch-lint mapping --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_warnings.yml --output-color=false
 module: github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy
 Project Packages:
+   [not attached]      /internal/c/not_covered
+   [not attached]      /internal/d
+   [not attached]      /internal/not_covered
    a                   /internal/a
    allowb              /internal/a/allowb
    b                   /internal/b
    c                   /internal/c
-   c                   /internal/c/not_covered
    common              /internal/common
    common              /internal/common/sub/foo/bar
-   d                   /internal/d
-   d                   /internal/d/models/a/model
-   d                   /internal/d/models/b/model
    e                   /internal/e
-   nc                  /internal/not_covered
+   models              /internal/d/models/a/model
+   models              /internal/d/models/b/model

@@ -48,5 +48,9 @@ Linter rewritten from scratch for better extensibility and support for several n
 > [!WARNING]
 > Breaking changes
 
-- when using command with json flag (ex `go-arch-lint check --json`)
+- when using command with json flag (ex `go-arch-lint mapping --json`)
   - output DTO now contains list of go packages paths instead of individual go files paths.
+
+Minor changes:
+
+- added `ComponentExist` bool flag to json, it useful for separating user defined components from system orphans

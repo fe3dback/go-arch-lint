@@ -36,4 +36,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/fe3dback/go-arch-lint-sdk v0.0.0 => /home/neo/code/fe3dback/go-arch-lint-sdk
+replace github.com/fe3dback/go-arch-lint-sdk v0.0.0 => /home/neo/code/fe3dback/linter/go-arch-lint-sdk

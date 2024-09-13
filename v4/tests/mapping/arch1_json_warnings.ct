@@ -1,0 +1,137 @@
+$ go-arch-lint mapping --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_warnings.yml --json
+{
+  "Type": "models.Mapping",
+  "Payload": {
+    "ProjectDirectory": "${ROOTDIR}/tests/_projects/legacy",
+    "ModuleName": "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy",
+    "MappingGrouped": [
+      {
+        "ComponentName": "[not attached]",
+        "ComponentExist": false,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/c/not_covered",
+          "${ROOTDIR}/tests/_projects/legacy/internal/d",
+          "${ROOTDIR}/tests/_projects/legacy/internal/not_covered"
+        ]
+      },
+      {
+        "ComponentName": "a",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/a"
+        ]
+      },
+      {
+        "ComponentName": "allowb",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/a/allowb"
+        ]
+      },
+      {
+        "ComponentName": "b",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/b"
+        ]
+      },
+      {
+        "ComponentName": "c",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/c"
+        ]
+      },
+      {
+        "ComponentName": "common",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/common",
+          "${ROOTDIR}/tests/_projects/legacy/internal/common/sub/foo/bar"
+        ]
+      },
+      {
+        "ComponentName": "e",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/e"
+        ]
+      },
+      {
+        "ComponentName": "main",
+        "ComponentExist": true,
+        "Packages": []
+      },
+      {
+        "ComponentName": "models",
+        "ComponentExist": true,
+        "Packages": [
+          "${ROOTDIR}/tests/_projects/legacy/internal/d/models/a/model",
+          "${ROOTDIR}/tests/_projects/legacy/internal/d/models/b/model"
+        ]
+      }
+    ],
+    "MappingList": [
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/c/not_covered",
+        "ComponentName": "[not attached]",
+        "ComponentExist": false
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/d",
+        "ComponentName": "[not attached]",
+        "ComponentExist": false
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/not_covered",
+        "ComponentName": "[not attached]",
+        "ComponentExist": false
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/a",
+        "ComponentName": "a",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/a/allowb",
+        "ComponentName": "allowb",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/b",
+        "ComponentName": "b",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/c",
+        "ComponentName": "c",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/common",
+        "ComponentName": "common",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/common/sub/foo/bar",
+        "ComponentName": "common",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/e",
+        "ComponentName": "e",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/d/models/a/model",
+        "ComponentName": "models",
+        "ComponentExist": true
+      },
+      {
+        "Package": "${ROOTDIR}/tests/_projects/legacy/internal/d/models/b/model",
+        "ComponentName": "models",
+        "ComponentExist": true
+      }
+    ]
+  }
+}

@@ -9,3 +9,7 @@ type Container struct {
 func NewContainer() *Container {
 	return &Container{}
 }
+
+func (c *Container) DropBuiltHeap() {
+	clearHeap()
+}

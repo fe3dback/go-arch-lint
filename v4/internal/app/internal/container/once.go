@@ -9,6 +9,11 @@ import (
 
 var instancesCache = safemap.New[string, any]()
 
+func clearHeap() {
+	instancesCache = safemap.New[string, any]()
+	runtime.GC()
+}
+
 // once выполняет вызов функции ровно один раз, учитывая конкретное место вызова once (путь к файлу и номер строки).
 // При последующих вызовах в этом же месте возвращает кэшированное значение
 func once[T any](factory func() T) T {

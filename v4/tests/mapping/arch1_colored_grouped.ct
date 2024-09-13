@@ -1,0 +1,24 @@
+$ go-arch-lint ls -s grouped --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_ok.yml
+module: [92mgithub.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy[0m
+Project Packages:
+   a:
+     [96m/internal/a[0m
+   allowb:
+     [96m/internal/a/allowb[0m
+   b:
+     [96m/internal/b[0m
+   c:
+     [96m/internal/c[0m
+     [96m/internal/c/not_covered[0m
+   common:
+     [96m/internal/common[0m
+     [96m/internal/common/sub/foo/bar[0m
+   d:
+     [96m/internal/d[0m
+     [96m/internal/d/models/a/model[0m
+     [96m/internal/d/models/b/model[0m
+   e:
+     [96m/internal/e[0m
+   main:
+   nc:
+     [96m/internal/not_covered[0m
