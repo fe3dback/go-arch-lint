@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/fe3dback/go-arch-lint-sdk/arch"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
@@ -45,15 +46,15 @@ func (eb *ErrorBuilder) BuildError(err error) models.CmdStdoutErrorOut {
 func (eb *ErrorBuilder) buildNoticesError(err *arch.ErrorWithNotices) models.CmdStdoutErrorOut {
 	outNotices := make([]models.StdoutNotice, 0, len(err.Notices))
 
-	mode := models.CodePrintModeExtend
+	mode := codeprinter.CodePrintModeExtend
 	if len(err.Notices) > 10 {
-		mode = models.CodePrintModeOneLine
+		mode = codeprinter.CodePrintModeOneLine
 	}
 
 	for _, notice := range err.Notices {
 		preview := ""
 		if notice.Reference.Valid {
-			preview, _ = eb.codePrinter.Print(notice.Reference, models.CodePrintOpts{
+			preview, _ = eb.codePrinter.Print(notice.Reference, codeprinter.CodePrintOpts{
 				LineNumbers: true,
 				Arrows:      true,
 				Highlight:   eb.useColors,
@@ -78,11 +79,11 @@ func (eb *ErrorBuilder) buildSingleError(refError arch.ReferencedError) models.C
 
 	preview := ""
 	if ref.Valid {
-		preview, _ = eb.codePrinter.Print(ref, models.CodePrintOpts{
+		preview, _ = eb.codePrinter.Print(ref, codeprinter.CodePrintOpts{
 			LineNumbers: true,
 			Arrows:      true,
 			Highlight:   eb.useColors,
-			Mode:        models.CodePrintModeExtend,
+			Mode:        codeprinter.CodePrintModeExtend,
 		})
 	}
 

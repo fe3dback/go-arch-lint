@@ -1,7 +1,0 @@
-some_code.go
-~~~~~~~~~~~~
-  16 | 		hello: [1m[32m"world!123"[0m,
-> 17 | 		world: time.Now(),
-                      ^
-  18 | 	}
-  19 | }

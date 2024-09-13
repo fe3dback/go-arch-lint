@@ -2,8 +2,8 @@ package container
 
 import (
 	"github.com/fe3dback/go-arch-lint-sdk/arch"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
-	"github.com/fe3dback/go-arch-lint/v4/internal/services/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/colorizer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/ascii"

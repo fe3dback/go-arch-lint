@@ -1,4 +1,0 @@
-11 | 
-12 | var test = "world"
-13 | 
-14 | func newSomeCode() *someCode {
