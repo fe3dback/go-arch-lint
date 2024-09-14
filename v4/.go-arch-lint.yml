@@ -13,6 +13,7 @@ exclude:
     - "^.*_test\\.go$"
     - "^.*\/test\/.*$"
     - "^.*\/tests\/.*$"
+    - "^.*\/mocks\/.*$"
 
 vendors:
   go-common:           { in: golang.org/x/sync/errgroup }

@@ -54,7 +54,7 @@ func (eb *ErrorBuilder) buildNoticesError(err *arch.ErrorWithNotices) models.Cmd
 	for _, notice := range err.Notices {
 		preview := ""
 		if notice.Reference.Valid {
-			preview, _ = eb.codePrinter.Print(notice.Reference, codeprinter.CodePrintOpts{
+			preview, _ = eb.codePrinter.Print(transformRef(notice.Reference), codeprinter.CodePrintOpts{
 				LineNumbers: true,
 				Arrows:      true,
 				Highlight:   eb.useColors,
@@ -79,7 +79,7 @@ func (eb *ErrorBuilder) buildSingleError(refError arch.ReferencedError) models.C
 
 	preview := ""
 	if ref.Valid {
-		preview, _ = eb.codePrinter.Print(ref, codeprinter.CodePrintOpts{
+		preview, _ = eb.codePrinter.Print(transformRef(ref), codeprinter.CodePrintOpts{
 			LineNumbers: true,
 			Arrows:      true,
 			Highlight:   eb.useColors,
@@ -97,5 +97,14 @@ func (eb *ErrorBuilder) buildSingleError(refError arch.ReferencedError) models.C
 				Preview: preview,
 			},
 		},
+	}
+}
+
+func transformRef(ref arch.Reference) codeprinter.Reference {
+	return codeprinter.Reference{
+		File:   string(ref.File),
+		Line:   ref.Line,
+		Column: ref.Column,
+		Valid:  ref.Valid,
 	}
 }
