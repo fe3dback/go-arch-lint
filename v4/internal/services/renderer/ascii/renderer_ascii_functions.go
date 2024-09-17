@@ -9,6 +9,35 @@ import (
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
+func (r *ASCII) asciiLines(value interface{}) string {
+	const maxLen = 70
+
+	words := strings.Fields(fmt.Sprintf("%v", value))
+	var result []string
+	var currentLine string
+
+	for _, word := range words {
+		if len(currentLine)+len(word)+1 > maxLen {
+			result = append(result, currentLine)
+			currentLine = word
+			continue
+		}
+
+		if currentLine == "" {
+			currentLine = word
+		} else {
+			currentLine += " " + word
+		}
+	}
+
+	if currentLine != "" {
+		result = append(result, currentLine)
+	}
+
+	return strings.Join(result, "\n")
+
+}
+
 func (r *ASCII) asciiColorize(color string, value interface{}) string {
 	return r.asciiColorizer.Colorize(
 		models.ColorName(color),

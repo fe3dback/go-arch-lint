@@ -1,10 +1,34 @@
 package colorizer
 
 import (
-	cl "github.com/fatih/color"
+	"os"
+
+	"github.com/muesli/termenv"
 
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
+
+var (
+	env          *termenv.Output
+	colorRed     termenv.Color
+	colorGreen   termenv.Color
+	colorBlue    termenv.Color
+	colorYellow  termenv.Color
+	colorMagenta termenv.Color
+	colorCyan    termenv.Color
+	colorGray    termenv.Color
+)
+
+func init() {
+	env = termenv.NewOutput(os.Stdout)
+	colorRed = env.Color("#d62d20")
+	colorGreen = env.Color("#008744")
+	colorBlue = env.Color("#0057e7")
+	colorYellow = env.Color("#ffa700")
+	colorMagenta = env.Color("#d62976")
+	colorCyan = env.Color("#2691a5")
+	colorGray = env.Color("#777777")
+}
 
 type ASCII struct {
 	useColors bool
@@ -21,23 +45,23 @@ func (c *ASCII) Colorize(color models.ColorName, text string) string {
 		return text
 	}
 
-	cl.NoColor = false
+	s := env.String(text)
 
 	switch color {
 	case models.ColorRed:
-		return cl.HiRedString(text)
+		return s.Foreground(colorRed).String()
 	case models.ColorGreen:
-		return cl.HiGreenString(text)
+		return s.Foreground(colorGreen).String()
 	case models.ColorYellow:
-		return cl.HiYellowString(text)
+		return s.Foreground(colorYellow).String()
 	case models.ColorBlue:
-		return cl.HiBlueString(text)
+		return s.Foreground(colorBlue).String()
 	case models.ColorMagenta:
-		return cl.HiMagentaString(text)
+		return s.Foreground(colorMagenta).String()
 	case models.ColorCyan:
-		return cl.HiCyanString(text)
+		return s.Foreground(colorCyan).String()
 	case models.ColorGray:
-		return cl.HiWhiteString(text)
+		return s.Foreground(colorGray).String()
 	default:
 		return text
 	}

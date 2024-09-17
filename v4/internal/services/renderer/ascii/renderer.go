@@ -10,6 +10,7 @@ import (
 
 const (
 	fnColorize   = "colorize"
+	fnLines      = "lines"
 	fnTrimPrefix = "trimPrefix"
 	fnTrimSuffix = "trimSuffix"
 	fnTrimDef    = "def"
@@ -48,6 +49,7 @@ func (r *ASCII) Render(model any) (string, error) {
 	tpl, err := template.
 		New(templateName).
 		Funcs(map[string]interface{}{
+			fnLines:      r.asciiLines,
 			fnColorize:   r.asciiColorize,
 			fnTrimPrefix: r.asciiTrimPrefix,
 			fnTrimSuffix: r.asciiTrimSuffix,

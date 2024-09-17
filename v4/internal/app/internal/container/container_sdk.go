@@ -1,6 +1,8 @@
 package container
 
 import (
+	"fmt"
+
 	sdk "github.com/fe3dback/go-arch-lint-sdk"
 	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
@@ -8,10 +10,15 @@ import (
 
 func (c *Container) sdk() *sdk.SDK {
 	return once(func() *sdk.SDK {
-		return sdk.NewSDK(
+		createdSDK, err := sdk.NewSDK(
 			arch.PathAbsolute(c.cCtx.String(models.FlagProjectPath)),
 			sdk.WithUsedContext(arch.UsedContextCLI),
 			sdk.WithSkipMissUse(c.cCtx.Bool(models.FlagSkipMissUsages)),
 		)
+		if err != nil {
+			panic(fmt.Errorf("failed to initialize sdk: %w", err))
+		}
+
+		return createdSDK
 	})
 }

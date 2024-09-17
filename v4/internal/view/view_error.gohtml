@@ -5,13 +5,20 @@
 {{ end -}}
 
 {{ $count := (.Errors | len) -}}
-{{ $space := "" -}}
+{{ $space := " " -}}
 
-{{ range .Errors -}}
-	{{ if gt $count 1 -}} #] {{ $space = "    "}}{{ end -}}
-	{{ concat .Notice.Message ":" | colorize "red" }}
+{{ range .Errors }}
+
+	{{- if gt $count 1 }}
+		{{ "  #]" | colorize "red" }} {{ $space = "     . "}}
+	{{- end -}}
+
+	{{ concat .Notice.Message ":" | colorize "yellow" }}
+
 	{{ if .Notice.Reference.Valid -}}
-		{{ concat $space .Notice.Reference.File ":" .Notice.Reference.Line }}
+		{{ concat $space "at " .Notice.Reference.File ":" .Notice.Reference.Line | colorize "gray" }}
+		{{ " "}}
 		{{ .Preview | linePrefix $space }}
-	{{ end -}}
+	{{ end }}
+
 {{ end -}}

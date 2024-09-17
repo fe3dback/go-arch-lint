@@ -1,0 +1,75 @@
+{{- /*gotype: github.com/fe3dback/go-arch-lint-sdk/commands/check.Out*/ -}}
+
+module: {{.ModuleName | colorize "green"}}
+
+Linters:
+
+{{- $prefixDisabled := "  OFF | " -}}
+{{- $prefixWarning  := " OUPS | " -}}
+{{- $prefixSuccess  := "   OK | " -}}
+{{- $prefixExpand   := "      | " -}}
+
+{{- $lineCommentPrefix := "  // " -}}
+
+{{ range .Linters -}}
+	{{- $primaryColor := "cyan" -}}
+	{{- $prefix := $prefixDisabled -}}
+	{{- $comment := .Linter.EnableConditionHint -}}
+
+	{{/* define primary color */}}
+	{{- if .Linter.Used -}}
+		{{- if gt (len .Notices) 0 -}}
+			{{- $primaryColor = "yellow" -}}
+			{{- $prefix = $prefixWarning -}}
+			{{- $comment = .Linter.Description -}}
+		{{- else -}}
+			{{- $primaryColor = "green" -}}
+			{{- $prefix = "   OK | " -}}
+			{{- $comment = "this linter not found any issues" -}}
+		{{- end -}}
+	{{- end -}}
+
+	{{/* name / status / comment */}}
+	{{ concat $prefix .Linter.Name | colorize $primaryColor }}
+	{{ $comment | lines | linePrefix (concat $prefixExpand $lineCommentPrefix) | colorize $primaryColor }}
+
+	{{/* notices list */}}
+	{{- $noticeID := 1 -}}
+	{{- range .Notices }}
+		{{ concat (concat $noticeID "]" | padLeft 5 " ") " | " | colorize $primaryColor -}}
+		{{- $noticeID = plus $noticeID 1 -}}
+		{{ "" }}
+
+		{{- if eq .Details.LinterID "orphans" -}}
+			{{- $text1 := concat "File " (.Details.LinterIDOrphan.FileRelativePath | colorize "cyan") -}}
+			{{- $text2 := "  not attached to any component in archfile" -}}
+			{{ $text1 }}
+			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+		{{- end -}}
+
+		{{- if eq .Details.LinterID "component_imports" -}}
+			{{- $text1 := concat "TODO (MODERN) " (.Details.LinterIDComponentImports.ComponentName | colorize "magenta") -}}
+			{{- $text2 := concat "  shouldn't depend on " (.Details.LinterIDComponentImports.ResolvedImportName | colorize "cyan") -}}
+			{{- $text3 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{ $text1 }}
+			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+			{{ $text3 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+			{{ "" | linePrefix ($prefixExpand | colorize $primaryColor) }}
+		{{- end -}}
+
+		{{- if eq .Details.LinterID "vendor_imports" -}}
+			{{- $text1 := concat "Component " (.Details.LinterIDVendorImports.ComponentName | colorize "magenta") -}}
+			{{- $text2 := concat "  shouldn't depend on vendor " (.Details.LinterIDVendorImports.ResolvedImportName | colorize "cyan") -}}
+			{{- $text3 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{ $text1 }}
+			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+			{{ $text3 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+			{{ "" | linePrefix ($prefixExpand | colorize $primaryColor) }}
+		{{- end -}}
+
+		{{- if eq .Details.LinterID "deepscan" -}}
+			!TODO
+		{{- end -}}
+	{{- end }}
+
+{{ end }}

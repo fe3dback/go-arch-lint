@@ -1,10 +1,10 @@
 module github.com/fe3dback/go-arch-lint/v4
 
-go 1.22
+go 1.23
 
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0
-	github.com/fatih/color v1.17.0
+	github.com/muesli/termenv v0.15.2
 	github.com/fe3dback/go-arch-lint-sdk v0.0.0
 	github.com/google/go-cmdtest v0.3.0
 	github.com/stretchr/testify v1.9.0

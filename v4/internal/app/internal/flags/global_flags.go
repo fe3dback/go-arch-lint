@@ -44,13 +44,13 @@ var GlobalFlags = []cli.Flag{
 	},
 	&cli.PathFlag{ // todo: add helper method with validation
 		Name:     models.FlagProjectPath,
-		Category: models.FlagCategoryCommand,
+		Category: models.FlagCategoryGlobal,
 		Usage:    "absolute path to project directory",
 		Value:    models.DefaultProjectPath,
 	},
 	&cli.PathFlag{
 		Name:     models.FlagArchConfigRelativePath,
-		Category: models.FlagCategoryCommand,
+		Category: models.FlagCategoryGlobal,
 		Usage:    "relative path to linter config",
 		Value:    models.DefaultArchFileName,
 	},
