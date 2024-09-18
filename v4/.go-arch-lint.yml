@@ -16,16 +16,17 @@ exclude:
     - "^.*\/mocks\/.*$"
 
 vendors:
-  go-common:           { in: golang.org/x/sync/errgroup }
-  go-ast:              { in: [ golang.org/x/mod/modfile, golang.org/x/tools/go/packages ] }
-  3rd-code-highlight:  { in: github.com/alecthomas/chroma/* }
-  3rd-graph:           { in: oss.terrastruct.com/d2/** }
-  3rd-yaml:
-    in:
-      - github.com/goccy/go-yaml
-      - github.com/goccy/go-yaml/**
-      - github.com/fe3dback/go-yaml    # custom fork (need propose back PR)
-      - github.com/fe3dback/go-yaml/** # custom fork (need propose back PR)
+  sdk-models:          { in: github.com/fe3dback/go-arch-lint-sdk/arch }
+  sdk-commands:        { in:
+                            - github.com/fe3dback/go-arch-lint-sdk
+                            - github.com/fe3dback/go-arch-lint-sdk/commands/*
+                       }
+  sdk-libs:            { in: github.com/fe3dback/go-arch-lint-sdk/pkg/** }
+  go-x-libs:           { in: golang.org/x/** }
+  cli:                 { in: github.com/urfave/cli/v2 }
+  cli-term-libs:       { in:
+                            - github.com/muesli/termenv
+                       }
 
 components:
   main:                { in: app/** }
@@ -37,7 +38,9 @@ components:
   libs:                { in: pkg/** }
 
 commonVendors:
-  - go-common
+  - cli
+  - sdk-models
+  - go-x-libs
 
 commonComponents:
   - models
@@ -52,11 +55,18 @@ dependencies:
     anyVendorDeps: true
     anyProjectDeps: true
 
+  commands:
+    canUse:
+      - sdk-commands
+
   services:
     mayDependOn:
       - services
     canUse:
-      - go-ast
-      - 3rd-yaml
-      - 3rd-code-highlight
-      - 3rd-graph
+      - sdk-commands
+      - sdk-libs
+      - cli-term-libs
+
+  view:
+    canUse:
+      - sdk-commands

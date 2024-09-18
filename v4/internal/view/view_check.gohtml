@@ -11,7 +11,7 @@ Linters:
 
 {{- $lineCommentPrefix := "  // " -}}
 
-{{ range .Linters -}}
+{{- range .Linters -}}
 	{{- $primaryColor := "cyan" -}}
 	{{- $prefix := $prefixDisabled -}}
 	{{- $comment := .Linter.EnableConditionHint -}}
@@ -31,11 +31,15 @@ Linters:
 
 	{{/* name / status / comment */}}
 	{{ concat $prefix .Linter.Name | colorize $primaryColor }}
-	{{ $comment | lines | linePrefix (concat $prefixExpand $lineCommentPrefix) | colorize $primaryColor }}
+	{{ if gt (len .Notices) 0 -}}
+		{{ concat $prefixExpand "------------------" | colorize $primaryColor }}
+		{{ $comment | lines | linePrefix (concat $prefixExpand $lineCommentPrefix) | colorize $primaryColor }}
+		{{ $prefixExpand | colorize $primaryColor }}
+	{{- end -}}
 
 	{{/* notices list */}}
 	{{- $noticeID := 1 -}}
-	{{- range .Notices }}
+	{{ range .Notices }}
 		{{ concat (concat $noticeID "]" | padLeft 5 " ") " | " | colorize $primaryColor -}}
 		{{- $noticeID = plus $noticeID 1 -}}
 		{{ "" }}
@@ -47,20 +51,26 @@ Linters:
 			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
 		{{- end -}}
 
-		{{- if eq .Details.LinterID "component_imports" -}}
-			{{- $text1 := concat "TODO (MODERN) " (.Details.LinterIDComponentImports.ComponentName | colorize "magenta") -}}
-			{{- $text2 := concat "  shouldn't depend on " (.Details.LinterIDComponentImports.ResolvedImportName | colorize "cyan") -}}
-			{{- $text3 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
-			{{ $text1 }}
-			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-			{{ $text3 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-			{{ "" | linePrefix ($prefixExpand | colorize $primaryColor) }}
-		{{- end -}}
+		{{- if eq .Details.LinterID "imports" -}}
+			{{- $text1 := "" }}
+			{{- $text2 := "" }}
+			{{- $text3 := "" }}
 
-		{{- if eq .Details.LinterID "vendor_imports" -}}
-			{{- $text1 := concat "Component " (.Details.LinterIDVendorImports.ComponentName | colorize "magenta") -}}
-			{{- $text2 := concat "  shouldn't depend on vendor " (.Details.LinterIDVendorImports.ResolvedImportName | colorize "cyan") -}}
-			{{- $text3 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{- if .Details.LinterIDImports.TargetDefined -}}
+				{{- $targetType := "" }}
+				{{- if eq .Details.LinterIDImports.TargetType "Vendor" -}}
+					{{- $targetType = concat (.Details.LinterIDImports.TargetType | colorize "blue") "." -}}
+				{{- end -}}
+
+				{{- $text1 = concat "Dependency " (.Details.LinterIDImports.ComponentName | colorize "magenta") " -\\-> " $targetType (.Details.LinterIDImports.TargetName | colorize "magenta") " not allowed" -}}
+				{{- $text2 = concat "  by import " (.Details.LinterIDImports.ResolvedImportName | colorize "cyan") -}}
+				{{- $text3 = concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{- else -}}
+				{{- $text1 = concat "Component " (.Details.LinterIDImports.ComponentName | colorize "magenta") -}}
+				{{- $text2 = concat "  shouldn't depend on (not declared) " .Details.LinterIDImports.TargetType " " (.Details.LinterIDImports.ResolvedImportName | colorize "cyan") -}}
+				{{- $text3 = concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{- end -}}
+
 			{{ $text1 }}
 			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
 			{{ $text3 | linePrefix ($prefixExpand | colorize $primaryColor) }}
@@ -72,4 +82,14 @@ Linters:
 		{{- end -}}
 	{{- end }}
 
+{{ end }}
+
+--
+{{ if gt .NoticesCount 0 -}}
+	total notices: {{ .NoticesCount | printf "%d" | colorize "yellow" }}
+	{{ if gt .OmittedCount 0 -}}
+		| omitted: {{.OmittedCount | printf "%d" | colorize "yellow" }} (too big to display)
+	{{ end }}
+{{ else }}
+	{{"OK - No warnings found" | colorize "green" -}}
 {{ end }}
