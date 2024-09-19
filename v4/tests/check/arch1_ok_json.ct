@@ -1,0 +1,32 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_ok.yml --json --skip-syntax
+{
+  "Type": "models.Check",
+  "Payload": {
+    "ModuleName": "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy",
+    "NoticesCount": 0,
+    "OmittedCount": 0,
+    "Linters": [
+      {
+        "Linter": {
+          "ID": "syntax",
+          "Used": false
+        },
+        "Notices": null
+      },
+      {
+        "Linter": {
+          "ID": "orphans",
+          "Used": true
+        },
+        "Notices": []
+      },
+      {
+        "Linter": {
+          "ID": "imports",
+          "Used": true
+        },
+        "Notices": []
+      }
+    ]
+  }
+}

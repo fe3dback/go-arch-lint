@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/fe3dback/go-arch-lint-sdk"
 	"github.com/fe3dback/go-arch-lint-sdk/commands/check"
+	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 )
 
 type Command struct {
@@ -38,12 +39,18 @@ func (c *Command) Execute(cCtx *cli.Context) (any, error) {
 		return "", err
 	}
 
+	if out.NoticesCount > 0 {
+		// force exitCode=1
+		return out, models.ProjectNotMatchSpecificationsError
+	}
+
 	return out, nil
 }
 
 func (c *Command) parseIn(cCtx *cli.Context) check.In {
 	in := check.In{}
 	in.MaxWarnings = cCtx.Int(flagMaxWarnings)
+	in.CheckSyntax = !cCtx.Bool(flagSkipSyntax)
 
 	return in
 }

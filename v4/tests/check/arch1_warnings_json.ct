@@ -1,0 +1,134 @@
+$ go-arch-lint check --json --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_warnings.yml --> FAIL
+{
+  "Type": "models.Check",
+  "Payload": {
+    "ModuleName": "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy",
+    "NoticesCount": 6,
+    "OmittedCount": 0,
+    "Linters": [
+      {
+        "Linter": {
+          "ID": "syntax",
+          "Used": true
+        },
+        "Notices": [
+          {
+            "Message": "Failed parse component 'e' package 'e' at 'internal/e': invalid syntax: could not import github.com/example/a (invalid package name: \"\")",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go",
+              "Line": 4,
+              "Column": 7,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "syntax"
+            }
+          },
+          {
+            "Message": "Failed parse component 'e' package 'e' at 'internal/e': invalid syntax: could not import github.com/example/b (invalid package name: \"\")",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go",
+              "Line": 5,
+              "Column": 7,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "syntax"
+            }
+          }
+        ]
+      },
+      {
+        "Linter": {
+          "ID": "orphans",
+          "Used": true
+        },
+        "Notices": [
+          {
+            "Message": "File 'internal/c/not_covered/c1nc.go' not attached to any component in archfile",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/c/not_covered/c1nc.go",
+              "Line": 1,
+              "Column": 0,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "orphans",
+              "LinterIDOrphan": {
+                "FileRelativePath": "internal/c/not_covered/c1nc.go",
+                "FileAbsolutePath": "${ROOTDIR}/tests/_projects/legacy/internal/c/not_covered/c1nc.go"
+              }
+            }
+          },
+          {
+            "Message": "File 'internal/d/not_covered.go' not attached to any component in archfile",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/d/not_covered.go",
+              "Line": 1,
+              "Column": 0,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "orphans",
+              "LinterIDOrphan": {
+                "FileRelativePath": "internal/d/not_covered.go",
+                "FileAbsolutePath": "${ROOTDIR}/tests/_projects/legacy/internal/d/not_covered.go"
+              }
+            }
+          },
+          {
+            "Message": "File 'internal/not_covered/nc.go' not attached to any component in archfile",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/not_covered/nc.go",
+              "Line": 1,
+              "Column": 0,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "orphans",
+              "LinterIDOrphan": {
+                "FileRelativePath": "internal/not_covered/nc.go",
+                "FileAbsolutePath": "${ROOTDIR}/tests/_projects/legacy/internal/not_covered/nc.go"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "Linter": {
+          "ID": "imports",
+          "Used": true
+        },
+        "Notices": [
+          {
+            "Message": "Component 'c' shouldn't depend on 'a' ('github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a') in '${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3'",
+            "Reference": {
+              "File": "${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go",
+              "Line": 3,
+              "Column": 8,
+              "Valid": true
+            },
+            "Details": {
+              "LinterID": "imports",
+              "LinterIDImports": {
+                "ComponentName": "c",
+                "TargetType": "Component",
+                "TargetName": "a",
+                "TargetDefined": true,
+                "FileRelativePath": "/internal/c/c1.go",
+                "FileAbsolutePath": "${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go",
+                "ResolvedImportName": "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a",
+                "Reference": {
+                  "File": "${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go",
+                  "Line": 3,
+                  "Column": 8,
+                  "Valid": true
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

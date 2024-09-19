@@ -1,9 +1,9 @@
-$ go-arch-lint ps --help
+$ go-arch-lint check --help
 NAME:
-   go-arch-lint mapping - output mapping table between go packages and components
+   go-arch-lint check - compare project *.go files with architectural specification defined in file
 
 USAGE:
-   go-arch-lint mapping [command options]
+   go-arch-lint check [command options]
 
 OPTIONS:
    global:
@@ -18,4 +18,5 @@ OPTIONS:
 
    this command:
 
-   --scheme value, -s value  display scheme. Enum:[list, grouped] (default: "list")
+   --max-warnings value  max number of warnings to output (default: 100)
+   --skip-syntax         skip checking that golang code has valid syntax (other linters may not work as expected in this case) (default: false)

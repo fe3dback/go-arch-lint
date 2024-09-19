@@ -1,0 +1,15 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_ok.yml --output-color=false --skip-syntax
+module: github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy
+Linters:
+  OFF | Go Syntax
+
+
+   OK | Orphans
+
+
+   OK | Imports
+
+
+--
+
+OK - No warnings found

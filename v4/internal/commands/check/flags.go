@@ -8,9 +8,16 @@ import (
 
 const (
 	flagMaxWarnings = "max-warnings"
+	flagSkipSyntax  = "skip-syntax"
 )
 
 var Flags = []cli.Flag{
+	&cli.BoolFlag{
+		Name:     flagSkipSyntax,
+		Category: models.FlagCategoryCommand,
+		Usage:    "skip checking that golang code has valid syntax (other linters may not work as expected in this case)",
+		Value:    false,
+	},
 	&cli.IntFlag{
 		Name:     flagMaxWarnings,
 		Category: models.FlagCategoryCommand,

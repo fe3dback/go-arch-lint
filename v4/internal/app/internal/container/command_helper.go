@@ -1,6 +1,7 @@
 package container
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
@@ -23,7 +24,13 @@ func (c *Container) makeCliCommand(name string, factory func() CommandHandler) c
 	return func(cCtx *cli.Context) error {
 		handler := factory()
 		model, err := handler.Execute(cCtx)
-		if err != nil {
+
+		isProjectError := false
+		if errors.Is(err, models.ProjectNotMatchSpecificationsError) {
+			isProjectError = true
+		}
+
+		if err != nil && !isProjectError {
 			renderErr := c.render(cCtx, name, true, c.serviceErrorBuilder().BuildError(err))
 			if renderErr != nil {
 				return renderErr
@@ -32,7 +39,16 @@ func (c *Container) makeCliCommand(name string, factory func() CommandHandler) c
 			return models.NewUserLandError(err)
 		}
 
-		return c.render(cCtx, name, false, model)
+		err = c.render(cCtx, name, false, model)
+		if err != nil {
+			return err
+		}
+
+		if isProjectError {
+			return models.ProjectNotMatchSpecificationsError
+		}
+
+		return nil
 	}
 }
 

@@ -44,6 +44,13 @@ Linters:
 		{{- $noticeID = plus $noticeID 1 -}}
 		{{ "" }}
 
+		{{- if eq .Details.LinterID "syntax" -}}
+			{{- $text1 := .Message -}}
+			{{- $text2 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
+			{{ $text1 }}
+			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
+		{{- end -}}
+
 		{{- if eq .Details.LinterID "orphans" -}}
 			{{- $text1 := concat "File " (.Details.LinterIDOrphan.FileRelativePath | colorize "cyan") -}}
 			{{- $text2 := "  not attached to any component in archfile" -}}

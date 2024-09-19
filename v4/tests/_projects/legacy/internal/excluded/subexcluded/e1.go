@@ -1,8 +1,8 @@
 package subexcluded
 
 import (
-	"github.com/fe3dback/go-arch-lint/test/check/project/internal/a"
-	"github.com/fe3dback/go-arch-lint/test/check/project/internal/b"
+	"github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a"
+	"github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/b"
 )
 
 func E1() {

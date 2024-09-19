@@ -33,8 +33,15 @@ func Execute(env EnvType) (exitCode int) {
 
 	err := cliApp.Run(os.Args)
 	if err != nil {
-		userError := &models.UserLandError{}
-		if !errors.As(err, &userError) {
+		userLandError := &models.UserLandError{}
+
+		switch {
+		case errors.Is(err, models.ProjectNotMatchSpecificationsError):
+			// actually is not a linter error, just enforce exitCode=1
+		case errors.As(err, &userLandError):
+			// this error will be printed with custom formatted view
+		default:
+			// internal errors we can just print as-is
 			fmt.Printf("Error: %s\n", err)
 		}
 
