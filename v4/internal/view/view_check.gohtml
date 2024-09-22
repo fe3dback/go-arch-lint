@@ -9,7 +9,7 @@ Linters:
 {{- $prefixSuccess  := "   OK | " -}}
 {{- $prefixExpand   := "      | " -}}
 
-{{- $lineCommentPrefix := "  // " -}}
+{{- $lineCommentPrefix := "# " -}}
 
 {{- range .Linters -}}
 	{{- $primaryColor := "cyan" -}}
@@ -32,8 +32,8 @@ Linters:
 	{{/* name / status / comment */}}
 	{{ concat $prefix .Linter.Name | colorize $primaryColor }}
 	{{ if gt (len .Notices) 0 -}}
-		{{ concat $prefixExpand "------------------" | colorize $primaryColor }}
 		{{ $comment | lines | linePrefix (concat $prefixExpand $lineCommentPrefix) | colorize $primaryColor }}
+		{{ concat $prefixExpand "------------------" | colorize $primaryColor }}
 		{{ $prefixExpand | colorize $primaryColor }}
 	{{- end -}}
 
@@ -42,50 +42,10 @@ Linters:
 	{{ range .Notices }}
 		{{ concat (concat $noticeID "]" | padLeft 5 " ") " | " | colorize $primaryColor -}}
 		{{- $noticeID = plus $noticeID 1 -}}
-		{{ "" }}
 
-		{{- if eq .Details.LinterID "syntax" -}}
-			{{- $text1 := .Message -}}
-			{{- $text2 := concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
-			{{ $text1 }}
-			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-		{{- end -}}
-
-		{{- if eq .Details.LinterID "orphans" -}}
-			{{- $text1 := concat "File " (.Details.LinterIDOrphan.FileRelativePath | colorize "cyan") -}}
-			{{- $text2 := "  not attached to any component in archfile" -}}
-			{{ $text1 }}
-			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-		{{- end -}}
-
-		{{- if eq .Details.LinterID "imports" -}}
-			{{- $text1 := "" }}
-			{{- $text2 := "" }}
-			{{- $text3 := "" }}
-
-			{{- if .Details.LinterIDImports.TargetDefined -}}
-				{{- $targetType := "" }}
-				{{- if eq .Details.LinterIDImports.TargetType "Vendor" -}}
-					{{- $targetType = concat (.Details.LinterIDImports.TargetType | colorize "blue") "." -}}
-				{{- end -}}
-
-				{{- $text1 = concat "Dependency " (.Details.LinterIDImports.ComponentName | colorize "magenta") " -\\-> " $targetType (.Details.LinterIDImports.TargetName | colorize "magenta") " not allowed" -}}
-				{{- $text2 = concat "  by import " (.Details.LinterIDImports.ResolvedImportName | colorize "cyan") -}}
-				{{- $text3 = concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
-			{{- else -}}
-				{{- $text1 = concat "Component " (.Details.LinterIDImports.ComponentName | colorize "magenta") -}}
-				{{- $text2 = concat "  shouldn't depend on (not declared) " .Details.LinterIDImports.TargetType " " (.Details.LinterIDImports.ResolvedImportName | colorize "cyan") -}}
-				{{- $text3 = concat "  at " (concat .Reference.File ":" .Reference.Line | colorize "gray") -}}
-			{{- end -}}
-
-			{{ $text1 }}
-			{{ $text2 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-			{{ $text3 | linePrefix ($prefixExpand | colorize $primaryColor) }}
-			{{ "" | linePrefix ($prefixExpand | colorize $primaryColor) }}
-		{{- end -}}
-
-		{{- if eq .Details.LinterID "deepscan" -}}
-			!TODO
+		{{ .Message | linePrefixEFL ($prefixExpand | colorize $primaryColor) }}
+		{{- if isMultiline .Message }}
+			{{ $prefixExpand | colorize $primaryColor }}
 		{{- end -}}
 	{{- end }}
 

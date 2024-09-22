@@ -33,14 +33,14 @@ var viewMapping []byte
 ////go:embed view_version.gohtml
 //var viewVersion []byte
 
-var Templates = map[string]string{
-	tpl(models.CmdStdoutErrorOut{}): string(viewError),
-	tpl(mapping.Out{}):              string(viewMapping),
-	tpl(check.Out{}):                string(viewCheck),
-	//tpl(models.CmdGraphOut{}):       string(viewGraph),
-	//tpl(models.CmdSchemaOut{}):      string(viewSchema),
-	//tpl(models.CmdSelfInspectOut{}): string(viewSelfInspect),
-	//tpl(models.CmdVersionOut{}):     string(viewVersion),
+var Templates = map[string][]byte{
+	tpl(models.CmdStdoutErrorOut{}): viewError,
+	tpl(mapping.Out{}):              viewMapping,
+	tpl(check.Out{}):                viewCheck,
+	//tpl(models.CmdGraphOut{}):       viewGraph,
+	//tpl(models.CmdSchemaOut{}):      viewSchema,
+	//tpl(models.CmdSelfInspectOut{}): viewSelfInspect,
+	//tpl(models.CmdVersionOut{}):     viewVersion,
 }
 
 func tpl(model interface{}) string {

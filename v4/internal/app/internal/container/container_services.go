@@ -1,10 +1,11 @@
 package container
 
 import (
+	"fmt"
+
 	"github.com/fe3dback/go-arch-lint-sdk/arch"
 	"github.com/fe3dback/go-arch-lint-sdk/pkg/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
-	"github.com/fe3dback/go-arch-lint/v4/internal/services/colorizer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/ascii"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/json"
@@ -33,19 +34,18 @@ func (c *Container) serviceErrorBuilder() *xstdout.ErrorBuilder {
 
 func (c *Container) serviceRenderer() *renderer.Renderer {
 	return once(func() *renderer.Renderer {
+		asciiRenderer, err := ascii.NewRenderer(
+			c.sdkRenderer(),
+			view.Templates,
+		)
+		if err != nil {
+			panic(fmt.Errorf("failed create ascii renderer: %w", err))
+		}
+
 		return renderer.New(
 			json.NewRenderer(),
-			ascii.NewRenderer(
-				c.serviceAsciiColorizer(),
-				view.Templates,
-			),
+			asciiRenderer,
 		)
-	})
-}
-
-func (c *Container) serviceAsciiColorizer() *colorizer.ASCII {
-	return once(func() *colorizer.ASCII {
-		return colorizer.New(c.cCtx.Bool(models.FlagOutputUseAsciiColors))
 	})
 }
 
