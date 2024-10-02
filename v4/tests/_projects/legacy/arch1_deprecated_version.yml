@@ -1,0 +1,9 @@
+version: 1
+
+components:
+  a:
+    in: internal/a
+
+deps:
+  a:
+    anyVendorDeps: false

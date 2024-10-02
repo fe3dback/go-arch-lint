@@ -1,0 +1,9 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_invalid_spec_type_err.yml --output-color=false --> FAIL
+[5:3] unknown field "depOnAnyVendore":
+ at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec_type_err.yml:5
+ 
+   4 |   # type error
+ > 5 |   depOnAnyVendore: false
+   6 | 
+   7 | deps: []
+

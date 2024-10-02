@@ -1,0 +1,9 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_invalid_spec_critical.yml --output-color=false --> FAIL
+Config validator find some notices:
+*validator.ExcludedFilesValidator: Regexp pattern '(A-Z' for files exclusion is invalid:
+ at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec_critical.yml:5
+ 
+   4 | excludeFiles:
+ > 5 |   - "(A-Z" # not valid regexp (V)
+   6 | 
+   7 | components:

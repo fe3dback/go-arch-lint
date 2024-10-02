@@ -1,0 +1,38 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_warnings.yml --> FAIL
+module: [32mgithub.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy[0m
+Linters:
+[93m OUPS | Go Syntax[0m
+[93m      | # Check that go files has correct go AST code (if not, checker can
+      | # guarantee correct work of other arch-linters)[0m
+[93m      | ------------------[0m
+[93m      | [0m
+[93m   1] | [0mFailed parse AST of component e package e:
+[93m      | [0m invalid syntax: could not import github.com/example/a (invalid package name: "")
+[93m      | [0m at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:4
+[93m      | [0m
+[93m   2] | [0mFailed parse AST of component e package e:
+[93m      | [0m invalid syntax: could not import github.com/example/b (invalid package name: "")
+[93m      | [0m at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:5
+[93m      | [0m
+
+[93m OUPS | Orphans[0m
+[93m      | # Will return list of all files that not mapped to any components
+      | # specified in config[0m
+[93m      | ------------------[0m
+[93m      | [0m
+[93m   1] | [0mFile internal/c/not_covered/c1nc.go not attached to any component in archfile
+[93m   2] | [0mFile internal/d/not_covered.go not attached to any component in archfile
+[93m   3] | [0mFile internal/not_covered/nc.go not attached to any component in archfile
+
+[93m OUPS | Imports[0m
+[93m      | # Check that packages contain only allowed "import" statements[0m
+[93m      | ------------------[0m
+[93m      | [0m
+[93m   1] | [0mDependency c -\-> a not allowed
+[93m      | [0m  by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a
+[93m      | [0m  at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3
+[93m      | [0m
+[93m      | [0m
+
+--
+total notices: [93m6[0m

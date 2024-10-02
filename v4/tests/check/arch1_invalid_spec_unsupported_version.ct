@@ -1,0 +1,7 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_invalid_spec_unsupported_version.yml --output-color=false --> FAIL
+config version 999 is deprecated or not implemented. Current linter version support configs range [v3-v4]:
+ at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec_unsupported_version.yml:1
+ 
+ > 1 | version: 999
+   2 | 
+   3 | components:

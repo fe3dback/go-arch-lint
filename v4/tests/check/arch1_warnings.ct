@@ -2,34 +2,36 @@ $ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file ar
 module: github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy
 Linters:
  OUPS | Go Syntax
+      | # Check that go files has correct go AST code (if not, checker can
+      | # guarantee correct work of other arch-linters)
       | ------------------
-      |   // Check that go files has correct go AST code (if not, checker can
-      |   // guarantee correct work of other arch-linters)
       | 
-   1] | Failed parse component 'e' package 'e' at 'internal/e': invalid syntax: could not import github.com/example/a (invalid package name: "")
-      |   at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:4
-   2] | Failed parse component 'e' package 'e' at 'internal/e': invalid syntax: could not import github.com/example/b (invalid package name: "")
-      |   at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:5
+   1] | Failed parse AST of component e package e:
+      |  invalid syntax: could not import github.com/example/a (invalid package name: "")
+      |  at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:4
+      | 
+   2] | Failed parse AST of component e package e:
+      |  invalid syntax: could not import github.com/example/b (invalid package name: "")
+      |  at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:5
+      | 
 
  OUPS | Orphans
+      | # Will return list of all files that not mapped to any components
+      | # specified in config
       | ------------------
-      |   // Will return list of all files that not mapped to any components
-      |   // specified in config
       | 
-   1] | File internal/c/not_covered/c1nc.go
-      |   not attached to any component in archfile
-   2] | File internal/d/not_covered.go
-      |   not attached to any component in archfile
-   3] | File internal/not_covered/nc.go
-      |   not attached to any component in archfile
+   1] | File internal/c/not_covered/c1nc.go not attached to any component in archfile
+   2] | File internal/d/not_covered.go not attached to any component in archfile
+   3] | File internal/not_covered/nc.go not attached to any component in archfile
 
  OUPS | Imports
+      | # Check that packages contain only allowed "import" statements
       | ------------------
-      |   // Check that packages contain only allowed "import" statements
       | 
    1] | Dependency c -\-> a not allowed
       |   by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a
       |   at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3
+      | 
       | 
 
 --

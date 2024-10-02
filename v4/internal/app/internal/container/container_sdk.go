@@ -14,6 +14,7 @@ func (c *Container) sdk() *sdk.SDK {
 			arch.PathAbsolute(c.cCtx.String(models.FlagProjectPath)),
 			sdk.WithUsedContext(arch.UsedContextCLI),
 			sdk.WithSkipMissUse(c.cCtx.Bool(models.FlagSkipMissUsages)),
+			sdk.WithOutputColors(c.cCtx.Bool(models.FlagOutputUseAsciiColors)),
 		)
 		if err != nil {
 			panic(fmt.Errorf("failed to initialize sdk: %w", err))

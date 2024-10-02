@@ -5,24 +5,22 @@ Linters:
 
 
  OUPS | Orphans
+      | # Will return list of all files that not mapped to any components
+      | # specified in config
       | ------------------
-      |   // Will return list of all files that not mapped to any components
-      |   // specified in config
       | 
-   1] | File internal/c/not_covered/c1nc.go
-      |   not attached to any component in archfile
-   2] | File internal/d/not_covered.go
-      |   not attached to any component in archfile
-   3] | File internal/not_covered/nc.go
-      |   not attached to any component in archfile
+   1] | File internal/c/not_covered/c1nc.go not attached to any component in archfile
+   2] | File internal/d/not_covered.go not attached to any component in archfile
+   3] | File internal/not_covered/nc.go not attached to any component in archfile
 
  OUPS | Imports
+      | # Check that packages contain only allowed "import" statements
       | ------------------
-      |   // Check that packages contain only allowed "import" statements
       | 
    1] | Dependency c -\-> a not allowed
       |   by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a
       |   at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3
+      | 
       | 
 
 --

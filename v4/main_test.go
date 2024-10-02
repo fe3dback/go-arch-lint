@@ -36,6 +36,9 @@ func TestCLI(t *testing.T) {
 		// will print errors in some cases (instead of silent fail)
 		_ = os.Setenv("CLI_TEMPLATE_ERROR_DEBUG", "1")
 
+		// force turn on ansi CLI colors for testing
+		_ = os.Setenv("CLICOLOR_FORCE", "1")
+
 		return nil
 	}
 

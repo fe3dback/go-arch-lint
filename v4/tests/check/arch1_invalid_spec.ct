@@ -1,0 +1,72 @@
+$ go-arch-lint check --project-path ${PWD}/tests/_projects/legacy --arch-file arch1_invalid_spec.yml --output-color=false --> FAIL
+Config validator find some notices:
+
+  #] *validator.CommonComponentsValidator: Common component 'models' is not known:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:20
+ 
+     .   19 | commonComponents:
+     . > 20 |   - models # not exist component (V)
+     .   21 | 
+     .   22 | deps:
+
+
+  #] *validator.ComponentsValidator: not found any directories by glob 'internal/not_exist':
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:14
+ 
+     .   13 |   not_exist:
+     . > 14 |     in: internal/not_exist # not exist path (V)
+     .   15 | 
+     .   16 |   a:
+
+
+  #] *validator.DepsValidator: Component 'cmd' in dependencies is not defined:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:32
+ 
+     .   31 |   cmd: # not exist component
+     . > 32 |     canUse:
+     .   33 |       - go-modfile
+     .   34 | 
+
+
+  #] *validator.DepsValidator: In component 'a': no rules is defined (require at least one of [AnyProjectDeps, AnyVendorDeps, MayDependOn, CanUse, CanContainTags]):
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:36
+ 
+     .   35 |   a:
+     . > 36 |     anyVendorDeps: false
+     .   37 |     # empty dep (V)
+
+
+  #] *validator.DepsComponentsValidator: Component 'not_exist_too_rnd_order' is not defined:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:25
+ 
+     .   24 |     mayDependOn:
+     . > 25 |       - not_exist_too_rnd_order # not exist dep (V)
+     .   26 |       - cmd # not exist dep (V)
+     .   27 |     canUse:
+
+
+  #] *validator.DepsComponentsValidator: Component 'cmd' is not defined:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:26
+ 
+     .   25 |       - not_exist_too_rnd_order # not exist dep (V)
+     . > 26 |       - cmd # not exist dep (V)
+     .   27 |     canUse:
+     .   28 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
+
+
+  #] *validator.DepsVendorsValidator: Vendor '3rd-cobra-not-defined-too' is not defined:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:28
+ 
+     .   27 |     canUse:
+     . > 28 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
+     .   29 |       - 3rd-cobra # not defined vendor (V)
+     .   30 | 
+
+
+  #] *validator.DepsVendorsValidator: Vendor '3rd-cobra' is not defined:
+     . at ${ROOTDIR}/tests/_projects/legacy/arch1_invalid_spec.yml:29
+ 
+     .   28 |       - 3rd-cobra-not-defined-too # not defined vendor (V)
+     . > 29 |       - 3rd-cobra # not defined vendor (V)
+     .   30 | 
+     .   31 |   cmd: # not exist component

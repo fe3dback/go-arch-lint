@@ -1,0 +1,13 @@
+version: 3
+
+# this is critical error
+excludeFiles:
+  - "(A-Z" # not valid regexp (V)
+
+components:
+  a:
+    in: internal/a
+
+deps:
+  a:
+    anyVendorDeps: false
