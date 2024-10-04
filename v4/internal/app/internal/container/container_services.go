@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/go-arch-lint-sdk/arch"
-	"github.com/fe3dback/go-arch-lint-sdk/pkg/codeprinter"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/tpl/codeprinter"
 	"github.com/fe3dback/go-arch-lint/v4/internal/models"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer"
 	"github.com/fe3dback/go-arch-lint/v4/internal/services/renderer/ascii"
@@ -27,7 +27,6 @@ func (c *Container) serviceErrorBuilder() *xstdout.ErrorBuilder {
 	return once(func() *xstdout.ErrorBuilder {
 		return xstdout.NewErrorBuilder(
 			c.servicePrinter(),
-			c.cCtx.Bool(models.FlagOutputUseAsciiColors),
 		)
 	})
 }
@@ -54,6 +53,7 @@ func (c *Container) servicePrinter() *codeprinter.Printer {
 		return codeprinter.NewPrinter(
 			c.servicePrinterExtractorRaw(),
 			c.servicePrinterExtractorHL(),
+			c.colorEnv() == arch.TerminalColorEnvColored,
 		)
 	})
 }

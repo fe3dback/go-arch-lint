@@ -23,3 +23,9 @@ func (c *Container) sdk() *sdk.SDK {
 		return createdSDK
 	})
 }
+
+func (c *Container) colorEnv() arch.TerminalColorEnv {
+	return arch.DetectColorProfile(
+		c.cCtx.Bool(models.FlagOutputUseAsciiColors),
+	)
+}

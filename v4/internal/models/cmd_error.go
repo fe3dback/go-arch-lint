@@ -8,13 +8,8 @@ import (
 
 type (
 	CmdStdoutErrorOut struct {
-		OverallNote string         `json:"OverallNote"`
-		Errors      []StdoutNotice `json:"Errors"`
-	}
-
-	StdoutNotice struct {
-		arch.Notice
-		Preview string `json:"-"`
+		OverallNote string        `json:"OverallNote"`
+		Errors      []arch.Notice `json:"Errors"`
 	}
 )
 

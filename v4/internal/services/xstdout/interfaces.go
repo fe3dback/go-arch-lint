@@ -1,7 +1,7 @@
 package xstdout
 
 import (
-	"github.com/fe3dback/go-arch-lint-sdk/pkg/codeprinter"
+	"github.com/fe3dback/go-arch-lint-sdk/pkg/tpl/codeprinter"
 )
 
 type (

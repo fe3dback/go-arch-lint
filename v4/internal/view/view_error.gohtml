@@ -1,4 +1,4 @@
-{{- /* gotype: github.com/fe3dback/go-arch-lint/v4/internal/models.CmdStdoutErrorOut */ -}}
+{{- /* gotype: github.com/fe3dback/go-arch-lint/v4/internal/models.CmdStdoutErrorOut*/ -}}
 
 {{- if .OverallNote -}}
 	{{ .OverallNote -}}:
@@ -13,12 +13,12 @@
 		{{ "  #]" | colorize "red" }} {{ $space = "     . "}}
 	{{- end -}}
 
-	{{ concat .Notice.Message ":" | colorize "yellow" }}
+	{{ concat .Message ":" | colorize "yellow" }}
 
-	{{ if .Notice.Reference.Valid -}}
-		{{ concat $space "at " .Notice.Reference.File ":" .Notice.Reference.Line | colorize "gray" }}
+	{{ if .Reference.Valid -}}
+		{{ concat $space "at " .Reference.File ":" .Reference.Line | colorize "gray" }}
 		{{ " "}}
-		{{ .Preview | linePrefix $space }}
+		{{ .CodePreview | linePrefix $space }}
 	{{ end }}
 
 {{ end -}}
