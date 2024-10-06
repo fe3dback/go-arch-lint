@@ -44,6 +44,13 @@ Linters:
 		{{- $noticeID = plus $noticeID 1 -}}
 
 		{{ .Message | linePrefixEFL ($prefixExpand | colorize $primaryColor) }}
+
+		{{- if .Preview }}
+			{{ $prefixExpand | colorize $primaryColor }}
+			{{ .Preview | linePrefix ($prefixExpand | colorize $primaryColor) }}
+			{{ $prefixExpand | colorize $primaryColor }}
+		{{- end -}}
+
 		{{- if isMultiline .Message }}
 			{{ $prefixExpand | colorize $primaryColor }}
 		{{- end -}}

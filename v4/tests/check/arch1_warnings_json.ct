@@ -113,7 +113,7 @@ $ go-arch-lint check --json --project-path ${PWD}/tests/_projects/legacy --arch-
         },
         "Notices": [
           {
-            "Message": "Dependency c -\\-\u003e a not allowed\n  by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a\n  at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3\n",
+            "Message": "Dependency c -\\-\u003e a not allowed\n  by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a\n  at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3",
             "Reference": {
               "File": "${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go",
               "Line": 3,

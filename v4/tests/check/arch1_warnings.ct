@@ -10,9 +10,21 @@ Linters:
       |  invalid syntax: could not import github.com/example/a (invalid package name: "")
       |  at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:4
       | 
+      |   3 | import (
+      | > 4 | 	libA "github.com/example/a"
+      |   5 | 	libB "github.com/example/b"
+      |   6 | 
+      | 
+      | 
    2] | Failed parse AST of component e package e:
       |  invalid syntax: could not import github.com/example/b (invalid package name: "")
       |  at ${ROOTDIR}/tests/_projects/legacy/internal/e/e1.go:5
+      | 
+      |   4 | 	libA "github.com/example/a"
+      | > 5 | 	libB "github.com/example/b"
+      |   6 | 
+      |   7 | 	modelA "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/d/models/a/model"
+      | 
       | 
 
  OUPS | Orphans
@@ -31,6 +43,11 @@ Linters:
    1] | Dependency c -\-> a not allowed
       |   by import github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a
       |   at ${ROOTDIR}/tests/_projects/legacy/internal/c/c1.go:3
+      | 
+      |   2 | 
+      | > 3 | import "github.com/fe3dback/go-arch-lint/v4/tests/_projects/legacy/internal/a"
+      |   4 | 
+      |   5 | func C1() {
       | 
       | 
 
