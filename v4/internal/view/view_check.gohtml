@@ -14,14 +14,13 @@ Linters:
 {{- range .Linters -}}
 	{{- $primaryColor := "cyan" -}}
 	{{- $prefix := $prefixDisabled -}}
-	{{- $comment := .Linter.EnableConditionHint -}}
+	{{- $comment := .Linter.Description -}}
 
 	{{/* define primary color */}}
 	{{- if .Linter.Used -}}
 		{{- if gt (len .Notices) 0 -}}
 			{{- $primaryColor = "yellow" -}}
 			{{- $prefix = $prefixWarning -}}
-			{{- $comment = .Linter.Description -}}
 		{{- else -}}
 			{{- $primaryColor = "green" -}}
 			{{- $prefix = "   OK | " -}}
