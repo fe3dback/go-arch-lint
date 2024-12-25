@@ -142,7 +142,9 @@ func (r *Scanner) getImportType(ctx *resolveContext, importPath string) models.I
 		return models.ImportTypeStdLib
 	}
 
-	if strings.HasPrefix(importPath, ctx.moduleName) {
+	// We can't use a straight prefix match here because the module name could be a substring of the import path.
+	// For example, if the module name is "example.com/foo/bar", we do not want to match "example.com/foo/bar-utils"
+	if importPath == ctx.moduleName || strings.HasPrefix(importPath, ctx.moduleName+"/") {
 		return models.ImportTypeProject
 	}
 
