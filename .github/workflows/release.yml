@@ -27,7 +27,7 @@ jobs:
         if: steps.check-tag.outputs.match == 'true'
         uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: 1.24
       -
         name: Docker Login
         if: success() && steps.check-tag.outputs.match == 'true'
