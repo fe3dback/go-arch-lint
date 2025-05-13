@@ -47,10 +47,6 @@ $ go-arch-lint check --json --project-path ${PWD}/test/check/project --arch-file
       {
         "ID": "deepscan",
         "Used": false
-      },
-      {
-        "ID": "ignore_not_found_components",
-        "Used": false
       }
     ]
   }

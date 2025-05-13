@@ -88,12 +88,6 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdCheckIn) (models.Cm
 				Used: spec.Allow.DeepScan.Value == true,
 				Hint: "switch 'allow.deepScan = true' (or delete) to on",
 			},
-			{
-				ID:   "ignore_not_found_components",
-				Name: "Advanced: ignore not found components",
-				Used: spec.Allow.DeepScan.Value == true,
-				Hint: "switch 'allow.ignoreNotFoundComponents = true' to on",
-			},
 		},
 	}
 
