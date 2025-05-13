@@ -117,6 +117,10 @@ func (a ArchV2Allow) DeepScan() common.Referable[bool] {
 	return common.NewEmptyReferable(false)
 }
 
+func (a ArchV2Allow) IgnoreNotFoundComponents() common.Referable[bool] {
+	return common.NewEmptyReferable(false)
+}
+
 // --
 
 func (a ArchV2Vendor) ImportPaths() []models.Glob {

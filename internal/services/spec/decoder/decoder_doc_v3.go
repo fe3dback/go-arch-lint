@@ -23,8 +23,9 @@ type (
 	}
 
 	ArchV3Allow struct {
-		FDepOnAnyVendor ref[bool] `json:"depOnAnyVendor"`
-		FDeepScan       ref[bool] `json:"deepScan"`
+		FDepOnAnyVendor           ref[bool] `json:"depOnAnyVendor"`
+		FDeepScan                 ref[bool] `json:"deepScan"`
+		FIgnoreNotFoundComponents ref[bool] `json:"ignoreNotFoundComponents"`
 	}
 
 	ArchV3Vendor struct {
@@ -136,6 +137,15 @@ func (a ArchV3Allow) DeepScan() common.Referable[bool] {
 
 	// be default it`s on from V3+
 	return common.NewEmptyReferable(true)
+}
+
+func (a ArchV3Allow) IgnoreNotFoundComponents() common.Referable[bool] {
+	if a.FIgnoreNotFoundComponents.defined {
+		return a.FIgnoreNotFoundComponents.ref
+	}
+
+	// disabled by default
+	return common.NewEmptyReferable(false)
 }
 
 // --
