@@ -4,5 +4,6 @@ linters:
    On | Base: component imports # always on
    On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
    On | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+   On | Advanced: ignore not found components # switch 'allow.ignoreNotFoundComponents = true' to on
 
 failed to provide json scheme for validation: unknown version: 999

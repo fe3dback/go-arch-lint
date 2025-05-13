@@ -1,4 +1,4 @@
-$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch3_variadic.yml --output-color=false
+$ go-arch-lint check --project-path ${PWD}/test/check/project --arch-file arch3_ignore_not_found_components.yml --output-color=false
 module: github.com/fe3dback/go-arch-lint/test/check/project
 linters:
    On | Base: component imports # always on

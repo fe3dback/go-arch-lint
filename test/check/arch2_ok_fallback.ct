@@ -4,5 +4,6 @@ linters:
    On | Base: component imports # always on
    On | Advanced: vendor imports # switch 'allow.depOnAnyVendor = false' (or delete) to on
   Off | Advanced: method calls and dependency injections # switch 'allow.deepScan = true' (or delete) to on
+  Off | Advanced: ignore not found components # switch 'allow.ignoreNotFoundComponents = true' to on
 
 OK - No warnings found
