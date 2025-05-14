@@ -71,6 +71,10 @@ type (
 		// DeepScan turn on usage of advanced AST linter
 		// this is default behavior since v3+ configs
 		DeepScan() common.Referable[bool]
+
+		// IgnoreNotFoundComponents skips components that are not found by their glob
+		// disabled by default
+		IgnoreNotFoundComponents() common.Referable[bool]
 	}
 
 	Vendor interface {

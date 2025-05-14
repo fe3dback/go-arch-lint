@@ -35,7 +35,7 @@ func (u *utils) assertGlobPathValid(localGlobPath string) error {
 		return fmt.Errorf("failed to resolv path: %w", err)
 	}
 
-	if len(resolved) == 0 {
+	if len(resolved) == 0 && !u.document.Options().IgnoreNotFoundComponents().Value {
 		return fmt.Errorf("not found directories for '%s' in '%s'", localGlobPath, absPath)
 	}
 

@@ -43,6 +43,10 @@
         "deepScan": {
           "title": "will use new advanced AST linter (this default=true from v3+)",
           "type": "boolean"
+        },
+        "ignoreNotFoundComponents": {
+          "title": "skips components that are not found by their glob (disabled by default)",
+          "type": "boolean"
         }
       }
     },

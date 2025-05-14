@@ -20,8 +20,9 @@ type (
 	}
 
 	Allow struct {
-		DepOnAnyVendor common.Referable[bool]
-		DeepScan       common.Referable[bool]
+		DepOnAnyVendor           common.Referable[bool]
+		DeepScan                 common.Referable[bool]
+		IgnoreNotFoundComponents common.Referable[bool]
 	}
 
 	Component struct {
