@@ -75,7 +75,7 @@ docker run --rm -v ${PWD}:/app fe3dback/go-arch-lint:latest-stable-release check
 [other docker tags and versions](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
 
 #### From sources
-It require go 1.20+
+It requires go 1.24+
 
 ```bash
 go install github.com/fe3dback/go-arch-lint@latest
@@ -91,12 +91,6 @@ go-arch-lint check
 #### Precompiled binaries
 
 [see on releases page](https://github.com/fe3dback/go-arch-lint/releases)
-
-### IDE plugin for autocompletion and other help
-
-<img src="https://user-images.githubusercontent.com/2073883/104641610-0f453900-56bb-11eb-8419-6d94fbcb4d2f.png" alt="jetbrains goland logo" align="left" width="80px" height="80px">
-
-https://plugins.jetbrains.com/plugin/15423-goarchlint-file-support
 
 ## Usage
 
@@ -163,27 +157,3 @@ go-arch-lint graph
 ```
 
 See full [graph documentation](docs/graph/README.md) for details.
-
-### Pre-Commit
-
-go-arch-lint can also be used as a pre-commit hook, acting before each commit is made.  
-This is useful to always check that your new code still respects your repo architecture, and to always update your graph SVG.
-
-1. Install pre-commit from [https://pre-commit.com/#install](https://pre-commit.com/#install)
-2. Create a `.pre-commit-config.yaml` file at the root of your repository with the following content:
-
-```go
-repos:
-  - repo: https://github.com/fe3dback/go-arch-lint
-    rev: master
-    hooks:
-      - id: go-arch-lint-check
-      - id: go-arch-lint-graph
-        args: ['--include-vendors=true', '--out=go-arch-lint-graph.svg']
-```
-
-3. If needed, add any flags you need in `args`.
-4. Auto-update the config to the latest repos' versions by executing `pre-commit autoupdate`
-5. Install with `pre-commit install`
-6. Now you're all set! Try a commit, and see the logs (passing or failing).
-

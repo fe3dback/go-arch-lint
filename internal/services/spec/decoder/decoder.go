@@ -131,7 +131,7 @@ func (sp *Decoder) jsonSchemeValidate(schemeVersion int, sourceCode []byte, file
 		}
 
 		schemeNotices = append(schemeNotices, arch.Notice{
-			Notice: fmt.Errorf(jsonNotice.notice),
+			Notice: fmt.Errorf("%v", jsonNotice.notice),
 			Ref:    schemeRef,
 		})
 	}
