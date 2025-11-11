@@ -5,8 +5,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
-type workdirAssembler struct {
-}
+type workdirAssembler struct{}
 
 func newWorkdirAssembler() *workdirAssembler {
 	return &workdirAssembler{}

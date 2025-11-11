@@ -98,19 +98,19 @@ func (r Reference) guaranteeValidState(mutate func(r *Reference)) Reference {
 }
 
 func clampInt(num, a, b int) int {
-	min, max := sortInt(a, b)
+	minimum, maximum := sortInt(a, b)
 
-	if num < min {
-		num = min
+	if num < minimum {
+		num = minimum
 	}
-	if num > max {
-		num = max
+	if num > maximum {
+		num = maximum
 	}
 
 	return num
 }
 
-func sortInt(a, b int) (min, max int) {
+func sortInt(a, b int) (minimum, maximum int) {
 	if a > b {
 		return b, a
 	}

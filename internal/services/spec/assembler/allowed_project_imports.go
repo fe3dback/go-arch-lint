@@ -9,17 +9,14 @@ import (
 )
 
 type allowedProjectImportsAssembler struct {
-	projectPath string
-	resolver    *resolver
+	resolver *resolver
 }
 
 func newAllowedProjectImportsAssembler(
-	projectPath string,
 	resolver *resolver,
 ) *allowedProjectImportsAssembler {
 	return &allowedProjectImportsAssembler{
-		projectPath: projectPath,
-		resolver:    resolver,
+		resolver: resolver,
 	}
 }
 

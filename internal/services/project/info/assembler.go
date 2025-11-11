@@ -5,14 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"golang.org/x/mod/modfile"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
-
-	"golang.org/x/mod/modfile"
 )
 
-type Assembler struct {
-}
+type Assembler struct{}
 
 func NewAssembler() *Assembler {
 	return &Assembler{}

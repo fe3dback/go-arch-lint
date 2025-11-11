@@ -1,0 +1,92 @@
+# More info: https://golangci-lint.run/docs/configuration/file/
+version: "2"
+
+run:
+  tests: true
+  go: "1.25"
+  build-tags:
+    - integration
+
+output:
+  formats:
+    text:
+      print-issued-lines: true
+      print-linter-name: true
+
+linters:
+  # v2: вместо disable-all используем default: none
+  default: none
+  enable:
+    # Базовые качество/стиль
+    - unused                        # Неиспользуемые константы/переменные/функции/типы
+    - staticcheck                   # Большой набор проверок (honnef.co/go/tools)
+    - govet                         # Встроенный "go vet": подозрительные конструкции
+    - revive                        # Гибкий стилевой линтер (на замену golint)
+    - whitespace                    # Лишние пустые строки в начале/конце блоков и т.п.
+    - asciicheck                    # ASCII-только: стиль идентификаторов/комментариев
+    - misspell                      # Опечатки в комментариях/строках
+    - dupword                       # Повторяющиеся слова
+    - decorder                      # Порядок объявлений (const/type/var/func)
+    - goconst                       # Повторяющиеся литералы → константы
+    - tagalign                      # Выравнивание тегов структур
+
+    # Ошибки и обработка ошибок
+    - errcheck                      # Непроверенные ошибки
+    - errorlint                     # Правильная работа с обёртками ошибок (Go 1.13+)
+    - errname                       # Имена ошибок: Err* / *Error
+
+    # Контекст/конкурентность/тесты
+    - copyloopvar                   # Копирование переменной цикла (замыкания/го‑рутины)
+
+    # Производственный код/практики
+    - ineffassign                   # Присваивания без использования
+    - wastedassign                  # "Бесполезные" присваивания
+    - unconvert                     # Лишние преобразования типов
+    - predeclared                   # Затенение предобъявленных идентификаторов
+    - makezero                      # make с ненулевой длиной
+    - gochecknoinits                # Запрещает init(): больше предсказуемости и тестопригодности
+    - gosec                         # Статический анализ на уязвимости (безопасность)
+
+  settings:
+    revive:
+      rules:
+        - name: var-naming
+          disabled: true
+    unused:
+      field-writes-are-uses: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+# В v2 форматтеры выделены отдельно и могут участвовать в `run` как проверки.
+formatters:
+  enable:
+    - gci
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - localmodule
+  # Исключения директорий для форматтеров дублируем, как рекомендует миграция
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - bin
+      - var
+      - tmp

@@ -1,6 +1,7 @@
 package deepscan
 
 import (
+	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
@@ -45,9 +46,9 @@ type (
 	}
 
 	Source struct {
-		Pkg    string           // package name (example: "a")
-		Import string           // package full import path (example: "example.com/myProject/internal/a")
-		Path   string           // package full abs path (example: "/home/user/go/src/myProject/internal/a")
-		Place  common.Reference // exactly place in source code
+		Pkg    string                // package name (example: "a")
+		Import models.ResolvedImport // package full import path with type
+		Path   string                // package full abs path (example: "/home/user/go/src/myProject/internal/a")
+		Place  common.Reference      // exactly place in source code
 	}
 )

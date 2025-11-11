@@ -14,8 +14,7 @@ var v2 []byte
 //go:embed v3.json
 var v3 []byte
 
-type Provider struct {
-}
+type Provider struct{}
 
 func NewProvider() *Provider {
 	return &Provider{}

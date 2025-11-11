@@ -9,11 +9,12 @@ import (
 	"strings"
 	"sync"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-arch-lint/internal/services/checker/deepscan"
-	"golang.org/x/sync/errgroup"
 )
 
 type DeepScan struct {
@@ -71,8 +72,8 @@ func (c *DeepScan) workersCount() int {
 func (c *DeepScan) Check(ctx context.Context, spec arch.Spec) (models.CheckResult, error) {
 	maxWorkers := c.workersCount()
 
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	// -- prepare shared objects
 	c.spec = spec
@@ -105,15 +106,13 @@ func (c *DeepScan) Check(ctx context.Context, spec arch.Spec) (models.CheckResul
 	var wg errgroup.Group
 
 	for _, component := range spec.Components {
-		component := component
-
 		pool <- struct{}{}
 		wg.Go(func() error {
 			defer func() {
 				<-pool
 			}()
 
-			if component.DeepScan.Value != true {
+			if !component.DeepScan.Value {
 				return nil
 			}
 
@@ -210,7 +209,7 @@ func (c *DeepScan) checkGate(_ context.Context, cmp *arch.Component, gate *deeps
 	for _, implementation := range gate.Implementations {
 		err := c.checkImplementation(cmp, gate, &implementation)
 		if err != nil {
-			return fmt.Errorf("failed check implementation '%s': %w",
+			return fmt.Errorf("failed check implementation '%v': %w",
 				implementation.Injector.ParamDefinition,
 				err,
 			)
@@ -227,10 +226,19 @@ func (c *DeepScan) checkImplementation(
 ) error {
 	injectedImport := imp.Target.Definition.Import
 
+	// allow explicitly allowed project imports
 	for _, allowedImport := range cmp.AllowedProjectImports {
-		if allowedImport.Value.ImportPath == injectedImport {
+		if allowedImport.Value.ImportPath == injectedImport.Name {
 			return nil
 		}
+	}
+
+	// allow by special flags per import type
+	if cmp.SpecialFlags.AllowAllProjectDeps.Value && injectedImport.ImportType == models.ImportTypeProject {
+		return nil
+	}
+	if cmp.SpecialFlags.AllowAllVendorDeps.Value && injectedImport.ImportType == models.ImportTypeVendor {
+		return nil
 	}
 
 	targetPath := imp.Target.Definition.Place.File
@@ -287,14 +295,6 @@ func (c *DeepScan) renderCode(pointer, from, to common.Reference) []byte {
 		false,
 		false,
 	)
-}
-
-func (c *DeepScan) sortPositions(a, b common.Reference) (min, max common.Reference) {
-	if a.Line < b.Line {
-		return a, b
-	}
-
-	return b, a
 }
 
 func (c *DeepScan) definitionToRelPath(source common.Reference) string {

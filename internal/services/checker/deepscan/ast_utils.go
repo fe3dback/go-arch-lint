@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -72,10 +71,9 @@ func parseRecursive(
 	path string,
 	excludedPaths []string,
 	excludedFileMatchers []*regexp.Regexp,
-	filter func(fs.FileInfo) bool,
 	mode parser.Mode,
-) (pkgs map[string]*ast.Package, first error) {
-	pkgs = make(map[string]*ast.Package)
+) (files map[string]*ast.File, first error) {
+	files = make(map[string]*ast.File)
 
 	parseCtx := parseRecursiveCtx{
 		excludedPaths:        excludedPaths,
@@ -90,34 +88,16 @@ func parseRecursive(
 		return nil, fmt.Errorf("failed to walk project tree: %w", err)
 	}
 
-	foundPackages := extractPackagesFromFilePaths(parseCtx.foundFiles)
-	for _, analysePackage := range foundPackages {
-		found, err := parser.ParseDir(fset, analysePackage, filter, mode)
+	for filePath := range parseCtx.foundFiles {
+		fileAst, err := parser.ParseFile(fset, filePath, nil, mode)
 		if err != nil {
-			return nil, fmt.Errorf("failed parse '%s': %w", analysePackage, err)
+			return nil, fmt.Errorf("failed parse '%s': %w", filePath, err)
 		}
 
-		for packageID, astPackage := range found {
-			pkgs[fmt.Sprintf("%s_%s", analysePackage, packageID)] = astPackage
-		}
+		files[filePath] = fileAst
 	}
 
-	return pkgs, nil
-}
-
-func extractPackagesFromFilePaths(paths map[string]struct{}) []string {
-	r := make(map[string]struct{})
-
-	for path := range paths {
-		r[filepath.Dir(path)] = struct{}{}
-	}
-
-	list := make([]string, 0, len(r))
-	for packagePath := range r {
-		list = append(list, packagePath)
-	}
-
-	return list
+	return files, nil
 }
 
 func resolveScopeFile(ctx *parseRecursiveCtx, path string, info os.FileInfo, err error) error {

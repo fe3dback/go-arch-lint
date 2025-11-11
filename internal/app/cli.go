@@ -23,7 +23,6 @@ func Execute() int {
 
 	// -- process
 	err := di.CommandRoot().ExecuteContext(mainCtx)
-
 	// -- handle errors
 	if err != nil {
 		if errors.Is(err, models.UserSpaceError{}) {

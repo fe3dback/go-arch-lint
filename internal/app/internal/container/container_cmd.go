@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/spf13/cobra"
+
+	"github.com/fe3dback/go-arch-lint/internal/models"
 )
 
 type runner = func(cmd *cobra.Command) (any, error)
@@ -115,7 +116,6 @@ func (c *Container) commands() []*cobra.Command {
 
 	list := make([]*cobra.Command, 0, len(executors))
 	for _, x := range executors {
-		x := x
 		x.cmd.RunE = func(activeCmd *cobra.Command, _ []string) error {
 			return c.ProvideRenderer().RenderModel(x.runE(activeCmd))
 		}

@@ -6,16 +6,10 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
-type allowedVendorImportsAssembler struct {
-	resolver *resolver
-}
+type allowedVendorImportsAssembler struct{}
 
-func newAllowedVendorImportsAssembler(
-	resolver *resolver,
-) *allowedVendorImportsAssembler {
-	return &allowedVendorImportsAssembler{
-		resolver: resolver,
-	}
+func newAllowedVendorImportsAssembler() *allowedVendorImportsAssembler {
+	return &allowedVendorImportsAssembler{}
 }
 
 func (aia *allowedVendorImportsAssembler) assemble(

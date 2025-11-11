@@ -7,8 +7,7 @@ import (
 )
 
 type (
-	Resolver struct {
-	}
+	Resolver struct{}
 )
 
 func NewResolver() *Resolver {
@@ -16,9 +15,7 @@ func NewResolver() *Resolver {
 }
 
 func (r Resolver) Resolve(absPath string) (resolvePaths []string, err error) {
-	if strings.HasSuffix(absPath, ".") {
-		absPath = strings.TrimSuffix(absPath, ".")
-	}
+	absPath = strings.TrimSuffix(absPath, ".")
 
 	matches, err := glob(absPath)
 	if err != nil {

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/operations/graph"
-	"github.com/spf13/cobra"
 )
 
 func (c *Container) commandGraph() (*cobra.Command, runner) {

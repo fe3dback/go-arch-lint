@@ -1,9 +1,10 @@
 package container
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/operations/selfInspect"
-	"github.com/spf13/cobra"
 )
 
 func (c *Container) commandSelfInspect() (*cobra.Command, runner) {

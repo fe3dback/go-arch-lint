@@ -10,8 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
 	"golang.org/x/tools/go/packages"
+
+	"github.com/fe3dback/go-arch-lint/internal/models"
+	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
 )
 
 type (
@@ -36,7 +38,7 @@ type (
 		// hold all parsed packages in analyse scope
 		// but only with imports declarations
 		// used only for fast filter possible params
-		parsedImports []*ast.Package
+		parsedImports map[string]*ast.File
 
 		// hold all already parsed ast packages
 		// this holds all package meta information
@@ -51,7 +53,7 @@ type (
 func NewSearcher() *Searcher {
 	return &Searcher{
 		ctx: &searchCtx{
-			parsedImports:  []*ast.Package{},
+			parsedImports:  map[string]*ast.File{},
 			parsedPackages: map[absPath]*packages.Package{},
 			fileSet:        token.NewFileSet(),
 		},
@@ -99,15 +101,19 @@ func (s *Searcher) Usages(c Criteria) ([]InjectionMethod, error) {
 
 func (s *Searcher) sourceFromToken(pos token.Pos) Source {
 	place := astUtil.PositionFromToken(s.ctx.fileSet.Position(pos))
-	absPath := filepath.Dir(place.File)
-	importRef := s.pathToImport(absPath)
+	absolutePath := filepath.Dir(place.File)
+	importRef := s.pathToImport(absolutePath)
 	pkg := path.Base(importRef)
 
 	return Source{
-		Pkg:    pkg,
-		Import: importRef,
-		Path:   absPath,
-		Place:  place,
+		Pkg: pkg,
+		Import: models.ResolvedImport{
+			Name:       importRef,
+			ImportType: models.GetImportType(importRef, s.ctx.criteria.moduleName, nil),
+			Reference:  place,
+		},
+		Path:  absolutePath,
+		Place: place,
 	}
 }
 
@@ -129,16 +135,13 @@ func (s *Searcher) preloadImports() error {
 		s.ctx.criteria.analyseScope,
 		s.ctx.criteria.excludePaths,
 		s.ctx.criteria.excludeFileMatchers,
-		nil,
 		parser.ImportsOnly,
 	)
 	if err != nil {
 		return fmt.Errorf("failed parse imports in scope '%s': %w", s.ctx.criteria.analyseScope, err)
 	}
 
-	for _, scopePackage := range found {
-		s.ctx.parsedImports = append(s.ctx.parsedImports, scopePackage)
-	}
+	s.ctx.parsedImports = found
 
 	return nil
 }

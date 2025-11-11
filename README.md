@@ -75,7 +75,7 @@ docker run --rm -v ${PWD}:/app fe3dback/go-arch-lint:latest-stable-release check
 [other docker tags and versions](https://hub.docker.com/r/fe3dback/go-arch-lint/tags)
 
 #### From sources
-It requires go 1.24+
+It requires go 1.25+
 
 ```bash
 go install github.com/fe3dback/go-arch-lint@latest

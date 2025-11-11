@@ -72,12 +72,12 @@ func (r *Renderer) asciiPathDirectory(value interface{}) string {
 func (r *Renderer) asciiPlus(a, b interface{}) (int, error) {
 	iA, err := strconv.Atoi(fmt.Sprintf("%d", a))
 	if err != nil {
-		return 0, fmt.Errorf("A component of 'plus' is not int: %s", a)
+		return 0, fmt.Errorf("component A of 'plus' is not int: %s", a)
 	}
 
 	iB, err := strconv.Atoi(fmt.Sprintf("%d", b))
 	if err != nil {
-		return 0, fmt.Errorf("B component of 'plus' is not int: %s", b)
+		return 0, fmt.Errorf("component B of 'plus' is not int: %s", b)
 	}
 
 	return iA + iB, nil
@@ -86,12 +86,12 @@ func (r *Renderer) asciiPlus(a, b interface{}) (int, error) {
 func (r *Renderer) asciiMinus(a, b interface{}) (int, error) {
 	iA, err := strconv.Atoi(fmt.Sprintf("%d", a))
 	if err != nil {
-		return 0, fmt.Errorf("A component of 'minus' is not int: %s", a)
+		return 0, fmt.Errorf("component A of 'minus' is not int: %s", a)
 	}
 
 	iB, err := strconv.Atoi(fmt.Sprintf("%d", b))
 	if err != nil {
-		return 0, fmt.Errorf("B component of 'minus' is not int: %s", b)
+		return 0, fmt.Errorf("component B of 'minus' is not int: %s", b)
 	}
 
 	return iA + iB, nil

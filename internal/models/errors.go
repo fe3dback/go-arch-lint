@@ -7,7 +7,7 @@ type (
 		msg string
 	}
 
-	ReferableErr struct {
+	ReferableError struct {
 		original  error
 		reference common.Reference
 	}
@@ -17,11 +17,11 @@ func (u UserSpaceError) Error() string {
 	return u.msg
 }
 
-func (r ReferableErr) Error() string {
+func (r ReferableError) Error() string {
 	return r.original.Error()
 }
 
-func (r ReferableErr) Reference() common.Reference {
+func (r ReferableError) Reference() common.Reference {
 	return r.reference
 }
 
@@ -37,12 +37,12 @@ func (u UserSpaceError) Is(err error) bool {
 	return false
 }
 
-func (r ReferableErr) Is(err error) bool {
+func (r ReferableError) Is(err error) bool {
 	if err == nil {
 		return false
 	}
 
-	if _, ok := err.(ReferableErr); ok {
+	if _, ok := err.(ReferableError); ok {
 		return true
 	}
 
@@ -55,8 +55,8 @@ func NewUserSpaceError(msg string) UserSpaceError {
 	}
 }
 
-func NewReferableErr(err error, ref common.Reference) ReferableErr {
-	return ReferableErr{
+func NewReferableErr(err error, ref common.Reference) ReferableError {
+	return ReferableError{
 		original:  err,
 		reference: ref,
 	}

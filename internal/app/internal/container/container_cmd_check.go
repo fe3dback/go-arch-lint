@@ -3,9 +3,10 @@ package container
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/operations/check"
-	"github.com/spf13/cobra"
 )
 
 func (c *Container) commandCheck() (*cobra.Command, runner) {

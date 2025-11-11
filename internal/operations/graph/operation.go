@@ -9,15 +9,15 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fe3dback/go-arch-lint/internal/models"
-	"github.com/fe3dback/go-arch-lint/internal/models/arch"
-	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
-	"oss.terrastruct.com/d2/lib/textmeasure"
-
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2dagrelayout"
 	"oss.terrastruct.com/d2/d2lib"
 	"oss.terrastruct.com/d2/d2renderers/d2svg"
+	"oss.terrastruct.com/d2/d2themes/d2themescatalog"
+	"oss.terrastruct.com/d2/lib/textmeasure"
+
+	"github.com/fe3dback/go-arch-lint/internal/models"
+	"github.com/fe3dback/go-arch-lint/internal/models/arch"
 )
 
 type Operation struct {
@@ -62,7 +62,7 @@ func (o *Operation) Behave(ctx context.Context, in models.CmdGraphIn) (models.Cm
 	}
 
 	if o.isFileShouldBeWritten(in) {
-		err = os.WriteFile(outFile, svg, os.ModePerm)
+		err = os.WriteFile(outFile, svg, 0o600)
 		if err != nil {
 			return models.CmdGraphOut{}, fmt.Errorf("failed write graph into '%s' file: %w", in.OutFile, err)
 		}
