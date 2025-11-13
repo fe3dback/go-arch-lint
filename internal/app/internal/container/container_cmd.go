@@ -115,11 +115,12 @@ func (c *Container) commands() []*cobra.Command {
 	}
 
 	list := make([]*cobra.Command, 0, len(executors))
-	for _, x := range executors {
-		x.cmd.RunE = func(activeCmd *cobra.Command, _ []string) error {
-			return c.ProvideRenderer().RenderModel(x.runE(activeCmd))
+	for i := range executors {
+		executor := executors[i]
+		executor.cmd.RunE = func(activeCmd *cobra.Command, _ []string) error {
+			return c.ProvideRenderer().RenderModel(executor.runE(activeCmd))
 		}
-		list = append(list, x.cmd)
+		list = append(list, executor.cmd)
 	}
 
 	return list

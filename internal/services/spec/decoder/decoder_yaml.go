@@ -51,7 +51,7 @@ func (s *stringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		*s = []string{value}
 		return nil
 	} else {
-		lastErr = fmt.Errorf("%w: %w", lastErr, err)
+		lastErr = fmt.Errorf("%s: %w", lastErr.Error(), err)
 	}
 
 	return fmt.Errorf("failed decode yaml stringsList: %w", lastErr)
