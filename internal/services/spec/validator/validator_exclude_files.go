@@ -8,8 +8,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
-type validatorExcludeFiles struct {
-}
+type validatorExcludeFiles struct{}
 
 func newValidatorExcludeFiles() *validatorExcludeFiles {
 	return &validatorExcludeFiles{}
@@ -21,7 +20,7 @@ func (v *validatorExcludeFiles) Validate(doc spec.Document) []arch.Notice {
 	for index, regExp := range doc.ExcludedFilesRegExp() {
 		if _, err := regexp.Compile(regExp.Value); err != nil {
 			notices = append(notices, arch.Notice{
-				Notice: fmt.Errorf("invalid regexp '%s' at %d: %v", regExp.Value, index, err),
+				Notice: fmt.Errorf("invalid regexp '%s' at %d: %w", regExp.Value, index, err),
 				Ref:    regExp.Reference,
 			})
 		}

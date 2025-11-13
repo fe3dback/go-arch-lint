@@ -5,16 +5,10 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
-type validatorVendors struct {
-	utils *utils
-}
+type validatorVendors struct{}
 
-func newValidatorVendors(
-	utils *utils,
-) *validatorVendors {
-	return &validatorVendors{
-		utils: utils,
-	}
+func newValidatorVendors() *validatorVendors {
+	return &validatorVendors{}
 }
 
 func (v *validatorVendors) Validate(_ spec.Document) []arch.Notice {

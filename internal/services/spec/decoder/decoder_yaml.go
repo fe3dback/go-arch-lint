@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/fe3dback/go-arch-lint/internal/models/common"
 	"github.com/fe3dback/go-yaml/ast"
+
+	"github.com/fe3dback/go-arch-lint/internal/models/common"
 )
 
 type ref[T any] struct {
@@ -13,8 +14,10 @@ type ref[T any] struct {
 	ref     common.Referable[T]
 }
 
-type stringList []string
-type yamlParentFileCtx struct{}
+type (
+	stringList        []string
+	yamlParentFileCtx struct{}
+)
 
 func (r *ref[T]) UnmarshalYAML(ctx context.Context, node ast.Node, decode func(interface{}) error) error {
 	filePath := ""
@@ -48,7 +51,7 @@ func (s *stringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		*s = []string{value}
 		return nil
 	} else {
-		lastErr = fmt.Errorf("%v: %w", lastErr, err)
+		lastErr = fmt.Errorf("%s: %w", lastErr.Error(), err)
 	}
 
 	return fmt.Errorf("failed decode yaml stringsList: %w", lastErr)

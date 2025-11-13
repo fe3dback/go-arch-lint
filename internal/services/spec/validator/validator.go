@@ -29,7 +29,7 @@ func (v *Validator) Validate(doc spec.Document, projectDir string) []arch.Notice
 		newValidatorDepsComponents(utils),
 		newValidatorDepsVendors(utils),
 		newValidatorExcludeFiles(),
-		newValidatorVendors(utils),
+		newValidatorVendors(),
 		newValidatorVersion(),
 		newValidatorWorkDir(utils),
 	}

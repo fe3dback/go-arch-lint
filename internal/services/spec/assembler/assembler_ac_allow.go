@@ -5,8 +5,7 @@ import (
 	"github.com/fe3dback/go-arch-lint/internal/services/spec"
 )
 
-type allowAssembler struct {
-}
+type allowAssembler struct{}
 
 func newAllowAssembler() *allowAssembler {
 	return &allowAssembler{}

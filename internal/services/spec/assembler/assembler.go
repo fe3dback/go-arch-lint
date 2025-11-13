@@ -65,12 +65,9 @@ func (sa *Assembler) Assemble(prj common.Project) (arch.Spec, error) {
 		newComponentsAssembler(
 			resolver,
 			newAllowedProjectImportsAssembler(
-				prj.Directory,
 				resolver,
 			),
-			newAllowedVendorImportsAssembler(
-				resolver,
-			),
+			newAllowedVendorImportsAssembler(),
 		),
 		newExcludeAssembler(resolver),
 		newExcludeFilesMatcherAssembler(),

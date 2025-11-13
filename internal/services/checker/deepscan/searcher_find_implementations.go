@@ -43,7 +43,7 @@ func (s *Searcher) extractImports(methods []InjectionMethod) []goImport {
 	result := make(map[goImport]struct{}, 0)
 
 	for _, method := range methods {
-		result[method.Definition.Import] = struct{}{}
+		result[method.Definition.Import.Name] = struct{}{}
 	}
 
 	return mapStrToSlice(result)
@@ -60,18 +60,15 @@ func (s *Searcher) findPackagesWithImport(imports []goImport) ([]packageAbsPath,
 	foundPackagesPath := make(map[packageAbsPath]struct{}, 0)
 	importsMap := sliceStrToMap(imports)
 
-	for _, astPackage := range s.ctx.parsedImports {
-		for filePath, astFile := range astPackage.Files {
-			for _, astImportSpec := range astFile.Imports {
-				if _, ok := importsMap[strings.Trim(astImportSpec.Path.Value, `"`)]; ok {
-					// this file contains useful import
-					packagePath := filepath.Dir(filePath)
-					foundPackagesPath[packagePath] = struct{}{}
-					break
-				}
+	for filePath, astFile := range s.ctx.parsedImports {
+		for _, astImportSpec := range astFile.Imports {
+			if _, ok := importsMap[strings.Trim(astImportSpec.Path.Value, `"`)]; ok {
+				// this file contains useful import
+				packagePath := filepath.Dir(filePath)
+				foundPackagesPath[packagePath] = struct{}{}
+				break
 			}
 		}
-
 	}
 
 	return mapStrToSlice(foundPackagesPath), nil
@@ -107,12 +104,12 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 			// default alias is same as package name
 			// example `import "path/filepath"`
 			// `filepath` - is default alias
-			importAlias := path.Base(method.Definition.Import)
+			importAlias := path.Base(method.Definition.Import.Name)
 			fileHasCalls := false
 
 			// find importAlias for current file
 			for _, astImport := range astFile.Imports {
-				if strings.Trim(astImport.Path.Value, `"`) != method.Definition.Import {
+				if strings.Trim(astImport.Path.Value, `"`) != method.Definition.Import.Name {
 					continue
 				}
 
@@ -156,7 +153,7 @@ func (s *Searcher) applyMethodImplementationsInPackages(method *InjectionMethod,
 						}
 
 						targetDefinitions := s.sourceFromToken(targetPos)
-						if targetDefinitions.Import == method.Definition.Import {
+						if targetDefinitions.Import.Name == method.Definition.Import.Name {
 							// injector use our public interface for typing
 							// we exclude this cases from more deep analyse, because of runtime
 							// types injection. (we have not known type on compile time)

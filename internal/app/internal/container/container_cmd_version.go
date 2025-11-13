@@ -1,8 +1,9 @@
 package container
 
 import (
-	"github.com/fe3dback/go-arch-lint/internal/operations/version"
 	"github.com/spf13/cobra"
+
+	"github.com/fe3dback/go-arch-lint/internal/operations/version"
 )
 
 func (c *Container) commandVersion() (*cobra.Command, runner) {

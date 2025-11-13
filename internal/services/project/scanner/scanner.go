@@ -11,9 +11,10 @@ import (
 	"regexp"
 	"strings"
 
+	"golang.org/x/tools/go/packages"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
-	"golang.org/x/tools/go/packages"
 )
 
 type (
@@ -129,24 +130,10 @@ func (r *Scanner) extractImports(ctx *resolveContext, fileAst *ast.File) []model
 		importPath := strings.Trim(goImport.Path.Value, "\"")
 		imports = append(imports, models.ResolvedImport{
 			Name:       importPath,
-			ImportType: r.getImportType(ctx, importPath),
+			ImportType: models.GetImportType(importPath, ctx.moduleName, r.stdPackages),
 			Reference:  astUtil.PositionFromToken(ctx.tokenSet.Position(goImport.Pos())),
 		})
 	}
 
 	return imports
-}
-
-func (r *Scanner) getImportType(ctx *resolveContext, importPath string) models.ImportType {
-	if _, ok := r.stdPackages[importPath]; ok {
-		return models.ImportTypeStdLib
-	}
-
-	// We can't use a straight prefix match here because the module name could be a substring of the import path.
-	// For example, if the module name is "example.com/foo/bar", we do not want to match "example.com/foo/bar-utils"
-	if importPath == ctx.moduleName || strings.HasPrefix(importPath, ctx.moduleName+"/") {
-		return models.ImportTypeProject
-	}
-
-	return models.ImportTypeVendor
 }

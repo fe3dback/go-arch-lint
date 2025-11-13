@@ -9,8 +9,7 @@ import (
 )
 
 type (
-	Holder struct {
-	}
+	Holder struct{}
 
 	matchedComponent struct {
 		id         string
