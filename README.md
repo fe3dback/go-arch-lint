@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=fe3dback&project=go-arch-lint&lang=id">Bahasa Indonesia</a>
+      </div>
+    </div>
+  </details>
+</div>
+
 ![Logo image](./docs/images/logo.png)
 
 Linter used to enforce some good project structure and validate top level architecture (code layers) 
