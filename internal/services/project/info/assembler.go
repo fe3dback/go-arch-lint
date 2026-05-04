@@ -1,7 +1,11 @@
 package info
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -82,6 +86,10 @@ func checkCmdParseGoModFile(path string) (*modfile.File, error) {
 }
 
 func resolveArchPath(projectPath, archFilePath string) (string, error) {
+	if archFileURL, err := url.Parse(archFilePath); err == nil && archFileURL.Scheme != "" {
+		return checkArchFileURL(archFilePath)
+	}
+
 	if filepath.IsAbs(archFilePath) {
 		return checkArchFile(archFilePath)
 	}
@@ -96,4 +104,27 @@ func checkArchFile(archFilePath string) (string, error) {
 	}
 
 	return archFilePath, nil
+}
+
+func checkArchFileURL(archFileURL string) (string, error) {
+	resp, err := http.Get(archFileURL)
+	if err != nil {
+		return "", fmt.Errorf("downloading archfile: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("unexpected status code")
+	}
+
+	archFile, err := os.CreateTemp("", ".go-arch-lint-*.yml")
+	if err != nil {
+		return "", fmt.Errorf("creating temporary archfile: %w", err)
+	}
+
+	if _, err := io.Copy(archFile, resp.Body); err != nil {
+		return "", fmt.Errorf("storing downloaded archfile: %w", err)
+	}
+
+	return archFile.Name(), archFile.Close()
 }
