@@ -34,6 +34,11 @@ func (sp *Decoder) Decode(archFile string) (spec.Document, []arch.Notice, error)
 		return nil, nil, fmt.Errorf("failed to provide source code of archfile: %w", err)
 	}
 
+	// archfile written on windows usually has CRLF line endings, yaml parser
+	// count '\r' as part of line and return shifted line/column,
+	// so all notices will point to wrong place of archfile
+	sourceCode = bytes.ReplaceAll(sourceCode, []byte("\r\n"), []byte("\n"))
+
 	// read only doc Version
 	documentVersion, err := sp.readVersion(sourceCode)
 	if err != nil {

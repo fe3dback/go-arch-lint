@@ -128,7 +128,10 @@ func findRootPath(packagePath string) (moduleName string, rootPath string, err e
 		if os.IsNotExist(err) {
 			// try find one level upper
 			upperPath := filepath.Dir(packagePath)
-			if upperPath == string(filepath.Separator) {
+
+			// filepath.Dir of fs root returns same root ('/' on unix, 'C:\' on windows),
+			// so comparing with parent is the only os independent way to stop recursion
+			if upperPath == packagePath {
 				return "", "", fmt.Errorf("go.mod not found on all parent levels")
 			}
 

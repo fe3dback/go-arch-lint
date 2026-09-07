@@ -35,7 +35,8 @@ func sortedKeys[V any](m map[string]V) []string {
 }
 
 func (u *utils) assertGlobPathValid(localGlobPath string) error {
-	absPath := filepath.Join(u.projectDir, localGlobPath)
+	// localGlobPath comes from archfile in unix form ("a/b/**")
+	absPath := filepath.Join(u.projectDir, filepath.FromSlash(localGlobPath))
 	resolved, err := u.pathResolver.Resolve(absPath)
 	if err != nil {
 		return fmt.Errorf("failed to resolv path: %w", err)

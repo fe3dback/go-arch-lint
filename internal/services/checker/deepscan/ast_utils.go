@@ -131,8 +131,12 @@ func inScope(ctx *parseRecursiveCtx, path string) bool {
 		}
 	}
 
+	// excludeFiles regexp's are written by user in unix form ('^.*/test/.*$'),
+	// so they never match windows path with backslash separator
+	unixPath := filepath.ToSlash(path)
+
 	for _, matcher := range ctx.excludedFileMatchers {
-		if matcher.Match([]byte(path)) {
+		if matcher.Match([]byte(unixPath)) {
 			return false
 		}
 	}

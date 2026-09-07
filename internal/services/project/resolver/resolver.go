@@ -3,7 +3,7 @@ package resolver
 import (
 	"context"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
@@ -25,10 +25,10 @@ func NewResolver(
 }
 
 func (r *Resolver) ProjectFiles(ctx context.Context, spec arch.Spec) ([]models.FileHold, error) {
-	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
+	scanDirectory := filepath.Join(
 		spec.RootDirectory.Value,
-		spec.WorkingDirectory.Value,
-	))
+		filepath.FromSlash(spec.WorkingDirectory.Value),
+	)
 
 	projectFiles, err := r.projectFilesResolver.Scan(
 		ctx,
