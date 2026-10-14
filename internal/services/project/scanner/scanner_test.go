@@ -135,3 +135,173 @@ func TestScan_DoesNotDescendIntoExcludedDir(t *testing.T) {
 		t.Fatalf("expected only %q to be scanned, got %+v", kept, files)
 	}
 }
+
+func TestNewScanner_DoesNotPanicWithoutGo(t *testing.T) {
+	origPath := os.Getenv("PATH")
+	origGoroot := os.Getenv("GOROOT")
+	t.Setenv("PATH", t.TempDir())
+	t.Setenv("GOROOT", t.TempDir())
+	defer func() {
+		os.Setenv("PATH", origPath)
+		os.Setenv("GOROOT", origGoroot)
+	}()
+
+	var sc *scanner.Scanner
+	requireNoPanic := func() {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Fatalf("NewScanner panicked without go toolchain: %v", r)
+			}
+		}()
+		sc = scanner.NewScanner()
+	}
+	requireNoPanic()
+
+	if sc == nil {
+		t.Fatal("expected scanner instance, got nil")
+	}
+
+	projectDir := t.TempDir()
+	source := `package main
+
+import (
+	"fmt"
+	"iter"
+	"maps"
+	"slices"
+	"example.com/proj/pkg"
+	"github.com/stretchr/testify/assert"
+)
+`
+	filePath := filepath.Join(projectDir, "main.go")
+	if err := os.WriteFile(filePath, []byte(source), 0o600); err != nil {
+		t.Fatalf("failed to write source file: %v", err)
+	}
+
+	files, err := sc.Scan(context.Background(), projectDir, "example.com/proj", nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected scan error: %v", err)
+	}
+	if len(files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(files))
+	}
+
+	types := make(map[string]models.ImportType)
+	for _, imp := range files[0].Imports {
+		types[imp.Name] = imp.ImportType
+	}
+
+	expectedTypes := map[string]models.ImportType{
+		"fmt":                               models.ImportTypeStdLib,
+		"iter":                              models.ImportTypeStdLib,
+		"maps":                              models.ImportTypeStdLib,
+		"slices":                            models.ImportTypeStdLib,
+		"example.com/proj/pkg":              models.ImportTypeProject,
+		"github.com/stretchr/testify/assert": models.ImportTypeVendor,
+	}
+
+	for pkg, expected := range expectedTypes {
+		actual, ok := types[pkg]
+		if !ok {
+			t.Errorf("expected import %q not found in scan results", pkg)
+			continue
+		}
+		if actual != expected {
+			t.Errorf("package %q: expected type %d, got %d", pkg, expected, actual)
+		}
+	}
+}
+
+func TestNewScanner_LoadsFromGoroot(t *testing.T) {
+	fakeGoroot := t.TempDir()
+	customPkgDir := filepath.Join(fakeGoroot, "src", "custompkg")
+	if err := os.MkdirAll(customPkgDir, 0o755); err != nil {
+		t.Fatalf("failed to create fake goroot pkg dir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(customPkgDir, "pkg.go"), []byte("package custompkg\n"), 0o600); err != nil {
+		t.Fatalf("failed to write fake pkg: %v", err)
+	}
+
+	origGoroot := os.Getenv("GOROOT")
+	t.Setenv("GOROOT", fakeGoroot)
+	defer os.Setenv("GOROOT", origGoroot)
+
+	sc := scanner.NewScanner()
+
+	projectDir := t.TempDir()
+	source := `package main
+
+import (
+	"custompkg"
+	"fmt"
+	"example.com/proj/pkg"
+)
+`
+	filePath := filepath.Join(projectDir, "main.go")
+	if err := os.WriteFile(filePath, []byte(source), 0o600); err != nil {
+		t.Fatalf("failed to write source: %v", err)
+	}
+
+	files, err := sc.Scan(context.Background(), projectDir, "example.com/proj", nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected scan error: %v", err)
+	}
+	if len(files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(files))
+	}
+
+	types := make(map[string]models.ImportType)
+	for _, imp := range files[0].Imports {
+		types[imp.Name] = imp.ImportType
+	}
+
+	if types["custompkg"] != models.ImportTypeStdLib {
+		t.Errorf("custompkg from GOROOT: expected type %d, got %d", models.ImportTypeStdLib, types["custompkg"])
+	}
+	if types["fmt"] != models.ImportTypeStdLib {
+		t.Errorf("fmt: expected type %d, got %d", models.ImportTypeStdLib, types["fmt"])
+	}
+	if types["example.com/proj/pkg"] != models.ImportTypeProject {
+		t.Errorf("example.com/proj/pkg: expected type %d, got %d", models.ImportTypeProject, types["example.com/proj/pkg"])
+	}
+}
+
+func TestScan_ProjectWithoutDomainInModuleName(t *testing.T) {
+	sc := scanner.NewScanner()
+	projectDir := t.TempDir()
+	source := `package main
+
+import (
+	"fmt"
+	"myapp/pkg"
+	"github.com/foo/bar"
+)
+`
+	filePath := filepath.Join(projectDir, "main.go")
+	if err := os.WriteFile(filePath, []byte(source), 0o600); err != nil {
+		t.Fatalf("failed to write source: %v", err)
+	}
+
+	files, err := sc.Scan(context.Background(), projectDir, "myapp", nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected scan error: %v", err)
+	}
+	if len(files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(files))
+	}
+
+	types := make(map[string]models.ImportType)
+	for _, imp := range files[0].Imports {
+		types[imp.Name] = imp.ImportType
+	}
+
+	if types["fmt"] != models.ImportTypeStdLib {
+		t.Errorf("fmt: expected type %d, got %d", models.ImportTypeStdLib, types["fmt"])
+	}
+	if types["myapp/pkg"] != models.ImportTypeProject {
+		t.Errorf("myapp/pkg: expected type %d, got %d", models.ImportTypeProject, types["myapp/pkg"])
+	}
+	if types["github.com/foo/bar"] != models.ImportTypeVendor {
+		t.Errorf("github.com/foo/bar: expected type %d, got %d", models.ImportTypeVendor, types["github.com/foo/bar"])
+	}
+}

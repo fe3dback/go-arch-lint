@@ -12,8 +12,6 @@ import (
 	"regexp"
 	"strings"
 
-	"golang.org/x/tools/go/packages"
-
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	astUtil "github.com/fe3dback/go-arch-lint/internal/services/common/ast"
 )
@@ -35,20 +33,9 @@ type (
 )
 
 func NewScanner() *Scanner {
-	scanner := &Scanner{
-		stdPackages: make(map[string]struct{}, 255),
+	return &Scanner{
+		stdPackages: loadStdPackages(),
 	}
-
-	stdPackages, err := packages.Load(nil, "std")
-	if err != nil {
-		panic(fmt.Errorf("failed load std packages"))
-	}
-
-	for _, stdPackage := range stdPackages {
-		scanner.stdPackages[stdPackage.ID] = struct{}{}
-	}
-
-	return scanner
 }
 
 func (r *Scanner) Scan(
@@ -151,6 +138,9 @@ func (r *Scanner) extractImports(ctx *resolveContext, fileAst *ast.File) []model
 
 	for _, goImport := range fileAst.Imports {
 		importPath := strings.Trim(goImport.Path.Value, "\"")
+		if isStandardImport(importPath, ctx.moduleName) {
+			r.stdPackages[importPath] = struct{}{}
+		}
 		imports = append(imports, models.ResolvedImport{
 			Name:       importPath,
 			ImportType: models.GetImportType(importPath, ctx.moduleName, r.stdPackages),

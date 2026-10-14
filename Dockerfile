@@ -1,5 +1,8 @@
 FROM golang:1.27
 
+ENV GOROOT=/usr/local/go
+ENV PATH=$GOROOT/bin:$PATH
+
 # currently we use `packages.Load(..)` feature of go AST parser
 # this require go binary and some random files from go setup
 # to work. And this is reason why current build not from scratch
