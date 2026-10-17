@@ -192,11 +192,11 @@ import (
 	}
 
 	expectedTypes := map[string]models.ImportType{
-		"fmt":                               models.ImportTypeStdLib,
-		"iter":                              models.ImportTypeStdLib,
-		"maps":                              models.ImportTypeStdLib,
-		"slices":                            models.ImportTypeStdLib,
-		"example.com/proj/pkg":              models.ImportTypeProject,
+		"fmt":                                models.ImportTypeStdLib,
+		"iter":                               models.ImportTypeStdLib,
+		"maps":                               models.ImportTypeStdLib,
+		"slices":                             models.ImportTypeStdLib,
+		"example.com/proj/pkg":               models.ImportTypeProject,
 		"github.com/stretchr/testify/assert": models.ImportTypeVendor,
 	}
 

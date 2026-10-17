@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -188,6 +189,12 @@ func loadStdPackages() map[string]struct{} {
 
 	goroot := os.Getenv("GOROOT")
 	if goroot == "" {
+		if out, err := exec.Command("go", "env", "GOROOT").Output(); err == nil {
+			goroot = strings.TrimSpace(string(out))
+		}
+	}
+	if goroot == "" {
+		//nolint:staticcheck // SA1019: runtime.GOROOT is deprecated in Go 1.24+, used as fallback when go binary is unavailable
 		goroot = runtime.GOROOT()
 	}
 
@@ -201,12 +208,26 @@ func loadStdPackages() map[string]struct{} {
 }
 
 func loadFromGoroot(goroot string, stdMap map[string]struct{}) {
-	srcDir := filepath.Join(goroot, "src")
+	cleanGoroot := filepath.Clean(goroot)
+	if !filepath.IsAbs(cleanGoroot) {
+		if abs, err := filepath.Abs(cleanGoroot); err == nil {
+			cleanGoroot = abs
+		}
+	}
+
+	srcDir := filepath.Clean(filepath.Join(cleanGoroot, "src"))
+	rel, err := filepath.Rel(cleanGoroot, srcDir)
+	if err != nil || rel != "src" {
+		return
+	}
+
+	//nolint:gosec // G703: path is sanitized with filepath.Clean and verified to stay within goroot
 	fi, err := os.Stat(srcDir)
 	if err != nil || !fi.IsDir() {
 		return
 	}
 
+	//nolint:gosec // G703: path is sanitized with filepath.Clean and verified to stay within goroot
 	_ = filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil
@@ -215,7 +236,7 @@ func loadFromGoroot(goroot string, stdMap map[string]struct{}) {
 			return nil
 		}
 		rel, err := filepath.Rel(srcDir, path)
-		if err != nil || rel == "." {
+		if err != nil || rel == "." || strings.HasPrefix(rel, "..") {
 			return nil
 		}
 		pkg := filepath.ToSlash(rel)
@@ -226,7 +247,9 @@ func loadFromGoroot(goroot string, stdMap map[string]struct{}) {
 			return filepath.SkipDir
 		}
 
-		entries, err := os.ReadDir(path)
+		cleanPath := filepath.Clean(path)
+		//nolint:gosec // G703: path is verified to be within srcDir
+		entries, err := os.ReadDir(cleanPath)
 		if err != nil {
 			return nil
 		}
@@ -245,8 +268,9 @@ func loadFromPackages(goroot string, stdMap map[string]struct{}) {
 		Mode: packages.NeedName,
 	}
 	if goroot != "" {
-		cfg.Dir = goroot
-		cfg.Env = append(os.Environ(), "GO111MODULE=off", fmt.Sprintf("GOROOT=%s", goroot))
+		cleanGoroot := filepath.Clean(goroot)
+		cfg.Dir = cleanGoroot
+		cfg.Env = append(os.Environ(), "GO111MODULE=off", fmt.Sprintf("GOROOT=%s", cleanGoroot))
 	}
 
 	stdPackages, err := packages.Load(cfg, "std")
