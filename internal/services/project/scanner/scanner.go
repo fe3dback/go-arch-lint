@@ -1,5 +1,7 @@
 package scanner
 
+//go:generate go run github.com/fe3dback/go-arch-lint/scripts/gen-std-packages
+
 import (
 	"context"
 	"fmt"
@@ -19,6 +21,8 @@ import (
 )
 
 type (
+	packagesLoader func(cfg *packages.Config, patterns ...string) ([]*packages.Package, error)
+
 	Scanner struct {
 		stdPackages map[string]struct{}
 	}
@@ -35,17 +39,36 @@ type (
 )
 
 func NewScanner() *Scanner {
+	return newScannerWithLoader(packages.Load)
+}
+
+func newScannerWithLoader(loader packagesLoader) *Scanner {
 	scanner := &Scanner{
-		stdPackages: make(map[string]struct{}, 255),
+		stdPackages: make(map[string]struct{}, len(knownStdPackages)),
 	}
 
-	stdPackages, err := packages.Load(nil, "std")
-	if err != nil {
-		panic(fmt.Errorf("failed load std packages"))
+	for _, pkg := range knownStdPackages {
+		scanner.stdPackages[pkg] = struct{}{}
 	}
 
-	for _, stdPackage := range stdPackages {
-		scanner.stdPackages[stdPackage.ID] = struct{}{}
+	cfg := &packages.Config{
+		Mode: packages.NeedName,
+		Dir:  os.TempDir(),
+	}
+
+	stdPackages, err := loader(cfg, "std")
+	if err == nil {
+		for _, stdPackage := range stdPackages {
+			if stdPackage == nil {
+				continue
+			}
+			if stdPackage.ID != "" {
+				scanner.stdPackages[stdPackage.ID] = struct{}{}
+			}
+			if stdPackage.PkgPath != "" {
+				scanner.stdPackages[stdPackage.PkgPath] = struct{}{}
+			}
+		}
 	}
 
 	return scanner

@@ -2,13 +2,24 @@ package scanner_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
 
+	"golang.org/x/tools/go/packages"
+
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/services/project/scanner"
+)
+
+const (
+	cmpPkg    = "cmp"
+	fmtPkg    = "fmt"
+	osPkg     = "os"
+	iterPkg   = "iter"
+	slicesPkg = "slices"
 )
 
 // TestScan_IgnoresUnstatableOutOfScopeFile covers a directory that can be listed
@@ -133,5 +144,131 @@ func TestScan_DoesNotDescendIntoExcludedDir(t *testing.T) {
 
 	if len(files) != 1 || files[0].Path != kept {
 		t.Fatalf("expected only %q to be scanned, got %+v", kept, files)
+	}
+}
+
+func TestScanner_NewScanner(t *testing.T) {
+	s := scanner.NewScanner()
+	if s.StdPackagesCount() == 0 {
+		t.Fatal("expected standard packages to be populated")
+	}
+
+	for _, expected := range []string{fmtPkg, osPkg, "strings", iterPkg, slicesPkg, "maps", cmpPkg} {
+		if !s.HasStdPackage(expected) {
+			t.Errorf("expected std package %q to be registered", expected)
+		}
+	}
+}
+
+func TestScanner_ToleratesMissingOptionalStdPackages(t *testing.T) {
+	// Simulate an older Go runtime (e.g. Go 1.20) whose "std" expansion returns
+	// only legacy packages and omits packages introduced in newer releases (e.g. "iter").
+	legacyLoader := func(_ *packages.Config, _ ...string) ([]*packages.Package, error) {
+		return []*packages.Package{
+			{ID: fmtPkg, PkgPath: fmtPkg},
+			{ID: osPkg, PkgPath: osPkg},
+		}, nil
+	}
+
+	s := scanner.NewScannerWithLoader(legacyLoader)
+	for _, expected := range []string{fmtPkg, osPkg, iterPkg, slicesPkg, "maps", cmpPkg, "unique", "weak"} {
+		if !s.HasStdPackage(expected) {
+			t.Errorf("expected std package %q to be resolved despite missing from loader output", expected)
+		}
+	}
+}
+
+func TestScanner_ToleratesLoaderError(t *testing.T) {
+	// Simulate an environment where the go toolchain cannot be invoked
+	// (e.g. minimal container missing the go binary, or broken GOROOT).
+	failingLoader := func(_ *packages.Config, _ ...string) ([]*packages.Package, error) {
+		return nil, errors.New("exec: \"go\": executable file not found in $PATH")
+	}
+
+	s := scanner.NewScannerWithLoader(failingLoader)
+	for _, expected := range []string{fmtPkg, osPkg, iterPkg, slicesPkg, cmpPkg} {
+		if !s.HasStdPackage(expected) {
+			t.Errorf("expected fallback std package %q to be resolved after loader error", expected)
+		}
+	}
+}
+
+func TestScanner_ToleratesPackageErrors(t *testing.T) {
+	// Simulate loader output containing package-level errors for an optional or missing package.
+	errorReportingLoader := func(_ *packages.Config, _ ...string) ([]*packages.Package, error) {
+		return []*packages.Package{
+			{ID: fmtPkg, PkgPath: fmtPkg},
+			{
+				ID:      iterPkg,
+				PkgPath: iterPkg,
+				Errors: []packages.Error{
+					{Msg: "cannot find package iter in any of: /usr/local/go/src/iter (from $GOROOT)"},
+				},
+			},
+		}, nil
+	}
+
+	s := scanner.NewScannerWithLoader(errorReportingLoader)
+	if !s.HasStdPackage(fmtPkg) {
+		t.Error("expected fmt to be registered")
+	}
+	if !s.HasStdPackage(iterPkg) {
+		t.Error("expected iter to be registered despite package error")
+	}
+}
+
+func TestScan_ClassifiesOptionalAndNewerStdPackages(t *testing.T) {
+	projectDir := t.TempDir()
+	sourceFile := filepath.Join(projectDir, "main.go")
+
+	sourceCode := `package main
+
+import (
+	"cmp"
+	"fmt"
+	"iter"
+	"slices"
+
+	"example.com/proj/internal/foo"
+	"github.com/stretchr/testify/assert"
+)
+
+var _ = fmt.Println
+var _ = iter.Seq[int](nil)
+var _ = slices.Sort[[]int]
+var _ = cmp.Compare(1, 2)
+`
+
+	if err := os.WriteFile(sourceFile, []byte(sourceCode), 0o600); err != nil {
+		t.Fatalf("write source file: %v", err)
+	}
+
+	files, err := scanner.NewScanner().Scan(context.Background(), projectDir, "example.com/proj", nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected scan error: %v", err)
+	}
+
+	if len(files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(files))
+	}
+
+	expectedTypes := map[string]models.ImportType{
+		cmpPkg:                               models.ImportTypeStdLib,
+		fmtPkg:                               models.ImportTypeStdLib,
+		iterPkg:                              models.ImportTypeStdLib,
+		slicesPkg:                            models.ImportTypeStdLib,
+		"example.com/proj/internal/foo":      models.ImportTypeProject,
+		"github.com/stretchr/testify/assert": models.ImportTypeVendor,
+	}
+
+	for _, imp := range files[0].Imports {
+		expected, exists := expectedTypes[imp.Name]
+		if !exists {
+			t.Errorf("unexpected import %q in scan results", imp.Name)
+			continue
+		}
+		if imp.ImportType != expected {
+			t.Errorf("import %q classified as %d, expected %d", imp.Name, imp.ImportType, expected)
+		}
 	}
 }
