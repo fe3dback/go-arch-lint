@@ -39,13 +39,43 @@ func cachedPackage(ctx *searchCtx, path string) (*packages.Package, error) {
 		return nil, fmt.Errorf("not found go sources")
 	}
 
-	for _, parsedPackage := range parsedPackages {
-		// we always expect only one package by path
-		ctx.parsedPackages[path] = parsedPackage
-		break
+	// we always expect only one package by path
+	parsedPackage := parsedPackages[0]
+
+	// packages.Load reports import/type-checking problems via pkg.Errors,
+	// not via returned err. Package with errors has incomplete TypesInfo,
+	// so deep scan will silently find nothing. This happens, for example,
+	// when local go toolchain writes export data in format, unsupported
+	// by golang.org/x/tools version used to build linter.
+	if err := packageErrors(parsedPackage); err != nil {
+		return nil, err
 	}
 
-	return ctx.parsedPackages[path], nil
+	ctx.parsedPackages[path] = parsedPackage
+	return parsedPackage, nil
+}
+
+func packageErrors(pkg *packages.Package) error {
+	const maxReported = 5
+
+	if len(pkg.Errors) == 0 {
+		return nil
+	}
+
+	msgs := make([]string, 0, maxReported+1)
+	for i, pkgErr := range pkg.Errors {
+		if i >= maxReported {
+			msgs = append(msgs, fmt.Sprintf("... and %d more", len(pkg.Errors)-maxReported))
+			break
+		}
+
+		msgs = append(msgs, pkgErr.Error())
+	}
+
+	return fmt.Errorf("package '%s' loaded with errors (deep scan requires fully type-checked code):\n  %s",
+		pkg.PkgPath,
+		strings.Join(msgs, "\n  "),
+	)
 }
 
 // isPublicName check that first char in string in uppercase
