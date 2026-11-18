@@ -3,7 +3,6 @@ package checker
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/fe3dback/go-arch-lint/internal/models"
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
@@ -39,7 +38,7 @@ func (c *Imports) Check(ctx context.Context, spec arch.Spec) (models.CheckResult
 		if projectFile.ComponentID == nil {
 			c.result.addNotMatchedWarning(models.CheckArchWarningMatch{
 				Reference:        common.NewEmptyReference(),
-				FileRelativePath: strings.TrimPrefix(projectFile.File.Path, spec.RootDirectory.Value),
+				FileRelativePath: relativeToRoot(spec.RootDirectory.Value, projectFile.File.Path),
 				FileAbsolutePath: projectFile.File.Path,
 			})
 
@@ -89,7 +88,7 @@ func (c *Imports) checkFile(component arch.Component, file models.ProjectFile) e
 		c.result.addDependencyWarning(models.CheckArchWarningDependency{
 			Reference:          resolvedImport.Reference,
 			ComponentName:      component.Name.Value,
-			FileRelativePath:   strings.TrimPrefix(file.Path, c.spec.RootDirectory.Value),
+			FileRelativePath:   relativeToRoot(c.spec.RootDirectory.Value, file.Path),
 			FileAbsolutePath:   file.Path,
 			ResolvedImportName: resolvedImport.Name,
 		})

@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -66,7 +67,9 @@ func (r *Renderer) asciiLinePrefix(prefix string, value interface{}) string {
 }
 
 func (r *Renderer) asciiPathDirectory(value interface{}) string {
-	return path.Dir(fmt.Sprintf("%v", value))
+	// value is os specific file path, but view output should not depend on host os,
+	// without normalization path.Dir will not find any windows directory
+	return path.Dir(filepath.ToSlash(fmt.Sprintf("%v", value)))
 }
 
 func (r *Renderer) asciiPlus(a, b interface{}) (int, error) {

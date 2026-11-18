@@ -3,10 +3,8 @@ package checker
 import (
 	"context"
 	"fmt"
-	"path"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -298,15 +296,14 @@ func (c *DeepScan) renderCode(pointer, from, to common.Reference) []byte {
 }
 
 func (c *DeepScan) definitionToRelPath(source common.Reference) string {
-	relativePath := strings.TrimPrefix(source.File, c.spec.RootDirectory.Value)
-	return fmt.Sprintf("%s:%d", relativePath, source.Line)
+	return fmt.Sprintf("%s:%d", relativeToRoot(c.spec.RootDirectory.Value, source.File), source.Line)
 }
 
 func (c *DeepScan) findUsages(_ context.Context, absPackagePath string) ([]deepscan.InjectionMethod, error) {
-	scanDirectory := path.Clean(fmt.Sprintf("%s/%s",
+	scanDirectory := filepath.Join(
 		c.spec.RootDirectory.Value,
-		c.spec.WorkingDirectory.Value,
-	))
+		filepath.FromSlash(c.spec.WorkingDirectory.Value),
+	)
 	excludeDirectories := c.refPathToList(c.spec.Exclude)
 	excludeMatchers := c.refRegexpToList(c.spec.ExcludeFilesMatcher)
 

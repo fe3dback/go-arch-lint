@@ -3,6 +3,7 @@ package path
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -31,7 +32,9 @@ func (r Resolver) Resolve(absPath string) (resolvePaths []string, err error) {
 
 		switch mode := fileInfo.Mode(); {
 		case mode.IsDir():
-			dirs = append(dirs, match)
+			// glob can return path with mixed separators on windows,
+			// normalize it to os specific form
+			dirs = append(dirs, filepath.Clean(match))
 		default:
 			continue
 		}

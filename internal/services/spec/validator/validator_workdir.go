@@ -2,7 +2,6 @@ package validator
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 
 	"github.com/fe3dback/go-arch-lint/internal/models/arch"
@@ -22,8 +21,9 @@ func newValidatorWorkDir(utils *utils) *validatorWorkDir {
 func (v *validatorWorkDir) Validate(doc spec.Document) []arch.Notice {
 	notices := make([]arch.Notice, 0)
 
-	absPath := filepath.Join(v.utils.projectDir, doc.WorkingDirectory().Value)
-	absPath = path.Clean(absPath)
+	// workdir comes from archfile in unix form, projectDir is os specific,
+	// filepath.Join already cleans result, extra path.Clean does nothing on windows
+	absPath := filepath.Join(v.utils.projectDir, filepath.FromSlash(doc.WorkingDirectory().Value))
 
 	err := v.utils.assertDirectoriesValid(absPath)
 	if err != nil {
