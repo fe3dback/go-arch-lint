@@ -36,7 +36,7 @@ func (r *resolver) resolveLocalGlobPath(localGlobPath string) ([]models.Resolved
 	}
 
 	for _, absResolvedPath := range resolved {
-		localPath := strings.TrimPrefix(absResolvedPath, fmt.Sprintf("%s/", r.rootDirectory))
+		localPath := strings.TrimPrefix(filepath.ToSlash(absResolvedPath), filepath.ToSlash(r.rootDirectory)+"/")
 		localPath = strings.TrimRight(localPath, "/")
 		importPath := fmt.Sprintf("%s/%s", r.moduleName, localPath)
 
